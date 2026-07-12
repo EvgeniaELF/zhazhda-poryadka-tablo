@@ -245,6 +245,37 @@
     .rhythm-step span { display: block; color: var(--muted); font-size: .74rem; }
     .rhythm-arrow { color: var(--orange); font-size: 1.25rem; font-weight: 900; }
 
+    .action-banner {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 17px 19px;
+      color: var(--white);
+      background: var(--green);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-small);
+    }
+    .action-banner-icon { font-size: 1.65rem; }
+    .action-banner strong { display: block; font-weight: 900; }
+    .action-banner span { color: rgba(255,255,255,.76); font-size: .78rem; }
+    .action-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 10px 16px;
+      color: var(--white);
+      background: var(--orange);
+      border-radius: 999px;
+      font-weight: 900;
+      text-decoration: none;
+      transition: transform .2s ease, background .2s ease;
+    }
+    .action-button:hover { transform: translateY(-2px); background: var(--orange-2); }
+    .action-button:focus-visible { outline: 3px solid var(--beige); outline-offset: 3px; }
+
     .metrics {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -479,7 +510,7 @@
 
     .selected-detail {
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto minmax(180px, 1fr) auto;
       gap: 14px;
       align-items: center;
       margin-top: 16px;
@@ -493,6 +524,77 @@
     .selected-detail strong { display: block; font-weight: 900; }
     .selected-detail span { color: rgba(255,255,255,.77); font-size: .8rem; }
     .selected-detail-mark { color: var(--orange-2); font-size: 1.5rem; }
+    .selected-detail-stats { display: flex; flex-wrap: wrap; gap: 7px; justify-content: flex-end; }
+    .selected-detail-stats span {
+      padding: 6px 9px;
+      color: var(--green);
+      background: var(--beige);
+      border-radius: 999px;
+      font-size: .68rem;
+      font-weight: 900;
+    }
+
+    .season-path {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 115px;
+      min-height: 175px;
+      margin-bottom: 16px;
+      padding: 24px;
+      overflow: hidden;
+      background:
+        linear-gradient(rgba(255,253,247,.9), rgba(255,253,247,.9)),
+        url("track.webp") center 45% / 560px auto no-repeat;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-small);
+    }
+    .season-path::before {
+      content: "";
+      position: absolute;
+      left: 20%;
+      right: 20%;
+      top: 50%;
+      height: 5px;
+      background: repeating-linear-gradient(90deg, var(--green) 0 13px, transparent 13px 21px);
+      border-radius: 999px;
+      opacity: .35;
+    }
+    .path-stop {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      padding: 0;
+      color: var(--green);
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+    }
+    .path-stop:nth-child(even) { transform: translateY(18px); }
+    .path-stop:nth-child(odd) { transform: translateY(-18px); }
+    .path-node {
+      display: grid;
+      place-items: center;
+      width: 68px;
+      height: 68px;
+      color: var(--green);
+      background: var(--beige);
+      border: 5px solid var(--white);
+      border-radius: 50%;
+      box-shadow: 0 8px 18px rgba(45,79,54,.16);
+      font-size: 1.25rem;
+      font-weight: 900;
+    }
+    .path-stop.closed .path-node { color: var(--white); background: var(--green); }
+    .path-stop.active .path-node { color: var(--white); background: var(--orange); }
+    .path-stop[aria-current="step"] .path-node { outline: 4px solid var(--orange-2); outline-offset: 3px; }
+    .path-stop strong { font-size: .8rem; font-weight: 900; }
+    .path-stop small { color: var(--muted); font-size: .66rem; }
+    .path-stop:focus-visible { outline: 3px solid var(--orange); outline-offset: 5px; border-radius: 12px; }
 
     .history-wrap { position: relative; z-index: 1; overflow-x: auto; padding: 12px 27px 27px; }
     .history-grid {
@@ -595,6 +697,58 @@
     }
     footer strong { color: var(--green); font-weight: 900; }
 
+    .celebration[hidden] { display: none; }
+    .celebration {
+      position: fixed;
+      z-index: 20;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background: rgba(29,54,37,.65);
+      backdrop-filter: blur(5px);
+    }
+    .celebration-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: 170px minmax(220px, 1fr);
+      gap: 20px;
+      align-items: center;
+      width: min(620px, 100%);
+      padding: 27px;
+      overflow: hidden;
+      background: var(--beige);
+      border: 5px solid var(--white);
+      border-radius: 30px;
+      box-shadow: 0 25px 70px rgba(0,0,0,.28);
+    }
+    .celebration-card img { position: relative; z-index: 1; width: 170px; filter: drop-shadow(0 10px 12px rgba(45,79,54,.16)); }
+    .celebration-copy { position: relative; z-index: 1; }
+    .celebration-copy h2 { margin: 0 0 8px; color: var(--green); font-size: 1.65rem; font-weight: 900; }
+    .celebration-copy p { margin: 0 0 16px; color: var(--muted); }
+    .celebration-close {
+      min-height: 42px;
+      padding: 9px 15px;
+      color: var(--white);
+      background: var(--orange);
+      border: 0;
+      border-radius: 999px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .celebration-close:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
+    .confetti { position: absolute; inset: 0; pointer-events: none; }
+    .confetti i { position: absolute; width: 10px; height: 18px; background: var(--orange); border-radius: 4px; animation: confetti-fall 2.7s ease-in-out infinite; }
+    .confetti i:nth-child(2n) { background: var(--green); }
+    .confetti i:nth-child(3n) { width: 13px; height: 13px; background: var(--white); border-radius: 50%; }
+    .confetti i:nth-child(1) { left: 8%; top: -12%; animation-delay: -.3s; }
+    .confetti i:nth-child(2) { left: 21%; top: -18%; animation-delay: -1.1s; }
+    .confetti i:nth-child(3) { left: 36%; top: -10%; animation-delay: -.7s; }
+    .confetti i:nth-child(4) { left: 53%; top: -16%; animation-delay: -1.8s; }
+    .confetti i:nth-child(5) { left: 68%; top: -13%; animation-delay: -.9s; }
+    .confetti i:nth-child(6) { left: 83%; top: -20%; animation-delay: -1.4s; }
+    @keyframes confetti-fall { 0% { transform: translateY(-10px) rotate(0); } 100% { transform: translateY(430px) rotate(540deg); } }
+
     @media (max-width: 900px) {
       .hero { grid-template-columns: 1fr 300px; }
       .hero-copy { padding-left: 36px; }
@@ -619,6 +773,8 @@
       .tab { border-radius: 15px; }
       .checkpoint-rhythm { grid-template-columns: 1fr; }
       .rhythm-arrow { transform: rotate(90deg); justify-self: center; }
+      .action-banner { grid-template-columns: auto 1fr; }
+      .action-button { grid-column: 1 / -1; }
       .metrics { grid-template-columns: 1fr 1fr; }
       .board-head { flex-direction: column; padding: 21px 18px 16px; }
       .board-rule { max-width: none; text-align: left; }
@@ -627,10 +783,14 @@
       .state { margin-left: 66px; margin-top: -17px; }
       .selected-detail { grid-template-columns: auto 1fr; }
       .selected-detail-mark { display: none; }
+      .selected-detail-stats { grid-column: 1 / -1; justify-content: flex-start; }
+      .season-path { gap: 55px; }
       .logic-card { display: block; }
       .logic-visual { height: 190px; }
       .principles { grid-template-columns: 1fr; }
       footer { align-items: flex-start; flex-direction: column; }
+      .celebration-card { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+      .celebration-card img { width: 145px; }
     }
 
     @media (max-width: 430px) {
@@ -695,6 +855,12 @@
         </div>
       </div>
 
+      <div class="action-banner">
+        <span class="action-banner-icon" aria-hidden="true">🧝‍♀️</span>
+        <div><strong>Отметь свой чек-поинт</strong><span>Сообщение в ветке «Отчётность • чек-поинты» засчитывается как заезд на трек или финиш круга.</span></div>
+        <a class="action-button" href="https://t.me/c/4389010152/15" target="_blank" rel="noopener noreferrer">Заехать / Финишировать</a>
+      </div>
+
       <div class="metrics" aria-label="Состояние текущего круга">
         <article class="metric"><span class="metric-icon" aria-hidden="true">🟢</span><span class="metric-value" id="metric-entered">0</span><span class="metric-label">заехали на трек</span></article>
         <article class="metric"><span class="metric-icon" aria-hidden="true">🏁</span><span class="metric-value" id="metric-done">0</span><span class="metric-label">финишировали круг</span></article>
@@ -711,11 +877,12 @@
       <div class="selected-detail" id="selected-detail" aria-live="polite">
         <span class="selected-detail-icon" aria-hidden="true">🧝‍♀️</span>
         <div><strong>Эльфийка готова отмечать круг</strong><span>Нажми на карточку участника, чтобы увидеть последнюю фиксацию.</span></div>
-        <span class="selected-detail-mark" aria-hidden="true">✓</span>
+        <div class="selected-detail-stats" aria-label="Личная статистика пилота"><span id="stat-series">🔥 0 кругов</span><span id="stat-full">🏁 0 полных</span><span id="stat-marks">✓ 0 отметок</span></div>
       </div>
     </section>
 
     <section class="view" id="view-history" role="tabpanel" aria-labelledby="tab-history" hidden>
+      <div class="season-path" id="season-path" aria-label="Трасса сезона"></div>
       <div class="board">
         <div class="board-head">
           <div><h2 id="season-title">Сезон · июль</h2><p>Круг за кругом — личная история устойчивого движения</p></div>
@@ -756,6 +923,14 @@
     <footer><strong>Мягко, но едем.</strong><span>«Жажда порядка» · Эльфийка отмечает каждый пройденный круг</span></footer>
   </main>
 
+  <div class="celebration" id="celebration" hidden>
+    <div class="celebration-card" role="dialog" aria-modal="true" aria-labelledby="celebration-title">
+      <div class="confetti" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <img src="elf.webp" alt="Эльфийка-штурман отмечает финиш">
+      <div class="celebration-copy"><h2 id="celebration-title">Круг отмечен!</h2><p id="celebration-text"></p><button class="celebration-close" id="celebration-close" type="button">Ура! Мягко, но едем</button></div>
+    </div>
+  </div>
+
   <script>
     /*
       ДАННЫЕ ТАБЛО
@@ -778,6 +953,7 @@
           number: 1,
           dates: "29 июня–11 июля",
           updated: "12 июля 2026",
+          status: "closed",
           marks: {
             "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
             "Лена": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
@@ -789,6 +965,7 @@
           number: 2,
           dates: "13–18 июля",
           updated: "старт 13 июля",
+          status: "upcoming",
           marks: {}
         }
       ],
@@ -797,7 +974,12 @@
         { name: "Лена", profileUrl: "https://t.me/c/4389010152/2/76" },
         { name: "Юля" },
         { name: "Женя" }
-      ]
+      ],
+      celebration: {
+        id: "round-1-finish-lena-zhenya",
+        round: 1,
+        names: ["Лена", "Женя"]
+      }
     };
 
     const stateMeta = {
@@ -855,6 +1037,30 @@
       return count + " отметок";
     }
 
+    function pilotStats(name) {
+      let full = 0;
+      let checkpoints = 0;
+      BOARD_DATA.rounds.forEach(round => {
+        const mark = round.marks[name] || {};
+        const entered = Boolean(mark.entered);
+        const finished = Boolean(mark.finished);
+        checkpoints += Number(entered) + Number(finished);
+        if (entered && finished) full += 1;
+      });
+
+      let series = 0;
+      for (let index = BOARD_DATA.rounds.length - 1; index >= 0; index -= 1) {
+        const round = BOARD_DATA.rounds[index];
+        if (round.status === "upcoming") continue;
+        const mark = round.marks[name] || {};
+        const participated = Boolean(mark.entered || mark.finished);
+        if (round.status === "active" && !participated) continue;
+        if (!participated) break;
+        series += 1;
+      }
+      return { series, full, checkpoints };
+    }
+
     function renderHeader() {
       const round = selectedRound();
       document.getElementById("week-updated").textContent = "Последняя отметка: " + round.updated;
@@ -877,6 +1083,7 @@
           renderHeader();
           renderMetrics();
           renderParticipants();
+          renderSeasonPath();
         });
         switcher.appendChild(button);
       });
@@ -892,11 +1099,68 @@
 
     function renderDetail(person, state) {
       const meta = stateMeta[state];
+      const stats = pilotStats(person.name);
       const detail = document.getElementById("selected-detail");
       detail.querySelector("strong").textContent = person.name + " · " + meta.label;
       detail.querySelector(".selected-detail-icon").textContent = meta.icon;
       detail.querySelector("div span").textContent = person.lastMark;
-      detail.querySelector(".selected-detail-mark").textContent = person.finished ? "✓" : "•";
+      document.getElementById("stat-series").textContent = "🔥 Серия: " + formatLaps(stats.series);
+      document.getElementById("stat-full").textContent = "🏁 Полных: " + stats.full;
+      document.getElementById("stat-marks").textContent = "✓ " + formatCheckpoints(stats.checkpoints);
+    }
+
+    function renderSeasonPath() {
+      const path = document.getElementById("season-path");
+      path.replaceChildren();
+      BOARD_DATA.rounds.forEach(round => {
+        const stop = document.createElement("button");
+        stop.className = "path-stop " + round.status;
+        stop.type = "button";
+        if (round.number === BOARD_DATA.selectedRound) stop.setAttribute("aria-current", "step");
+        stop.setAttribute("aria-label", "Открыть круг " + round.number + ", " + round.dates);
+        const node = document.createElement("span");
+        node.className = "path-node";
+        node.textContent = round.status === "closed" ? "✓" : round.status === "active" ? "🏎️" : round.number;
+        const title = document.createElement("strong");
+        title.textContent = "Круг " + round.number;
+        const dates = document.createElement("small");
+        dates.textContent = round.dates;
+        stop.append(node, title, dates);
+        stop.addEventListener("click", () => {
+          BOARD_DATA.selectedRound = round.number;
+          renderRoundSwitch();
+          renderHeader();
+          renderMetrics();
+          renderParticipants();
+          renderSeasonPath();
+          document.getElementById("tab-current").click();
+        });
+        path.appendChild(stop);
+      });
+    }
+
+    function showCelebration() {
+      const data = BOARD_DATA.celebration;
+      if (!data || !data.id || !data.names.length) return;
+      const storageKey = "zhazhda-order-celebration";
+      let seen = null;
+      try { seen = localStorage.getItem(storageKey); } catch (error) { seen = null; }
+      if (seen === data.id) return;
+
+      const layer = document.getElementById("celebration");
+      const close = document.getElementById("celebration-close");
+      const names = data.names.length === 1 ? data.names[0] : data.names.slice(0, -1).join(", ") + " и " + data.names.at(-1);
+      document.getElementById("celebration-text").textContent = "Финиш круга " + data.round + ": " + names + ". Эльфийка зафиксировала чек-поинты!";
+      layer.hidden = false;
+      close.focus();
+
+      const dismiss = () => {
+        layer.hidden = true;
+        try { localStorage.setItem(storageKey, data.id); } catch (error) { /* сохранение недоступно */ }
+      };
+      close.addEventListener("click", dismiss, { once: true });
+      layer.addEventListener("click", event => { if (event.target === layer) dismiss(); });
+      document.addEventListener("keydown", event => { if (event.key === "Escape" && !layer.hidden) dismiss(); });
     }
 
     function renderParticipants() {
@@ -1089,6 +1353,8 @@
     renderMetrics();
     renderParticipants();
     renderHistory();
+    renderSeasonPath();
+    showCelebration();
   </script>
 </body>
 </html>
