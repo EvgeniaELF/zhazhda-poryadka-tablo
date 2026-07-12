@@ -574,8 +574,6 @@
       border: 0;
       cursor: pointer;
     }
-    .path-stop:nth-child(even) { transform: translateY(18px); }
-    .path-stop:nth-child(odd) { transform: translateY(-18px); }
     .path-node {
       display: grid;
       place-items: center;
@@ -725,17 +723,42 @@
     .celebration-card img { position: relative; z-index: 1; width: 170px; filter: drop-shadow(0 10px 12px rgba(45,79,54,.16)); }
     .celebration-copy { position: relative; z-index: 1; }
     .celebration-copy h2 { margin: 0 0 8px; color: var(--green); font-size: 1.65rem; font-weight: 900; }
-    .celebration-copy p { margin: 0 0 16px; color: var(--muted); }
+    .celebration-copy p { margin: 0 0 12px; color: var(--muted); }
+    .celebration-results { display: grid; gap: 7px; margin: 12px 0 14px; }
+    .celebration-result {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px 10px;
+      color: var(--green);
+      background: rgba(255,255,255,.58);
+      border-radius: 12px;
+      font-size: .78rem;
+      font-weight: 800;
+    }
+    .celebration-prompt { font-size: .78rem; }
+    .celebration-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .celebration-action,
     .celebration-close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       min-height: 42px;
       padding: 9px 15px;
+      border-radius: 999px;
+      font-weight: 900;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .celebration-action {
       color: var(--white);
       background: var(--orange);
       border: 0;
-      border-radius: 999px;
-      font-weight: 900;
-      cursor: pointer;
     }
+    .celebration-close { color: var(--green); background: transparent; border: 2px solid var(--green); }
+    .celebration-action:hover { background: var(--orange-2); }
+    .celebration-close:hover { color: var(--white); background: var(--green); }
+    .celebration-action:focus-visible,
     .celebration-close:focus-visible { outline: 3px solid var(--green); outline-offset: 3px; }
     .confetti { position: absolute; inset: 0; pointer-events: none; }
     .confetti i { position: absolute; width: 10px; height: 18px; background: var(--orange); border-radius: 4px; animation: confetti-fall 2.7s ease-in-out infinite; }
@@ -927,7 +950,13 @@
     <div class="celebration-card" role="dialog" aria-modal="true" aria-labelledby="celebration-title">
       <div class="confetti" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <img src="elf.webp" alt="Эльфийка-штурман отмечает финиш">
-      <div class="celebration-copy"><h2 id="celebration-title">Круг отмечен!</h2><p id="celebration-text"></p><button class="celebration-close" id="celebration-close" type="button">Ура! Мягко, но едем</button></div>
+      <div class="celebration-copy">
+        <h2 id="celebration-title">Привет, пилоты!</h2>
+        <p id="celebration-text"></p>
+        <div class="celebration-results" id="celebration-results"></div>
+        <p class="celebration-prompt">Если твой чек-поинт ещё не отмечен — отправь отчёт, и Эльфийка добавит его на табло.</p>
+        <div class="celebration-actions"><a class="celebration-action" id="celebration-action" href="https://t.me/c/4389010152/15" target="_blank" rel="noopener noreferrer">Заехать / Финишировать</a><button class="celebration-close" id="celebration-close" type="button">Перейти к табло</button></div>
+      </div>
     </div>
   </div>
 
@@ -976,9 +1005,8 @@
         { name: "Женя" }
       ],
       celebration: {
-        id: "round-1-finish-lena-zhenya",
-        round: 1,
-        names: ["Лена", "Женя"]
+        id: "round-1-team-summary-v2",
+        round: 1
       }
     };
 
@@ -1141,7 +1169,9 @@
 
     function showCelebration() {
       const data = BOARD_DATA.celebration;
-      if (!data || !data.id || !data.names.length) return;
+      if (!data || !data.id) return;
+      const round = BOARD_DATA.rounds.find(item => item.number === data.round);
+      if (!round) return;
       const storageKey = "zhazhda-order-celebration";
       let seen = null;
       try { seen = localStorage.getItem(storageKey); } catch (error) { seen = null; }
@@ -1149,8 +1179,37 @@
 
       const layer = document.getElementById("celebration");
       const close = document.getElementById("celebration-close");
-      const names = data.names.length === 1 ? data.names[0] : data.names.slice(0, -1).join(", ") + " и " + data.names.at(-1);
-      document.getElementById("celebration-text").textContent = "Финиш круга " + data.round + ": " + names + ". Эльфийка зафиксировала чек-поинты!";
+      const action = document.getElementById("celebration-action");
+      const results = document.getElementById("celebration-results");
+      const groups = { full: [], start: [], finish: [], empty: [] };
+
+      BOARD_DATA.members.forEach(member => {
+        const mark = round.marks[member.name] || {};
+        if (mark.entered && mark.finished) groups.full.push(member.name);
+        else if (mark.entered) groups.start.push(member.name);
+        else if (mark.finished) groups.finish.push(member.name);
+        else groups.empty.push(member.name);
+      });
+
+      const joinNames = names => names.length < 2 ? names.join("") : names.slice(0, -1).join(", ") + " и " + names[names.length - 1];
+      const addResult = (icon, text) => {
+        const row = document.createElement("div");
+        row.className = "celebration-result";
+        const symbol = document.createElement("span");
+        symbol.textContent = icon;
+        symbol.setAttribute("aria-hidden", "true");
+        const copy = document.createElement("span");
+        copy.textContent = text;
+        row.append(symbol, copy);
+        results.appendChild(row);
+      };
+
+      results.replaceChildren();
+      document.getElementById("celebration-text").textContent = "Круг " + data.round + " завершён — отмечаю движение всей команды:";
+      if (groups.full.length) addResult("🏁", joinNames(groups.full) + " — заезд и финиш отмечены.");
+      if (groups.start.length) addResult("🟢", joinNames(groups.start) + " — заезд отмечен, финиш ещё можно добавить.");
+      if (groups.finish.length) addResult("⚑", joinNames(groups.finish) + " — финиш отмечен, заезд пока без отметки.");
+      if (groups.empty.length) addResult("○", joinNames(groups.empty) + " — чек-поинты пока не отмечены.");
       layer.hidden = false;
       close.focus();
 
@@ -1159,6 +1218,7 @@
         try { localStorage.setItem(storageKey, data.id); } catch (error) { /* сохранение недоступно */ }
       };
       close.addEventListener("click", dismiss, { once: true });
+      action.addEventListener("click", dismiss, { once: true });
       layer.addEventListener("click", event => { if (event.target === layer) dismiss(); });
       document.addEventListener("keydown", event => { if (event.key === "Escape" && !layer.hidden) dismiss(); });
     }
