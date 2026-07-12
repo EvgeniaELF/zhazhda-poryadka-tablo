@@ -1,0 +1,1106 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2d4f36">
+  <meta name="description" content="Онлайн-табло кругов проекта «Жажда порядка»">
+  <title>Табло кругов · Жажда порядка</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green: #2d4f36;
+      --green-2: #42694b;
+      --green-3: #1d3625;
+      --green-soft: #e8f0e8;
+      --orange: #ec8502;
+      --orange-2: #ffab3d;
+      --orange-soft: #fff0d8;
+      --beige: #ffefcd;
+      --cream: #fff9ec;
+      --paper: #fffdf7;
+      --white: #ffffff;
+      --ink: #26382b;
+      --muted: #6f7d72;
+      --red: #cb5639;
+      --line: rgba(45, 79, 54, .16);
+      --shadow: 0 18px 44px rgba(45, 79, 54, .12);
+      --shadow-small: 0 8px 22px rgba(45, 79, 54, .075);
+      --radius-xl: 32px;
+      --radius-lg: 23px;
+      --radius-md: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(236, 133, 2, .15), transparent 29rem),
+        radial-gradient(circle at 100% 24%, rgba(45, 79, 54, .12), transparent 31rem),
+        var(--cream);
+      font-family: "Nunito", system-ui, sans-serif;
+      font-weight: 600;
+    }
+
+    button { font: inherit; }
+    img { display: block; max-width: 100%; }
+
+    .page {
+      width: min(1180px, calc(100% - 30px));
+      margin: 0 auto;
+      padding: 22px 0 40px;
+    }
+
+    .hero {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(270px, .65fr);
+      align-items: center;
+      min-height: 355px;
+      overflow: hidden;
+      color: var(--white);
+      background:
+        linear-gradient(135deg, rgba(29,54,37,.18), rgba(29,54,37,.72)),
+        var(--green);
+      border-radius: 38px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 480px;
+      height: 480px;
+      right: -170px;
+      top: -190px;
+      border: 54px solid rgba(255,255,255,.06);
+      border-radius: 50%;
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 2;
+      padding: 40px 12px 40px 46px;
+    }
+
+    .brand-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 17px;
+      padding: 8px 13px;
+      color: var(--beige);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 999px;
+      font-size: .77rem;
+      font-weight: 900;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      max-width: 680px;
+      margin: 0;
+      color: var(--orange-2);
+      font-size: clamp(2.65rem, 7vw, 5.5rem);
+      font-weight: 900;
+      line-height: .92;
+      letter-spacing: -.05em;
+      text-shadow: 0 4px 0 rgba(0,0,0,.09);
+    }
+
+    .hero-lead {
+      max-width: 610px;
+      margin: 22px 0 0;
+      color: rgba(255,255,255,.9);
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      line-height: 1.55;
+    }
+
+    .hero-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 21px;
+      color: var(--beige);
+      font-size: .85rem;
+      font-weight: 800;
+    }
+
+    .hero-visual {
+      position: relative;
+      align-self: stretch;
+      min-height: 355px;
+    }
+
+    .hero-elf {
+      position: absolute;
+      z-index: 2;
+      width: min(385px, 106%);
+      right: -8px;
+      bottom: -35px;
+      filter: drop-shadow(0 18px 18px rgba(0,0,0,.23));
+    }
+
+    .hero-helmet {
+      position: absolute;
+      z-index: 1;
+      width: 118px;
+      left: -30px;
+      top: 22px;
+      transform: rotate(-10deg);
+      filter: drop-shadow(0 14px 14px rgba(0,0,0,.22));
+    }
+
+    .week-bar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 18px;
+      align-items: center;
+      margin: 20px 0 16px;
+      padding: 17px 20px;
+      color: var(--green);
+      background: var(--beige);
+      border: 1px solid rgba(236,133,2,.26);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-small);
+    }
+
+    .round-switch { display: flex; flex-wrap: wrap; gap: 9px; }
+    .round-button {
+      padding: 10px 14px;
+      color: var(--green);
+      background: rgba(255,255,255,.52);
+      border: 1px solid rgba(45,79,54,.16);
+      border-radius: 14px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .round-button[aria-pressed="true"] { color: var(--white); background: var(--green); border-color: var(--green); }
+    .round-button:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+    .week-meta { display: grid; justify-items: end; gap: 7px; }
+    .week-updated { color: var(--muted); font-size: .78rem; }
+
+    .demo-badge {
+      padding: 7px 11px;
+      color: var(--white);
+      background: var(--orange);
+      border-radius: 999px;
+      font-size: .73rem;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .tabs {
+      display: inline-flex;
+      gap: 5px;
+      margin-bottom: 16px;
+      padding: 6px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      box-shadow: var(--shadow-small);
+    }
+
+    .tab {
+      min-height: 45px;
+      padding: 10px 18px;
+      color: var(--green);
+      background: transparent;
+      border: 0;
+      border-radius: 999px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: color .2s ease, background .2s ease, transform .2s ease;
+    }
+
+    .tab:hover { transform: translateY(-1px); }
+    .tab:focus-visible { outline: 3px solid var(--orange-2); outline-offset: 2px; }
+    .tab[aria-selected="true"] { color: var(--white); background: var(--green); }
+    .view[hidden] { display: none; }
+
+    .checkpoint-rhythm {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 17px 20px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-small);
+    }
+
+    .rhythm-step { display: flex; align-items: center; gap: 11px; min-width: 0; }
+    .rhythm-icon {
+      display: grid;
+      place-items: center;
+      width: 43px;
+      height: 43px;
+      flex: 0 0 auto;
+      background: var(--orange-soft);
+      border-radius: 13px;
+      font-size: 1.3rem;
+    }
+    .rhythm-step strong { display: block; color: var(--green); font-size: .88rem; font-weight: 900; }
+    .rhythm-step span { display: block; color: var(--muted); font-size: .74rem; }
+    .rhythm-arrow { color: var(--orange); font-size: 1.25rem; font-weight: 900; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .metric {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 3px 11px;
+      align-items: center;
+      padding: 16px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-small);
+    }
+
+    .metric-icon {
+      grid-row: 1 / 3;
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      background: var(--green-soft);
+      border-radius: 14px;
+      font-size: 1.3rem;
+    }
+
+    .metric-value { color: var(--green); font-size: 1.55rem; font-weight: 900; line-height: 1; }
+    .metric-label { color: var(--muted); font-size: .75rem; }
+
+    .board {
+      position: relative;
+      overflow: hidden;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+    }
+
+    .board::after {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      width: 540px;
+      height: 540px;
+      right: -190px;
+      bottom: -205px;
+        background: url("track.webp") center / contain no-repeat;
+      opacity: .1;
+      pointer-events: none;
+    }
+
+    .board-head {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      padding: 25px 27px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .board-head h2 {
+      margin: 0;
+      color: var(--green);
+      font-size: clamp(1.5rem, 3vw, 2.15rem);
+      font-weight: 900;
+    }
+
+    .board-head p { margin: 5px 0 0; color: var(--muted); }
+
+    .board-rule {
+      max-width: 285px;
+      padding: 8px 11px;
+      color: var(--green);
+      background: var(--green-soft);
+      border-radius: 12px;
+      font-size: .75rem;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .participants {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 13px;
+      padding: 18px 27px 27px;
+    }
+
+    .participant {
+      display: grid;
+      width: 100%;
+      padding: 18px;
+      color: inherit;
+      background: rgba(255,255,255,.88);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 5px 16px rgba(45,79,54,.045);
+      text-align: left;
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .participant:hover { transform: translateY(-2px); border-color: rgba(236,133,2,.35); }
+    .participant.is-selected { border-color: var(--orange); box-shadow: 0 10px 26px rgba(236,133,2,.14); }
+
+    .participant-main {
+      display: grid;
+      gap: 13px;
+      width: 100%;
+      padding: 0;
+      color: inherit;
+      background: transparent;
+      border: 0;
+      text-align: left;
+      cursor: pointer;
+    }
+    .participant-main:focus-visible { outline: 3px solid var(--orange-2); outline-offset: 5px; border-radius: 12px; }
+
+    .participant-top { display: flex; align-items: center; gap: 12px; }
+    .helmet-wrap {
+      display: grid;
+      place-items: center;
+      width: 54px;
+      height: 54px;
+      flex: 0 0 auto;
+      overflow: hidden;
+      background: var(--beige);
+      border: 2px solid var(--white);
+      border-radius: 16px;
+      box-shadow: 0 4px 11px rgba(45,79,54,.13);
+    }
+    .helmet-wrap img { width: 55px; height: 55px; object-fit: contain; }
+    .participant-name { flex: 1 1 auto; min-width: 0; }
+    .participant-name strong { display: block; color: var(--green); font-size: 1.06rem; font-weight: 900; }
+    .participant-name span { color: var(--muted); font-size: .75rem; }
+    .state {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex: 0 0 auto;
+      padding: 7px 11px;
+      color: var(--state-color, var(--green));
+      background: var(--state-bg, var(--green-soft));
+      border-radius: 999px;
+      font-size: .7rem;
+      font-weight: 900;
+      text-align: center;
+    }
+    .profile-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      justify-self: start;
+      max-height: 0;
+      margin-top: 0;
+      padding: 0 11px;
+      overflow: hidden;
+      color: var(--white);
+      background: var(--green);
+      border-radius: 999px;
+      opacity: 0;
+      pointer-events: none;
+      font-size: .72rem;
+      font-weight: 900;
+      text-decoration: none;
+      transform: translateY(-4px);
+      transition: max-height .2s ease, margin-top .2s ease, padding .2s ease, opacity .2s ease, transform .2s ease;
+    }
+    .participant:hover .profile-link,
+    .participant:focus-within .profile-link {
+      max-height: 36px;
+      margin-top: 11px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .profile-link:hover { background: var(--orange); }
+    .profile-link:focus-visible { outline: 3px solid var(--orange-2); outline-offset: 2px; }
+
+    .checkline {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .checkpoint {
+      display: grid;
+      justify-items: center;
+      gap: 3px;
+      min-width: 54px;
+    }
+    .checkpoint-dot {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      color: var(--muted);
+      background: #f1f2ee;
+      border: 2px solid rgba(45,79,54,.15);
+      border-radius: 50%;
+      font-weight: 900;
+    }
+    .checkpoint.done .checkpoint-dot { color: var(--white); background: var(--green); border-color: var(--green); }
+    .checkpoint.finish.done .checkpoint-dot { background: var(--orange); border-color: var(--orange); }
+    .checkpoint small { color: var(--muted); font-size: .64rem; font-weight: 800; }
+
+    .road-segment {
+      position: relative;
+      height: 7px;
+      background: repeating-linear-gradient(90deg, rgba(45,79,54,.27) 0 10px, transparent 10px 16px);
+      border-radius: 999px;
+    }
+    .road-segment.active { background: repeating-linear-gradient(90deg, var(--green) 0 10px, transparent 10px 16px); }
+    .road-segment.complete { background: var(--orange); }
+    .road-car {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -58%);
+      font-size: 1.25rem;
+      filter: drop-shadow(0 4px 3px rgba(45,79,54,.18));
+    }
+
+    .selected-detail {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+      margin-top: 16px;
+      padding: 17px 20px;
+      color: var(--white);
+      background: var(--green);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-small);
+    }
+    .selected-detail-icon { font-size: 1.8rem; }
+    .selected-detail strong { display: block; font-weight: 900; }
+    .selected-detail span { color: rgba(255,255,255,.77); font-size: .8rem; }
+    .selected-detail-mark { color: var(--orange-2); font-size: 1.5rem; }
+
+    .history-wrap { position: relative; z-index: 1; overflow-x: auto; padding: 12px 27px 27px; }
+    .history-grid {
+      display: grid;
+      grid-template-columns: minmax(140px, 1.4fr) repeat(var(--round-count, 2), minmax(88px, .75fr)) minmax(105px, .9fr);
+      gap: 9px;
+      min-width: 720px;
+      align-items: center;
+    }
+    .history-head { padding: 9px 6px; color: var(--muted); font-size: .72rem; font-weight: 900; text-align: center; text-transform: uppercase; }
+    .history-head:first-child { text-align: left; }
+    .history-name { display: flex; align-items: center; gap: 8px; padding: 8px 6px; color: var(--green); font-weight: 900; }
+    .history-initial {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      color: var(--white);
+      background: var(--green);
+      border-radius: 50%;
+      font-size: .75rem;
+    }
+    .lap {
+      display: grid;
+      place-items: center;
+      min-height: 50px;
+      color: var(--green);
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      font-weight: 900;
+    }
+    .lap.pit { color: var(--muted); background: var(--beige); border-color: rgba(236,133,2,.22); }
+    .lap.future { background: rgba(255,255,255,.55); }
+    .lap-marks { display: flex; gap: 6px; align-items: center; justify-content: center; }
+    .lap-mark {
+      display: grid;
+      place-items: center;
+      width: 29px;
+      height: 29px;
+      color: rgba(45,79,54,.38);
+      background: rgba(45,79,54,.07);
+      border: 1px solid rgba(45,79,54,.1);
+      border-radius: 50%;
+      font-size: .72rem;
+    }
+    .lap-mark.start.on { color: var(--white); background: var(--green); border-color: var(--green); }
+    .lap-mark.finish.on { color: var(--white); background: var(--orange); border-color: var(--orange); }
+    .lap.future .lap-mark { opacity: .45; }
+    .lap-total { display: grid; justify-items: center; gap: 1px; color: var(--green); text-align: center; }
+    .lap-total strong { font-weight: 900; }
+    .lap-total span { color: var(--muted); font-size: .68rem; font-weight: 700; }
+    .history-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .history-legend span { padding: 6px 9px; color: var(--muted); background: var(--white); border: 1px solid var(--line); border-radius: 999px; font-size: .7rem; font-weight: 800; }
+
+    .logic-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+    .logic-card {
+      overflow: hidden;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-small);
+    }
+    .logic-visual { display: grid; place-items: center; height: 210px; background: var(--beige); overflow: hidden; }
+    .logic-visual img { width: 82%; height: 90%; object-fit: contain; filter: drop-shadow(0 10px 12px rgba(45,79,54,.12)); }
+    .logic-visual.track-bg { background: linear-gradient(rgba(255,239,205,.8), rgba(255,239,205,.8)), url("track.webp") center / cover; }
+    .logic-copy { padding: 20px; }
+    .logic-number { display: inline-grid; place-items: center; width: 30px; height: 30px; color: var(--white); background: var(--orange); border-radius: 50%; font-weight: 900; }
+    .logic-copy h3 { margin: 11px 0 6px; color: var(--green); font-size: 1.15rem; font-weight: 900; }
+    .logic-copy p { margin: 0; color: var(--muted); font-size: .86rem; line-height: 1.5; }
+
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+      padding: 20px;
+      color: var(--white);
+      background: var(--green);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-small);
+    }
+    .principle { display: flex; align-items: flex-start; gap: 10px; }
+    .principle b { color: var(--orange-2); font-size: 1.2rem; }
+    .principle strong { display: block; font-size: .88rem; font-weight: 900; }
+    .principle span { color: rgba(255,255,255,.72); font-size: .75rem; }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: center;
+      padding: 24px 5px 0;
+      color: var(--muted);
+      font-size: .76rem;
+    }
+    footer strong { color: var(--green); font-weight: 900; }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr 300px; }
+      .hero-copy { padding-left: 36px; }
+      .hero-elf { width: 390px; right: -42px; }
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      .participants { grid-template-columns: 1fr; }
+      .logic-grid { grid-template-columns: 1fr; }
+      .logic-card { display: grid; grid-template-columns: 210px 1fr; }
+      .logic-visual { height: 100%; min-height: 200px; }
+    }
+
+    @media (max-width: 680px) {
+      .page { width: min(100% - 18px, 1180px); padding-top: 9px; }
+      .hero { grid-template-columns: 1fr; min-height: 555px; border-radius: 28px; }
+      .hero-copy { padding: 30px 23px 0; }
+      .hero-visual { min-height: 290px; }
+      .hero-elf { width: min(350px, 94%); right: 50%; bottom: -28px; transform: translateX(50%); }
+      .hero-helmet { width: 88px; left: 18px; top: 13px; }
+      .week-bar { grid-template-columns: 1fr; }
+      .week-meta { justify-items: start; }
+      .demo-badge { justify-self: start; }
+      .tabs { display: grid; grid-template-columns: 1fr; width: 100%; border-radius: 20px; }
+      .tab { border-radius: 15px; }
+      .checkpoint-rhythm { grid-template-columns: 1fr; }
+      .rhythm-arrow { transform: rotate(90deg); justify-self: center; }
+      .metrics { grid-template-columns: 1fr 1fr; }
+      .board-head { flex-direction: column; padding: 21px 18px 16px; }
+      .board-rule { max-width: none; text-align: left; }
+      .participants { padding: 14px 17px 20px; }
+      .participant-top { align-items: flex-start; flex-wrap: wrap; }
+      .state { margin-left: 66px; margin-top: -17px; }
+      .selected-detail { grid-template-columns: auto 1fr; }
+      .selected-detail-mark { display: none; }
+      .logic-card { display: block; }
+      .logic-visual { height: 190px; }
+      .principles { grid-template-columns: 1fr; }
+      footer { align-items: flex-start; flex-direction: column; }
+    }
+
+    @media (max-width: 430px) {
+      .metrics { grid-template-columns: 1fr; }
+      .checkline { grid-template-columns: 50px 1fr 50px; }
+    }
+
+    @media (hover: none) {
+      .profile-link {
+        max-height: 36px;
+        margin-top: 11px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        opacity: 1;
+        pointer-events: auto;
+        transform: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="brand-kicker"><span aria-hidden="true">🏎️</span> Онлайн-табло команды</p>
+        <h1>Табло кругов</h1>
+        <p class="hero-lead">Здесь видно не скорость и не место в гонке, а самое важное: кто заехал на трек и чей финиш круга уже отмечен.</p>
+        <p class="hero-note"><span aria-hidden="true">✓</span> Эльфийка-штурман следит за чек-поинтами</p>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <img class="hero-helmet" src="helmet.webp" alt="">
+        <img class="hero-elf" src="elf.webp" alt="">
+      </div>
+    </header>
+
+    <div class="week-bar">
+      <div>
+        <div class="round-switch" id="round-switch" aria-label="Выбор круга"></div>
+      </div>
+      <div class="week-meta"><span class="demo-badge" id="demo-badge">Демонстрационные данные</span><span class="week-updated" id="week-updated">Последняя отметка: 12 июля</span></div>
+    </div>
+
+    <nav class="tabs" role="tablist" aria-label="Разделы табло">
+      <button class="tab" id="tab-current" type="button" role="tab" aria-selected="true" aria-controls="view-current">Текущий круг</button>
+      <button class="tab" id="tab-history" type="button" role="tab" aria-selected="false" aria-controls="view-history">История сезона</button>
+      <button class="tab" id="tab-logic" type="button" role="tab" aria-selected="false" aria-controls="view-logic">Как считается круг</button>
+    </nav>
+
+    <section class="view" id="view-current" role="tabpanel" aria-labelledby="tab-current">
+      <div class="checkpoint-rhythm" aria-label="Ритм недельного круга">
+        <div class="rhythm-step">
+          <span class="rhythm-icon" aria-hidden="true">🟢</span>
+          <span><strong>Понедельник · чек-поинт</strong><span>Заезд на трек</span></span>
+        </div>
+        <span class="rhythm-arrow" aria-hidden="true">→</span>
+        <div class="rhythm-step">
+          <span class="rhythm-icon" aria-hidden="true">🏁</span>
+          <span><strong>Суббота · чек-поинт</strong><span>Финиш круга</span></span>
+        </div>
+      </div>
+
+      <div class="metrics" aria-label="Состояние текущего круга">
+        <article class="metric"><span class="metric-icon" aria-hidden="true">🟢</span><span class="metric-value" id="metric-entered">0</span><span class="metric-label">заехали на трек</span></article>
+        <article class="metric"><span class="metric-icon" aria-hidden="true">🏁</span><span class="metric-value" id="metric-done">0</span><span class="metric-label">финишировали круг</span></article>
+      </div>
+
+      <div class="board">
+        <div class="board-head">
+          <div><h2>Команда на треке</h2><p>Заезд в понедельник · финиш в субботу</p></div>
+          <span class="board-rule">Без процентов, мест и сравнения скорости</span>
+        </div>
+        <div class="participants" id="participants"></div>
+      </div>
+
+      <div class="selected-detail" id="selected-detail" aria-live="polite">
+        <span class="selected-detail-icon" aria-hidden="true">🧝‍♀️</span>
+        <div><strong>Эльфийка готова отмечать круг</strong><span>Нажми на карточку участника, чтобы увидеть последнюю фиксацию.</span></div>
+        <span class="selected-detail-mark" aria-hidden="true">✓</span>
+      </div>
+    </section>
+
+    <section class="view" id="view-history" role="tabpanel" aria-labelledby="tab-history" hidden>
+      <div class="board">
+        <div class="board-head">
+          <div><h2 id="season-title">Сезон · июль</h2><p>Круг за кругом — личная история устойчивого движения</p></div>
+          <span class="board-rule">Порядок участников не меняется: это не рейтинг</span>
+        </div>
+        <div class="history-wrap">
+          <div class="history-grid" id="history-grid" role="table" aria-label="История кругов команды"></div>
+          <div class="history-legend" aria-label="Обозначения истории">
+            <span>● заезд на трек</span><span>⚑ финиш круга</span><span>● + ⚑ обе отметки</span><span>🔧 пит-стоп</span><span>пусто — отметок ещё нет</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-logic" role="tabpanel" aria-labelledby="tab-logic" hidden>
+      <div class="logic-grid">
+        <article class="logic-card">
+          <div class="logic-visual"><img src="start-flag.webp" alt="Зелёный флаг старта"></div>
+          <div class="logic-copy"><span class="logic-number">1</span><h3>Заезд на трек</h3><p>В понедельник проходит первый чек-поинт: участник присылает задачи недели. После этой фиксации заезд отмечается на табло.</p></div>
+        </article>
+        <article class="logic-card">
+          <div class="logic-visual"><img src="checkpoints.webp" alt="Календарь и финишный флаг"></div>
+          <div class="logic-copy"><span class="logic-number">2</span><h3>Финиш круга</h3><p>В субботу проходит второй чек-поинт: участник присылает итог. Неважно, сколько задач выполнено — важна сама рефлексия.</p></div>
+        </article>
+        <article class="logic-card">
+          <div class="logic-visual track-bg"><img src="finish-flag.webp" alt="Клетчатый финишный флаг"></div>
+          <div class="logic-copy"><span class="logic-number">3</span><h3>История круга</h3><p>В историю попадает любое участие: только заезд, только финиш или обе отметки. Так движение не обнуляется, даже если один чек-поинт пропущен.</p></div>
+        </article>
+      </div>
+
+      <div class="principles">
+        <div class="principle"><b>∞</b><div><strong>Не соревнование</strong><span>Здесь нет лидеров и последних мест.</span></div></div>
+        <div class="principle"><b>✓</b><div><strong>Считаем возвращения</strong><span>Ценность — регулярно замечать свой прогресс.</span></div></div>
+        <div class="principle"><b>♡</b><div><strong>Пит-стоп — часть пути</strong><span>Пауза не обнуляет уже пройденные круги.</span></div></div>
+      </div>
+    </section>
+
+    <footer><strong>Мягко, но едем.</strong><span>«Жажда порядка» · Эльфийка отмечает каждый пройденный круг</span></footer>
+  </main>
+
+  <script>
+    /*
+      ДАННЫЕ ТАБЛО
+      Меняется только этот блок. Остальной сайт перестраивается автоматически.
+
+      Для каждого круга:
+      entered — участник прислал понедельничный план;
+      finished — участник прислал субботний итог;
+      pit — участник обозначил паузу;
+      late — поздний старт (он всё равно считается входом на круг).
+
+      История строится автоматически из двух независимых отметок: entered и finished.
+    */
+    const BOARD_DATA = {
+      demo: false,
+      season: "Июль",
+      selectedRound: 1,
+      rounds: [
+        {
+          number: 1,
+          dates: "29 июня–11 июля",
+          updated: "12 июля 2026",
+          marks: {
+            "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Лена": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
+            "Юля": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Женя": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." }
+          }
+        },
+        {
+          number: 2,
+          dates: "13–18 июля",
+          updated: "старт 13 июля",
+          marks: {}
+        }
+      ],
+      members: [
+        { name: "Аня", profileUrl: "https://t.me/c/4389010152/2/80" },
+        { name: "Лена", profileUrl: "https://t.me/c/4389010152/2/76" },
+        { name: "Юля" },
+        { name: "Женя" }
+      ]
+    };
+
+    const stateMeta = {
+      garage: { label: "Заезд не отмечен", icon: "○", color: "#2d4f36", bg: "#ffefcd" },
+      track: { label: "Заезд на трек", icon: "🏎️", color: "#ffffff", bg: "#2d4f36" },
+      late: { label: "Заезд на трек", icon: "✨", color: "#ffffff", bg: "#2d4f36" },
+      done: { label: "Финиш круга", icon: "🏁", color: "#ffffff", bg: "#ec8502" },
+      pit: { label: "Пит-стоп", icon: "🔧", color: "#2d4f36", bg: "#ffefcd" }
+    };
+
+    function selectedRound() {
+      return BOARD_DATA.rounds.find(round => round.number === BOARD_DATA.selectedRound) || BOARD_DATA.rounds[0];
+    }
+
+    function selectedParticipants() {
+      const round = selectedRound();
+      return BOARD_DATA.members.map(member => ({
+        ...member,
+        entered: false,
+        finished: false,
+        pit: false,
+        late: false,
+        lastMark: "Заезд на этот круг ещё не отмечен.",
+        ...(round.marks[member.name] || {})
+      }));
+    }
+
+    function currentState(person) {
+      if (person.pit) return "pit";
+      if (person.finished) return "done";
+      if (person.entered && person.late) return "late";
+      if (person.entered) return "track";
+      return "garage";
+    }
+
+    function initial(name) {
+      return Array.from(name.trim())[0].toUpperCase();
+    }
+
+    function formatLaps(count) {
+      const lastTwo = count % 100;
+      const last = count % 10;
+      if (lastTwo >= 11 && lastTwo <= 14) return count + " кругов";
+      if (last === 1) return count + " круг";
+      if (last >= 2 && last <= 4) return count + " круга";
+      return count + " кругов";
+    }
+
+    function formatCheckpoints(count) {
+      const lastTwo = count % 100;
+      const last = count % 10;
+      if (lastTwo >= 11 && lastTwo <= 14) return count + " отметок";
+      if (last === 1) return count + " отметка";
+      if (last >= 2 && last <= 4) return count + " отметки";
+      return count + " отметок";
+    }
+
+    function renderHeader() {
+      const round = selectedRound();
+      document.getElementById("week-updated").textContent = "Последняя отметка: " + round.updated;
+      document.getElementById("season-title").textContent = "Сезон · " + BOARD_DATA.season.toLowerCase();
+      document.getElementById("demo-badge").hidden = !BOARD_DATA.demo;
+    }
+
+    function renderRoundSwitch() {
+      const switcher = document.getElementById("round-switch");
+      switcher.replaceChildren();
+      BOARD_DATA.rounds.forEach(round => {
+        const button = document.createElement("button");
+        button.className = "round-button";
+        button.type = "button";
+        button.setAttribute("aria-pressed", round.number === BOARD_DATA.selectedRound ? "true" : "false");
+        button.textContent = "Круг " + round.number + " · " + round.dates;
+        button.addEventListener("click", () => {
+          BOARD_DATA.selectedRound = round.number;
+          renderRoundSwitch();
+          renderHeader();
+          renderMetrics();
+          renderParticipants();
+        });
+        switcher.appendChild(button);
+      });
+    }
+
+    function renderMetrics() {
+      const participants = selectedParticipants();
+      const entered = participants.filter(person => person.entered).length;
+      const done = participants.filter(person => person.finished).length;
+      document.getElementById("metric-entered").textContent = entered;
+      document.getElementById("metric-done").textContent = done;
+    }
+
+    function renderDetail(person, state) {
+      const meta = stateMeta[state];
+      const detail = document.getElementById("selected-detail");
+      detail.querySelector("strong").textContent = person.name + " · " + meta.label;
+      detail.querySelector(".selected-detail-icon").textContent = meta.icon;
+      detail.querySelector("div span").textContent = person.lastMark;
+      detail.querySelector(".selected-detail-mark").textContent = person.finished ? "✓" : "•";
+    }
+
+    function renderParticipants() {
+      const container = document.getElementById("participants");
+      container.replaceChildren();
+      const participants = selectedParticipants();
+
+      participants.forEach((person, index) => {
+        const state = currentState(person);
+        const meta = stateMeta[state];
+        const card = document.createElement("article");
+        card.className = "participant" + (index === 0 ? " is-selected" : "");
+        const main = document.createElement("button");
+        main.className = "participant-main";
+        main.type = "button";
+        main.setAttribute("aria-pressed", index === 0 ? "true" : "false");
+        main.setAttribute("aria-label", person.name + ": " + meta.label + ". " + person.lastMark);
+
+        const top = document.createElement("span");
+        top.className = "participant-top";
+        const helmet = document.createElement("span");
+        helmet.className = "helmet-wrap";
+        const helmetImg = document.createElement("img");
+        helmetImg.src = "helmet.webp";
+        helmetImg.alt = "";
+        helmet.appendChild(helmetImg);
+        const name = document.createElement("span");
+        name.className = "participant-name";
+        const strong = document.createElement("strong");
+        strong.textContent = person.name;
+        const small = document.createElement("span");
+        small.textContent = person.late ? "Поздний заезд тоже считается" : "Пилот команды";
+        name.append(strong, small);
+        const statePill = document.createElement("span");
+        statePill.className = "state";
+        statePill.style.setProperty("--state-color", meta.color);
+        statePill.style.setProperty("--state-bg", meta.bg);
+        statePill.textContent = meta.label;
+        top.append(helmet, name, statePill);
+
+        const line = document.createElement("span");
+        line.className = "checkline";
+        const start = document.createElement("span");
+        start.className = "checkpoint start" + (person.entered ? " done" : "");
+        start.innerHTML = '<span class="checkpoint-dot">' + (person.entered ? "✓" : "○") + '</span><small>ЗАЕЗД</small>';
+        const road = document.createElement("span");
+        road.className = "road-segment" + (person.entered ? " active" : "") + (person.finished ? " complete" : "");
+        if (person.entered && !person.finished && !person.pit) {
+          const car = document.createElement("span");
+          car.className = "road-car";
+          car.textContent = "🏎️";
+          car.setAttribute("aria-hidden", "true");
+          road.appendChild(car);
+        }
+        const finish = document.createElement("span");
+        finish.className = "checkpoint finish" + (person.finished ? " done" : "");
+        finish.innerHTML = '<span class="checkpoint-dot">' + (person.finished ? "✓" : "○") + '</span><small>ФИНИШ</small>';
+        line.append(start, road, finish);
+
+        main.append(top, line);
+        card.appendChild(main);
+
+        if (person.profileUrl) {
+          const profile = document.createElement("a");
+          profile.className = "profile-link";
+          profile.href = person.profileUrl;
+          profile.target = "_blank";
+          profile.rel = "noopener noreferrer";
+          profile.textContent = "Открыть визитку в чате →";
+          profile.setAttribute("aria-label", "Открыть визитку участника " + person.name + " в Telegram");
+          card.appendChild(profile);
+        }
+
+        main.addEventListener("click", () => {
+          container.querySelectorAll(".participant").forEach(item => {
+            item.classList.remove("is-selected");
+            const button = item.querySelector(".participant-main");
+            if (button) button.setAttribute("aria-pressed", "false");
+          });
+          card.classList.add("is-selected");
+          main.setAttribute("aria-pressed", "true");
+          renderDetail(person, state);
+        });
+        container.appendChild(card);
+      });
+
+      if (participants.length) {
+        const first = participants[0];
+        renderDetail(first, currentState(first));
+      }
+    }
+
+    function renderHistory() {
+      const grid = document.getElementById("history-grid");
+      grid.replaceChildren();
+      grid.style.setProperty("--round-count", BOARD_DATA.rounds.length);
+      ["Участник", ...BOARD_DATA.rounds.map(round => "Круг " + round.number), "Отмечено"].forEach(label => {
+        const head = document.createElement("div");
+        head.className = "history-head";
+        head.setAttribute("role", "columnheader");
+        head.textContent = label;
+        grid.appendChild(head);
+      });
+
+      BOARD_DATA.members.forEach(person => {
+        const name = document.createElement("div");
+        name.className = "history-name";
+        name.setAttribute("role", "rowheader");
+        const avatar = document.createElement("span");
+        avatar.className = "history-initial";
+        avatar.textContent = initial(person.name);
+        avatar.setAttribute("aria-hidden", "true");
+        const nameText = document.createElement("span");
+        nameText.textContent = person.name;
+        name.append(avatar, nameText);
+        grid.appendChild(name);
+
+        BOARD_DATA.rounds.forEach((round, index) => {
+          const lapName = "Круг " + round.number;
+          const mark = round.marks[person.name] || {};
+          const hasStart = Boolean(mark.entered);
+          const hasFinish = Boolean(mark.finished);
+          const isPit = Boolean(mark.pit) && !hasStart && !hasFinish;
+          const value = isPit ? "pit" : hasStart && hasFinish ? "both" : hasStart ? "start-only" : hasFinish ? "finish-only" : "future";
+          const cell = document.createElement("div");
+          cell.className = "lap " + value;
+          cell.setAttribute("role", "cell");
+          if (isPit) {
+            cell.textContent = "🔧";
+          } else {
+            const marks = document.createElement("span");
+            marks.className = "lap-marks";
+            const start = document.createElement("span");
+            start.className = "lap-mark start" + (hasStart ? " on" : "");
+            start.textContent = "●";
+            start.setAttribute("aria-hidden", "true");
+            const finish = document.createElement("span");
+            finish.className = "lap-mark finish" + (hasFinish ? " on" : "");
+            finish.textContent = "⚑";
+            finish.setAttribute("aria-hidden", "true");
+            marks.append(start, finish);
+            cell.appendChild(marks);
+          }
+          const readable = { both: "заезд и финиш отмечены", "start-only": "отмечен только заезд", "finish-only": "отмечен только финиш", pit: "пит-стоп", future: "отметок ещё нет" }[value];
+          cell.setAttribute("aria-label", person.name + ", " + lapName + ": " + readable);
+          grid.appendChild(cell);
+        });
+
+        const participationCount = BOARD_DATA.rounds.filter(round => {
+          const mark = round.marks[person.name] || {};
+          return Boolean(mark.entered || mark.finished);
+        }).length;
+        const checkpointCount = BOARD_DATA.rounds.reduce((sum, round) => {
+          const mark = round.marks[person.name] || {};
+          return sum + Number(Boolean(mark.entered)) + Number(Boolean(mark.finished));
+        }, 0);
+        const total = document.createElement("div");
+        total.className = "lap-total";
+        total.setAttribute("role", "cell");
+        const totalRounds = document.createElement("strong");
+        totalRounds.textContent = formatLaps(participationCount);
+        const totalMarks = document.createElement("span");
+        totalMarks.textContent = formatCheckpoints(checkpointCount);
+        total.append(totalRounds, totalMarks);
+        grid.appendChild(total);
+      });
+    }
+
+    const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        tabs.forEach(item => {
+          const active = item === tab;
+          item.setAttribute("aria-selected", active ? "true" : "false");
+          document.getElementById(item.getAttribute("aria-controls")).hidden = !active;
+        });
+      });
+      tab.addEventListener("keydown", event => {
+        if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+        event.preventDefault();
+        const direction = event.key === 'ArrowRight' ? 1 : -1;
+        const next = tabs[(tabs.indexOf(tab) + direction + tabs.length) % tabs.length];
+        next.focus();
+        next.click();
+      });
+    });
+
+    renderRoundSwitch();
+    renderHeader();
+    renderMetrics();
+    renderParticipants();
+    renderHistory();
+  </script>
+</body>
+</html>
