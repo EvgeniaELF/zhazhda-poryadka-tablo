@@ -969,7 +969,7 @@
       <div class="selected-detail" id="selected-detail" aria-live="polite">
         <span class="selected-detail-icon" aria-hidden="true">🧝‍♀️</span>
         <div><strong>Эльфийка готова отмечать круг</strong><span>Нажми на карточку участника, чтобы увидеть последнюю фиксацию.</span></div>
-        <div class="selected-detail-stats" aria-label="Личная статистика пилота"><span id="stat-series">🔥 0 кругов</span><span id="stat-full">🏁 0 полных</span><span id="stat-marks">✓ 0 отметок</span></div>
+        <div class="selected-detail-stats" aria-label="Личная статистика информационного гонщика"><span id="stat-series">🔥 0 кругов</span><span id="stat-full">🏁 0 полных</span><span id="stat-marks">✓ 0 отметок</span></div>
       </div>
     </section>
 
@@ -1033,7 +1033,7 @@
       <div class="confetti" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <img src="elf.webp" alt="Эльфийка-штурман отмечает финиш">
       <div class="celebration-copy">
-        <h2 id="celebration-title">Привет, пилоты!</h2>
+        <h2 id="celebration-title">Привет, информационные гонщики!</h2>
         <p id="celebration-text"></p>
         <div class="celebration-results" id="celebration-results"></div>
         <p class="celebration-prompt">Если твой чек-поинт ещё не отмечен — отправь отчёт, и Эльфийка добавит его на табло.</p>
@@ -1334,7 +1334,7 @@
         const strong = document.createElement("strong");
         strong.textContent = person.name;
         const small = document.createElement("span");
-        small.textContent = person.late ? "Поздний заезд тоже считается" : "Пилот команды";
+        small.textContent = person.late ? "Поздний заезд тоже считается" : "Информационный гонщик";
         name.append(strong, small);
         const statePill = document.createElement("span");
         statePill.className = "state";
