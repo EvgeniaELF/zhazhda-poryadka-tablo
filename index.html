@@ -575,7 +575,7 @@
     .history-wrap { position: relative; z-index: 1; overflow-x: auto; padding: 12px 27px 27px; }
     .history-grid {
       display: grid;
-      grid-template-columns: minmax(140px, 1.4fr) repeat(var(--round-count, 2), minmax(88px, .75fr)) minmax(105px, .9fr);
+      grid-template-columns: minmax(140px, 1.4fr) minmax(105px, .9fr) repeat(var(--round-count, 2), minmax(88px, .75fr));
       gap: 9px;
       min-width: 720px;
       align-items: center;
@@ -1029,7 +1029,7 @@
             "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Лена": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Юля": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
-            "Женя №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." }
+            "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." }
           }
         },
         {
@@ -1047,7 +1047,7 @@
         { name: "Аня", profileUrl: "https://t.me/c/4389010152/2/80", joinedRound: 1 },
         { name: "Лена", profileUrl: "https://t.me/c/4389010152/2/201", joinedRound: 1 },
         { name: "Юля", joinedRound: 1 },
-        { name: "Женя №9", joinedRound: 1 },
+        { name: "Женя · болид №9", joinedRound: 1 },
         { name: "Женя", profileUrl: "https://t.me/c/4389010152/2/197", joinedRound: 2 }
       ],
       celebration: {
@@ -1381,7 +1381,7 @@
       const grid = document.getElementById("history-grid");
       grid.replaceChildren();
       grid.style.setProperty("--round-count", BOARD_DATA.rounds.length);
-      ["Участник", ...BOARD_DATA.rounds.map(round => "Круг " + round.number), "Отмечено"].forEach(label => {
+      ["Участник", "Отмечено", ...BOARD_DATA.rounds.map(round => "Круг " + round.number)].forEach(label => {
         const head = document.createElement("div");
         head.className = "history-head";
         head.setAttribute("role", "columnheader");
@@ -1401,6 +1401,24 @@
         nameText.textContent = person.name;
         name.append(avatar, nameText);
         grid.appendChild(name);
+
+        const participationCount = BOARD_DATA.rounds.filter(round => {
+          const mark = round.marks[person.name] || {};
+          return Boolean(mark.entered || mark.finished);
+        }).length;
+        const checkpointCount = BOARD_DATA.rounds.reduce((sum, round) => {
+          const mark = round.marks[person.name] || {};
+          return sum + Number(Boolean(mark.entered)) + Number(Boolean(mark.finished));
+        }, 0);
+        const total = document.createElement("div");
+        total.className = "lap-total";
+        total.setAttribute("role", "cell");
+        const totalRounds = document.createElement("strong");
+        totalRounds.textContent = formatLaps(participationCount);
+        const totalMarks = document.createElement("span");
+        totalMarks.textContent = formatCheckpoints(checkpointCount);
+        total.append(totalRounds, totalMarks);
+        grid.appendChild(total);
 
         BOARD_DATA.rounds.forEach((round, index) => {
           const lapName = "Круг " + round.number;
@@ -1436,23 +1454,6 @@
           grid.appendChild(cell);
         });
 
-        const participationCount = BOARD_DATA.rounds.filter(round => {
-          const mark = round.marks[person.name] || {};
-          return Boolean(mark.entered || mark.finished);
-        }).length;
-        const checkpointCount = BOARD_DATA.rounds.reduce((sum, round) => {
-          const mark = round.marks[person.name] || {};
-          return sum + Number(Boolean(mark.entered)) + Number(Boolean(mark.finished));
-        }, 0);
-        const total = document.createElement("div");
-        total.className = "lap-total";
-        total.setAttribute("role", "cell");
-        const totalRounds = document.createElement("strong");
-        totalRounds.textContent = formatLaps(participationCount);
-        const totalMarks = document.createElement("span");
-        totalMarks.textContent = formatCheckpoints(checkpointCount);
-        total.append(totalRounds, totalMarks);
-        grid.appendChild(total);
       });
     }
 
