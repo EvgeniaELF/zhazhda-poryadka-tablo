@@ -163,18 +163,15 @@
       box-shadow: var(--shadow-small);
     }
 
-    .round-switch { display: flex; flex-wrap: wrap; gap: 9px; }
-    .round-button {
-      padding: 10px 14px;
-      color: var(--green);
-      background: rgba(255,255,255,.52);
-      border: 1px solid rgba(45,79,54,.16);
-      border-radius: 14px;
+    .current-round { display: flex; flex-wrap: wrap; align-items: baseline; gap: 7px 11px; }
+    .current-round-label {
+      color: var(--orange);
+      font-size: .7rem;
       font-weight: 900;
-      cursor: pointer;
+      letter-spacing: .06em;
+      text-transform: uppercase;
     }
-    .round-button[aria-pressed="true"] { color: var(--white); background: var(--green); border-color: var(--green); }
-    .round-button:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+    .current-round strong { color: var(--green); font-size: 1rem; font-weight: 900; }
     .week-meta { display: grid; justify-items: end; gap: 7px; }
     .week-updated { color: var(--muted); font-size: .78rem; }
 
@@ -216,34 +213,6 @@
     .tab:focus-visible { outline: 3px solid var(--orange-2); outline-offset: 2px; }
     .tab[aria-selected="true"] { color: var(--white); background: var(--green); }
     .view[hidden] { display: none; }
-
-    .checkpoint-rhythm {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 16px;
-      padding: 17px 20px;
-      background: var(--white);
-      border: 1px solid var(--line);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-small);
-    }
-
-    .rhythm-step { display: flex; align-items: center; gap: 11px; min-width: 0; }
-    .rhythm-icon {
-      display: grid;
-      place-items: center;
-      width: 43px;
-      height: 43px;
-      flex: 0 0 auto;
-      background: var(--orange-soft);
-      border-radius: 13px;
-      font-size: 1.3rem;
-    }
-    .rhythm-step strong { display: block; color: var(--green); font-size: .88rem; font-weight: 900; }
-    .rhythm-step span { display: block; color: var(--muted); font-size: .74rem; }
-    .rhythm-arrow { color: var(--orange); font-size: 1.25rem; font-weight: 900; }
 
     .action-banner {
       display: grid;
@@ -368,6 +337,7 @@
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 13px;
+      align-items: start;
       padding: 18px 27px 27px;
     }
 
@@ -399,6 +369,42 @@
       cursor: pointer;
     }
     .participant-main:focus-visible { outline: 3px solid var(--orange-2); outline-offset: 5px; border-radius: 12px; }
+    .participant-main:hover .participant-expand { color: var(--orange); }
+
+    .participant-expand {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 11px;
+      color: var(--green);
+      border-top: 1px dashed rgba(45,79,54,.2);
+      font-size: .72rem;
+      font-weight: 900;
+    }
+    .participant-expand-arrow { color: var(--orange); font-size: .95rem; }
+
+    .participant-details {
+      display: grid;
+      gap: 10px;
+      margin-top: 13px;
+      padding: 14px;
+      color: var(--white);
+      background: var(--green);
+      border-radius: 15px;
+    }
+    .participant-details[hidden] { display: none; }
+    .participant-details strong { font-size: .8rem; font-weight: 900; }
+    .participant-details p { margin: 0; color: rgba(255,255,255,.78); font-size: .76rem; line-height: 1.45; }
+    .participant-detail-stats { display: flex; flex-wrap: wrap; gap: 7px; }
+    .participant-detail-stats span {
+      padding: 6px 9px;
+      color: var(--green);
+      background: var(--beige);
+      border-radius: 999px;
+      font-size: .68rem;
+      font-weight: 900;
+    }
 
     .participant-top { display: flex; align-items: center; gap: 12px; }
     .helmet-wrap {
@@ -508,32 +514,6 @@
       filter: drop-shadow(0 4px 3px rgba(45,79,54,.18));
     }
 
-    .selected-detail {
-      display: grid;
-      grid-template-columns: auto minmax(180px, 1fr) auto;
-      gap: 14px;
-      align-items: center;
-      margin-top: 16px;
-      padding: 17px 20px;
-      color: var(--white);
-      background: var(--green);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-small);
-    }
-    .selected-detail-icon { font-size: 1.8rem; }
-    .selected-detail strong { display: block; font-weight: 900; }
-    .selected-detail span { color: rgba(255,255,255,.77); font-size: .8rem; }
-    .selected-detail-mark { color: var(--orange-2); font-size: 1.5rem; }
-    .selected-detail-stats { display: flex; flex-wrap: wrap; gap: 7px; justify-content: flex-end; }
-    .selected-detail-stats span {
-      padding: 6px 9px;
-      color: var(--green);
-      background: var(--beige);
-      border-radius: 999px;
-      font-size: .68rem;
-      font-weight: 900;
-    }
-
     .season-path {
       position: relative;
       display: flex;
@@ -572,7 +552,6 @@
       color: var(--green);
       background: transparent;
       border: 0;
-      cursor: pointer;
     }
     .path-node {
       display: grid;
@@ -592,7 +571,6 @@
     .path-stop[aria-current="step"] .path-node { outline: 4px solid var(--orange-2); outline-offset: 3px; }
     .path-stop strong { font-size: .8rem; font-weight: 900; }
     .path-stop small { color: var(--muted); font-size: .66rem; }
-    .path-stop:focus-visible { outline: 3px solid var(--orange); outline-offset: 5px; border-radius: 12px; }
 
     .history-wrap { position: relative; z-index: 1; overflow-x: auto; padding: 12px 27px 27px; }
     .history-grid {
@@ -627,6 +605,7 @@
     }
     .lap.pit { color: var(--muted); background: var(--beige); border-color: rgba(236,133,2,.22); }
     .lap.future { background: rgba(255,255,255,.55); }
+    .lap.not-joined { background: transparent; border-color: transparent; box-shadow: none; }
     .lap-marks { display: flex; gap: 6px; align-items: center; justify-content: center; }
     .lap-mark {
       display: grid;
@@ -863,8 +842,6 @@
       .demo-badge { justify-self: start; }
       .tabs { display: grid; grid-template-columns: 1fr; width: 100%; border-radius: 20px; }
       .tab { border-radius: 15px; }
-      .checkpoint-rhythm { grid-template-columns: 1fr; }
-      .rhythm-arrow { transform: rotate(90deg); justify-self: center; }
       .action-banner { grid-template-columns: auto 1fr; }
       .action-button { grid-column: 1 / -1; }
       .metrics { grid-template-columns: 1fr 1fr; }
@@ -873,9 +850,6 @@
       .participants { padding: 14px 17px 20px; }
       .participant-top { align-items: flex-start; flex-wrap: wrap; }
       .state { margin-left: 66px; margin-top: -17px; }
-      .selected-detail { grid-template-columns: auto 1fr; }
-      .selected-detail-mark { display: none; }
-      .selected-detail-stats { grid-column: 1 / -1; justify-content: flex-start; }
       .season-path { gap: 55px; }
       .logic-card { display: block; }
       .logic-visual { height: 190px; }
@@ -915,7 +889,7 @@
         <p class="brand-kicker"><span aria-hidden="true">🏎️</span> Онлайн-табло</p>
         <h1>«Жажда порядка»</h1>
         <p class="hero-lead">Мы едем с разной скоростью, но отмечаем круги вместе. Здесь видно, кто заехал на трек, кто финишировал и сколько пути уже пройдено.</p>
-        <p class="hero-note"><span aria-hidden="true">✓</span> Эльфийка-штурман принимает отчёты и бережно отмечает чек-поинты команды.</p>
+        <p class="hero-note"><span aria-hidden="true">✓</span> Эльфийка-штурман бережно ведёт табло команды.</p>
       </div>
       <div class="hero-visual" aria-hidden="true">
         <img class="hero-elf" src="elf.webp" alt="">
@@ -923,8 +897,9 @@
     </header>
 
     <div class="week-bar">
-      <div>
-        <div class="round-switch" id="round-switch" aria-label="Выбор круга"></div>
+      <div class="current-round">
+        <span class="current-round-label">Сейчас едем</span>
+        <strong id="current-round-title">Круг 2 · 13–18 июля</strong>
       </div>
       <div class="week-meta"><span class="demo-badge" id="demo-badge">Демонстрационные данные</span><span class="week-updated" id="week-updated">Последняя отметка: 12 июля</span></div>
     </div>
@@ -936,21 +911,9 @@
     </nav>
 
     <section class="view" id="view-current" role="tabpanel" aria-labelledby="tab-current">
-      <div class="checkpoint-rhythm" aria-label="Ритм недельного круга">
-        <div class="rhythm-step">
-          <span class="rhythm-icon" aria-hidden="true">🟢</span>
-          <span><strong>Понедельник · чек-поинт</strong><span>Заезд на трек</span></span>
-        </div>
-        <span class="rhythm-arrow" aria-hidden="true">→</span>
-        <div class="rhythm-step">
-          <span class="rhythm-icon" aria-hidden="true">🏁</span>
-          <span><strong>Суббота · чек-поинт</strong><span>Финиш круга</span></span>
-        </div>
-      </div>
-
       <div class="action-banner">
         <span class="action-banner-icon" aria-hidden="true">🧝‍♀️</span>
-        <div><strong>Отметь свой чек-поинт</strong><span>Сообщение в ветке «Отчётность • чек-поинты» засчитывается как заезд на трек или финиш круга.</span></div>
+        <div><strong>Отметь свой чек-поинт</strong><span>Отправь отчёт в ветку «Отчётность • чек-поинты» — Эльфийка отметит заезд или финиш.</span></div>
         <a class="action-button" href="https://t.me/c/4389010152/15" target="_blank" rel="noopener noreferrer">Заехать / Финишировать</a>
       </div>
 
@@ -966,12 +929,6 @@
         </div>
         <div class="participants" id="participants"></div>
       </div>
-
-      <div class="selected-detail" id="selected-detail" aria-live="polite">
-        <span class="selected-detail-icon" aria-hidden="true">🧝‍♀️</span>
-        <div><strong>Эльфийка готова отмечать круг</strong><span>Нажми на карточку участника, чтобы увидеть последнюю фиксацию.</span></div>
-        <div class="selected-detail-stats" aria-label="Личная статистика информационного гонщика"><span id="stat-series">🔥 0 кругов</span><span id="stat-full">🏁 0 полных</span><span id="stat-marks">✓ 0 отметок</span></div>
-      </div>
     </section>
 
     <section class="view" id="view-history" role="tabpanel" aria-labelledby="tab-history" hidden>
@@ -984,7 +941,7 @@
         <div class="history-wrap">
           <div class="history-grid" id="history-grid" role="table" aria-label="История кругов команды"></div>
           <div class="history-legend" aria-label="Обозначения истории">
-            <span>● заезд на трек</span><span>⚑ финиш круга</span><span>● + ⚑ обе отметки</span><span>🔧 пит-стоп</span><span>пусто — отметок ещё нет</span>
+            <span>● заезд на трек</span><span>⚑ финиш круга</span><span>● + ⚑ обе отметки</span><span>🔧 пит-стоп</span>
           </div>
         </div>
       </div>
@@ -1007,7 +964,7 @@
       </div>
 
       <div class="principles">
-        <div class="principle"><b>∞</b><div><strong>Не соревнование</strong><span>Здесь нет лидеров и последних мест.</span></div></div>
+        <div class="principle"><b>↗</b><div><strong>Можно начать с любого круга</strong><span>Не нужно проходить предыдущие круги, чтобы присоединиться сейчас.</span></div></div>
         <div class="principle"><b>✓</b><div><strong>Считаем возвращения</strong><span>Ценность — регулярно замечать свой прогресс.</span></div></div>
         <div class="principle"><b>♡</b><div><strong>Пит-стоп — часть пути</strong><span>Пауза не обнуляет уже пройденные круги.</span></div></div>
       </div>
@@ -1027,19 +984,19 @@
       </aside>
     </section>
 
-    <footer><strong>Мягко, но едем.</strong><span>«Жажда порядка» · Эльфийка отмечает каждый пройденный круг</span></footer>
+    <footer><strong>Мягко, но едем.</strong><span>«Жажда порядка»</span></footer>
   </main>
 
   <div class="celebration" id="celebration" hidden>
     <div class="celebration-card" role="dialog" aria-modal="true" aria-labelledby="celebration-title">
       <div class="confetti" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-      <img src="elf.webp" alt="Эльфийка-штурман отмечает финиш">
+      <img src="elf.webp" alt="Эльфийка-штурман отмечает чек-поинты">
       <div class="celebration-copy">
-        <h2 id="celebration-title">Привет, информационные гонщики!</h2>
+        <h2 id="celebration-title">Круг 2 — мы уже едем!</h2>
         <p id="celebration-text"></p>
         <div class="celebration-results" id="celebration-results"></div>
-        <p class="celebration-prompt">Если твой чек-поинт ещё не отмечен — отправь отчёт, и Эльфийка добавит его на табло.</p>
-        <div class="celebration-actions"><a class="celebration-action" id="celebration-action" href="https://t.me/c/4389010152/15" target="_blank" rel="noopener noreferrer">Заехать / Финишировать</a><button class="celebration-close" id="celebration-close" type="button">Перейти к табло</button></div>
+        <p class="celebration-prompt" id="celebration-prompt">Ещё не на треке? Даже если первый круг прошёл без тебя, ничего не упущено — присоединяйся сейчас и отправляй понедельничный отчёт.</p>
+        <div class="celebration-actions"><a class="celebration-action" id="celebration-action" href="https://t.me/c/4389010152/15" target="_blank" rel="noopener noreferrer">Присоединиться к кругу 2</a><button class="celebration-close" id="celebration-close" type="button">Перейти к табло</button></div>
       </div>
     </div>
   </div>
@@ -1054,43 +1011,48 @@
       finished — участник прислал субботний итог;
       pit — участник обозначил паузу;
       late — поздний старт (он всё равно считается входом на круг).
+      joinedRound — круг, с которого участник присоединился к сезону.
 
       История строится автоматически из двух независимых отметок: entered и finished.
     */
     const BOARD_DATA = {
       demo: false,
       season: "Июль",
-      selectedRound: 1,
+      selectedRound: 2,
       rounds: [
         {
           number: 1,
           dates: "29 июня–11 июля",
-          updated: "12 июля 2026",
+          updated: "13 июля 2026",
           status: "closed",
           marks: {
-            "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Лена": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Юля": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
-            "Женя": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." }
+            "Женя №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." }
           }
         },
         {
           number: 2,
           dates: "13–18 июля",
-          updated: "старт 13 июля",
-          status: "upcoming",
-          marks: {}
+          updated: "13 июля 2026",
+          status: "active",
+          marks: {
+            "Лена": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
+            "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." }
+          }
         }
       ],
       members: [
-        { name: "Аня", profileUrl: "https://t.me/c/4389010152/2/80" },
-        { name: "Лена", profileUrl: "https://t.me/c/4389010152/2/76" },
-        { name: "Юля" },
-        { name: "Женя" }
+        { name: "Аня", profileUrl: "https://t.me/c/4389010152/2/80", joinedRound: 1 },
+        { name: "Лена", profileUrl: "https://t.me/c/4389010152/2/201", joinedRound: 1 },
+        { name: "Юля", joinedRound: 1 },
+        { name: "Женя №9", joinedRound: 1 },
+        { name: "Женя", profileUrl: "https://t.me/c/4389010152/2/197", joinedRound: 2 }
       ],
       celebration: {
-        id: "round-1-team-summary-v2",
-        round: 1
+        id: "round-2-start-v3",
+        round: 2
       }
     };
 
@@ -1108,15 +1070,17 @@
 
     function selectedParticipants() {
       const round = selectedRound();
-      return BOARD_DATA.members.map(member => ({
-        ...member,
-        entered: false,
-        finished: false,
-        pit: false,
-        late: false,
-        lastMark: "Заезд на этот круг ещё не отмечен.",
-        ...(round.marks[member.name] || {})
-      }));
+      return BOARD_DATA.members
+        .filter(member => (member.joinedRound || 1) <= round.number)
+        .map(member => ({
+          ...member,
+          entered: false,
+          finished: false,
+          pit: false,
+          late: false,
+          lastMark: "Заезд на этот круг ещё не отмечен.",
+          ...(round.marks[member.name] || {})
+        }));
     }
 
     function currentState(person) {
@@ -1176,29 +1140,9 @@
     function renderHeader() {
       const round = selectedRound();
       document.getElementById("week-updated").textContent = "Последняя отметка: " + round.updated;
+      document.getElementById("current-round-title").textContent = "Круг " + round.number + " · " + round.dates;
       document.getElementById("season-title").textContent = "Сезон · " + BOARD_DATA.season.toLowerCase();
       document.getElementById("demo-badge").hidden = !BOARD_DATA.demo;
-    }
-
-    function renderRoundSwitch() {
-      const switcher = document.getElementById("round-switch");
-      switcher.replaceChildren();
-      BOARD_DATA.rounds.forEach(round => {
-        const button = document.createElement("button");
-        button.className = "round-button";
-        button.type = "button";
-        button.setAttribute("aria-pressed", round.number === BOARD_DATA.selectedRound ? "true" : "false");
-        button.textContent = "Круг " + round.number + " · " + round.dates;
-        button.addEventListener("click", () => {
-          BOARD_DATA.selectedRound = round.number;
-          renderRoundSwitch();
-          renderHeader();
-          renderMetrics();
-          renderParticipants();
-          renderSeasonPath();
-        });
-        switcher.appendChild(button);
-      });
     }
 
     function renderMetrics() {
@@ -1209,27 +1153,14 @@
       document.getElementById("metric-done").textContent = done;
     }
 
-    function renderDetail(person, state) {
-      const meta = stateMeta[state];
-      const stats = pilotStats(person.name);
-      const detail = document.getElementById("selected-detail");
-      detail.querySelector("strong").textContent = person.name + " · " + meta.label;
-      detail.querySelector(".selected-detail-icon").textContent = meta.icon;
-      detail.querySelector("div span").textContent = person.lastMark;
-      document.getElementById("stat-series").textContent = "🔥 Серия: " + formatLaps(stats.series);
-      document.getElementById("stat-full").textContent = "🏁 Полных: " + stats.full;
-      document.getElementById("stat-marks").textContent = "✓ " + formatCheckpoints(stats.checkpoints);
-    }
-
     function renderSeasonPath() {
       const path = document.getElementById("season-path");
       path.replaceChildren();
       BOARD_DATA.rounds.forEach(round => {
-        const stop = document.createElement("button");
+        const stop = document.createElement("div");
         stop.className = "path-stop " + round.status;
-        stop.type = "button";
         if (round.number === BOARD_DATA.selectedRound) stop.setAttribute("aria-current", "step");
-        stop.setAttribute("aria-label", "Открыть круг " + round.number + ", " + round.dates);
+        stop.setAttribute("aria-label", "Круг " + round.number + ", " + round.dates);
         const node = document.createElement("span");
         node.className = "path-node";
         node.textContent = round.status === "closed" ? "✓" : round.status === "active" ? "🏎️" : round.number;
@@ -1238,15 +1169,6 @@
         const dates = document.createElement("small");
         dates.textContent = round.dates;
         stop.append(node, title, dates);
-        stop.addEventListener("click", () => {
-          BOARD_DATA.selectedRound = round.number;
-          renderRoundSwitch();
-          renderHeader();
-          renderMetrics();
-          renderParticipants();
-          renderSeasonPath();
-          document.getElementById("tab-current").click();
-        });
         path.appendChild(stop);
       });
     }
@@ -1265,15 +1187,20 @@
       const close = document.getElementById("celebration-close");
       const action = document.getElementById("celebration-action");
       const results = document.getElementById("celebration-results");
+      const title = document.getElementById("celebration-title");
+      const text = document.getElementById("celebration-text");
+      const prompt = document.getElementById("celebration-prompt");
       const groups = { full: [], start: [], finish: [], empty: [] };
 
-      BOARD_DATA.members.forEach(member => {
-        const mark = round.marks[member.name] || {};
-        if (mark.entered && mark.finished) groups.full.push(member.name);
-        else if (mark.entered) groups.start.push(member.name);
-        else if (mark.finished) groups.finish.push(member.name);
-        else groups.empty.push(member.name);
-      });
+      BOARD_DATA.members
+        .filter(member => (member.joinedRound || 1) <= round.number)
+        .forEach(member => {
+          const mark = round.marks[member.name] || {};
+          if (mark.entered && mark.finished) groups.full.push(member.name);
+          else if (mark.entered) groups.start.push(member.name);
+          else if (mark.finished) groups.finish.push(member.name);
+          else groups.empty.push(member.name);
+        });
 
       const joinNames = names => names.length < 2 ? names.join("") : names.slice(0, -1).join(", ") + " и " + names[names.length - 1];
       const addResult = (icon, text) => {
@@ -1289,11 +1216,21 @@
       };
 
       results.replaceChildren();
-      document.getElementById("celebration-text").textContent = "Круг " + data.round + " завершён — отмечаю движение всей команды:";
+      if (round.status === "active") {
+        title.textContent = "Круг " + data.round + " — мы уже едем!";
+        text.textContent = "Привет, информационные гонщики! Отмечаю первые чек-поинты команды:";
+        prompt.textContent = "Ещё не на треке? Даже если первый круг прошёл без тебя, ничего не упущено — присоединяйся сейчас и отправляй понедельничный отчёт.";
+        action.textContent = "Присоединиться к кругу " + data.round;
+      } else {
+        title.textContent = "Круг " + data.round + " завершён!";
+        text.textContent = "Отмечаю движение всей команды:";
+        prompt.textContent = "Если твой чек-поинт ещё не отмечен — отправь отчёт, и Эльфийка добавит его на табло.";
+        action.textContent = "Заехать / Финишировать";
+      }
       if (groups.full.length) addResult("🏁", joinNames(groups.full) + " — заезд и финиш отмечены.");
-      if (groups.start.length) addResult("🟢", joinNames(groups.start) + " — заезд отмечен, финиш ещё можно добавить.");
+      if (groups.start.length) addResult("🟢", joinNames(groups.start) + (round.status === "active" ? " — уже на треке." : " — заезд отмечен, финиш ещё можно добавить."));
       if (groups.finish.length) addResult("⚑", joinNames(groups.finish) + " — финиш отмечен, заезд пока без отметки.");
-      if (groups.empty.length) addResult("○", joinNames(groups.empty) + " — чек-поинты пока не отмечены.");
+      if (groups.empty.length) addResult("○", joinNames(groups.empty) + (groups.empty.length === 1 ? " — чек-поинт ещё не отмечен." : " — чек-поинты ещё не отмечены."));
       layer.hidden = false;
       close.focus();
 
@@ -1315,13 +1252,14 @@
       participants.forEach((person, index) => {
         const state = currentState(person);
         const meta = stateMeta[state];
+        const stats = pilotStats(person.name);
         const card = document.createElement("article");
-        card.className = "participant" + (index === 0 ? " is-selected" : "");
+        card.className = "participant";
         const main = document.createElement("button");
         main.className = "participant-main";
         main.type = "button";
-        main.setAttribute("aria-pressed", index === 0 ? "true" : "false");
-        main.setAttribute("aria-label", person.name + ": " + meta.label + ". " + person.lastMark);
+        main.setAttribute("aria-expanded", "false");
+        main.setAttribute("aria-label", person.name + ": " + meta.label + ". Открыть личный трек.");
 
         const top = document.createElement("span");
         top.className = "participant-top";
@@ -1364,8 +1302,44 @@
         finish.innerHTML = '<span class="checkpoint-dot">' + (person.finished ? "✓" : "○") + '</span><small>ФИНИШ</small>';
         line.append(start, road, finish);
 
-        main.append(top, line);
-        card.appendChild(main);
+        const expand = document.createElement("span");
+        expand.className = "participant-expand";
+        const expandText = document.createElement("span");
+        expandText.textContent = "Открыть личный трек";
+        const expandArrow = document.createElement("span");
+        expandArrow.className = "participant-expand-arrow";
+        expandArrow.textContent = "↓";
+        expandArrow.setAttribute("aria-hidden", "true");
+        expand.append(expandText, expandArrow);
+
+        const details = document.createElement("div");
+        details.className = "participant-details";
+        details.id = "participant-details-" + index;
+        details.hidden = true;
+        details.setAttribute("role", "region");
+        details.setAttribute("aria-label", "Личный трек участника " + person.name);
+        main.setAttribute("aria-controls", details.id);
+
+        const detailsTitle = document.createElement("strong");
+        detailsTitle.textContent = "Последняя фиксация";
+        const detailsText = document.createElement("p");
+        detailsText.textContent = person.lastMark;
+        const detailsStats = document.createElement("div");
+        detailsStats.className = "participant-detail-stats";
+        detailsStats.setAttribute("aria-label", "Статистика личного трека");
+        [
+          "🔥 Серия: " + formatLaps(stats.series),
+          "🏁 Полных: " + stats.full,
+          "✓ " + formatCheckpoints(stats.checkpoints)
+        ].forEach(value => {
+          const stat = document.createElement("span");
+          stat.textContent = value;
+          detailsStats.appendChild(stat);
+        });
+        details.append(detailsTitle, detailsText, detailsStats);
+
+        main.append(top, line, expand);
+        card.append(main, details);
 
         if (person.profileUrl) {
           const profile = document.createElement("a");
@@ -1379,22 +1353,28 @@
         }
 
         main.addEventListener("click", () => {
+          const wasOpen = !details.hidden;
           container.querySelectorAll(".participant").forEach(item => {
             item.classList.remove("is-selected");
             const button = item.querySelector(".participant-main");
-            if (button) button.setAttribute("aria-pressed", "false");
+            const panel = item.querySelector(".participant-details");
+            const label = item.querySelector(".participant-expand > span:first-child");
+            const arrow = item.querySelector(".participant-expand-arrow");
+            if (button) button.setAttribute("aria-expanded", "false");
+            if (panel) panel.hidden = true;
+            if (label) label.textContent = "Открыть личный трек";
+            if (arrow) arrow.textContent = "↓";
           });
-          card.classList.add("is-selected");
-          main.setAttribute("aria-pressed", "true");
-          renderDetail(person, state);
+          if (!wasOpen) {
+            card.classList.add("is-selected");
+            main.setAttribute("aria-expanded", "true");
+            details.hidden = false;
+            expandText.textContent = "Скрыть личный трек";
+            expandArrow.textContent = "↑";
+          }
         });
         container.appendChild(card);
       });
-
-      if (participants.length) {
-        const first = participants[0];
-        renderDetail(first, currentState(first));
-      }
     }
 
     function renderHistory() {
@@ -1428,11 +1408,14 @@
           const hasStart = Boolean(mark.entered);
           const hasFinish = Boolean(mark.finished);
           const isPit = Boolean(mark.pit) && !hasStart && !hasFinish;
-          const value = isPit ? "pit" : hasStart && hasFinish ? "both" : hasStart ? "start-only" : hasFinish ? "finish-only" : "future";
+          const notJoined = (person.joinedRound || 1) > round.number;
+          const value = notJoined ? "not-joined" : isPit ? "pit" : hasStart && hasFinish ? "both" : hasStart ? "start-only" : hasFinish ? "finish-only" : "future";
           const cell = document.createElement("div");
           cell.className = "lap " + value;
           cell.setAttribute("role", "cell");
-          if (isPit) {
+          if (notJoined) {
+            // Пустой фон: участник ещё не был на этом круге.
+          } else if (isPit) {
             cell.textContent = "🔧";
           } else {
             const marks = document.createElement("span");
@@ -1448,7 +1431,7 @@
             marks.append(start, finish);
             cell.appendChild(marks);
           }
-          const readable = { both: "заезд и финиш отмечены", "start-only": "отмечен только заезд", "finish-only": "отмечен только финиш", pit: "пит-стоп", future: "отметок ещё нет" }[value];
+          const readable = notJoined ? "ещё не участвовала" : { both: "заезд и финиш отмечены", "start-only": "отмечен только заезд", "finish-only": "отмечен только финиш", pit: "пит-стоп", future: "отметок ещё нет" }[value];
           cell.setAttribute("aria-label", person.name + ", " + lapName + ": " + readable);
           grid.appendChild(cell);
         });
@@ -1492,7 +1475,6 @@
       });
     });
 
-    renderRoundSwitch();
     renderHeader();
     renderMetrics();
     renderParticipants();
