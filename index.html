@@ -356,7 +356,6 @@
     }
 
     .participant:hover { transform: translateY(-2px); border-color: rgba(236,133,2,.35); }
-    .participant.is-selected { border-color: var(--orange); box-shadow: 0 10px 26px rgba(236,133,2,.14); }
 
     .participant-main {
       display: grid;
@@ -367,45 +366,36 @@
       background: transparent;
       border: 0;
       text-align: left;
-      cursor: pointer;
     }
-    .participant-main:focus-visible { outline: 3px solid var(--orange-2); outline-offset: 5px; border-radius: 12px; }
-    .participant-main:hover .participant-expand { color: var(--orange); }
 
-    .participant-expand {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding-top: 11px;
-      color: var(--green);
-      border-top: 1px dashed rgba(45,79,54,.2);
-      font-size: .72rem;
-      font-weight: 900;
-    }
-    .participant-expand-arrow { color: var(--orange); font-size: .95rem; }
-
-    .participant-details {
+    .participant-track {
       display: grid;
-      gap: 10px;
-      margin-top: 13px;
-      padding: 14px;
-      color: var(--white);
-      background: var(--green);
+      gap: 8px;
+      padding: 12px;
+      color: var(--green);
+      background: linear-gradient(135deg, #fff0d5, var(--beige));
+      border: 1px solid rgba(236,133,2,.32);
       border-radius: 15px;
+      box-shadow: inset 4px 0 0 var(--orange);
     }
-    .participant-details[hidden] { display: none; }
-    .participant-details strong { font-size: .8rem; font-weight: 900; }
-    .participant-details p { margin: 0; color: rgba(255,255,255,.78); font-size: .76rem; line-height: 1.45; }
-    .participant-detail-stats { display: flex; flex-wrap: wrap; gap: 7px; }
-    .participant-detail-stats span {
+    .participant-track strong { font-size: .78rem; font-weight: 900; }
+    .participant-track-stats { display: flex; flex-wrap: wrap; gap: 6px; }
+    .participant-track-stats span {
       padding: 6px 9px;
       color: var(--green);
-      background: var(--beige);
+      background: rgba(255,255,255,.82);
+      border: 1px solid rgba(45,79,54,.1);
       border-radius: 999px;
       font-size: .68rem;
       font-weight: 900;
     }
+    .participant-track-next { margin: 0; color: #a45b00; font-size: .72rem; font-weight: 900; line-height: 1.4; }
+    .participant-track.is-complete {
+      background: linear-gradient(135deg, var(--green-soft), #f4f8f3);
+      border-color: rgba(45,79,54,.22);
+      box-shadow: inset 4px 0 0 var(--green);
+    }
+    .participant-track.is-complete .participant-track-next { color: var(--green); }
 
     .participant-top { display: flex; align-items: center; gap: 12px; }
     .helmet-wrap {
@@ -422,53 +412,26 @@
     }
     .helmet-wrap img { width: 55px; height: 55px; object-fit: contain; }
     .participant-name { flex: 1 1 auto; min-width: 0; }
-    .participant-name strong { display: block; color: var(--green); font-size: 1.06rem; font-weight: 900; }
-    .participant-name span { color: var(--muted); font-size: .75rem; }
-    .state {
+    .participant-title-line {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .participant-title-line strong { color: var(--green); font-size: 1.06rem; font-weight: 900; }
+    .participant-name > span:last-child { display: block; color: var(--muted); font-size: .75rem; }
+    .profile-inline-link {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      flex: 0 0 auto;
-      padding: 7px 11px;
-      color: var(--state-color, var(--green));
-      background: var(--state-bg, var(--green-soft));
-      border-radius: 999px;
+      color: var(--green-2);
       font-size: .7rem;
-      font-weight: 900;
-      text-align: center;
-    }
-    .profile-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      justify-self: start;
-      max-height: 0;
-      margin-top: 0;
-      padding: 0 11px;
-      overflow: hidden;
-      color: var(--white);
-      background: var(--green);
-      border-radius: 999px;
-      opacity: 0;
-      pointer-events: none;
-      font-size: .72rem;
-      font-weight: 900;
+      font-weight: 800;
       text-decoration: none;
-      transform: translateY(-4px);
-      transition: max-height .2s ease, margin-top .2s ease, padding .2s ease, opacity .2s ease, transform .2s ease;
+      text-underline-offset: 3px;
+      white-space: nowrap;
     }
-    .participant:hover .profile-link,
-    .participant:focus-within .profile-link {
-      max-height: 36px;
-      margin-top: 11px;
-      padding-top: 8px;
-      padding-bottom: 8px;
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateY(0);
-    }
-    .profile-link:hover { background: var(--orange); }
-    .profile-link:focus-visible { outline: 3px solid var(--orange-2); outline-offset: 2px; }
+    .profile-inline-link:hover { color: var(--green-3); text-decoration: underline; }
+    .profile-inline-link:focus-visible { outline: 3px solid var(--orange-2); outline-offset: 2px; border-radius: 4px; }
 
     .checkline {
       display: grid;
@@ -850,7 +813,6 @@
       .board-rule { max-width: none; text-align: left; }
       .participants { padding: 14px 17px 20px; }
       .participant-top { align-items: flex-start; flex-wrap: wrap; }
-      .state { margin-left: 66px; margin-top: -17px; }
       .season-path { gap: 55px; }
       .logic-card { display: block; }
       .logic-visual { height: 190px; }
@@ -864,18 +826,6 @@
     @media (max-width: 430px) {
       .metrics { grid-template-columns: 1fr; }
       .checkline { grid-template-columns: 50px 1fr 50px; }
-    }
-
-    @media (hover: none) {
-      .profile-link {
-        max-height: 36px;
-        margin-top: 11px;
-        padding-top: 8px;
-        padding-bottom: 8px;
-        opacity: 1;
-        pointer-events: auto;
-        transform: none;
-      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1036,10 +986,13 @@
         {
           number: 2,
           dates: "13–18 июля",
-          updated: "13 июля 2026",
+          updated: "14 июля 2026",
           status: "active",
           marks: {
+            "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
             "Лена": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
+            "Женя · болид №9": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
+            "Ира": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
             "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." }
           }
         }
@@ -1049,10 +1002,11 @@
         { name: "Лена", profileUrl: "https://t.me/c/4389010152/2/201", joinedRound: 1 },
         { name: "Юля", joinedRound: 1 },
         { name: "Женя · болид №9", joinedRound: 1 },
-        { name: "Женя", profileUrl: "https://t.me/c/4389010152/2/197", joinedRound: 2 }
+        { name: "Женя", profileUrl: "https://t.me/c/4389010152/2/197", joinedRound: 2 },
+        { name: "Ира", joinedRound: 2 }
       ],
       celebration: {
-        id: "round-2-start-v3",
+        id: "round-2-start-v4",
         round: 2
       }
     };
@@ -1090,6 +1044,14 @@
       if (person.entered && person.late) return "late";
       if (person.entered) return "track";
       return "garage";
+    }
+
+    function trackNextStep(person) {
+      if (person.entered && person.finished) return "Круг завершён — обе отметки собраны 🎉";
+      if (person.finished) return "Финиш отмечен — заезд можно добавить.";
+      if (person.pit) return "Пит-стоп — часть пути. Вернуться можно в своём темпе.";
+      if (person.entered) return "До полного круга остался субботний финиш.";
+      return "Следующий шаг — отметить заезд на текущий круг.";
     }
 
     function initial(name) {
@@ -1250,17 +1212,15 @@
       container.replaceChildren();
       const participants = selectedParticipants();
 
-      participants.forEach((person, index) => {
+      participants.forEach(person => {
         const state = currentState(person);
         const meta = stateMeta[state];
         const stats = pilotStats(person.name);
         const card = document.createElement("article");
         card.className = "participant";
-        const main = document.createElement("button");
+        card.setAttribute("aria-label", person.name + ": " + meta.label);
+        const main = document.createElement("div");
         main.className = "participant-main";
-        main.type = "button";
-        main.setAttribute("aria-expanded", "false");
-        main.setAttribute("aria-label", person.name + ": " + meta.label + ". Открыть личный трек.");
 
         const top = document.createElement("span");
         top.className = "participant-top";
@@ -1272,17 +1232,25 @@
         helmet.appendChild(helmetImg);
         const name = document.createElement("span");
         name.className = "participant-name";
+        const titleLine = document.createElement("span");
+        titleLine.className = "participant-title-line";
         const strong = document.createElement("strong");
         strong.textContent = person.name;
+        titleLine.appendChild(strong);
+        if (person.profileUrl) {
+          const profile = document.createElement("a");
+          profile.className = "profile-inline-link";
+          profile.href = person.profileUrl;
+          profile.target = "_blank";
+          profile.rel = "noopener noreferrer";
+          profile.textContent = "· визитка ↗";
+          profile.setAttribute("aria-label", "Открыть визитку участника " + person.name + " в Telegram");
+          titleLine.appendChild(profile);
+        }
         const small = document.createElement("span");
         small.textContent = person.late ? "Поздний заезд тоже считается" : "Информационный гонщик";
-        name.append(strong, small);
-        const statePill = document.createElement("span");
-        statePill.className = "state";
-        statePill.style.setProperty("--state-color", meta.color);
-        statePill.style.setProperty("--state-bg", meta.bg);
-        statePill.textContent = meta.label;
-        top.append(helmet, name, statePill);
+        name.append(titleLine, small);
+        top.append(helmet, name);
 
         const line = document.createElement("span");
         line.className = "checkline";
@@ -1303,31 +1271,13 @@
         finish.innerHTML = '<span class="checkpoint-dot">' + (person.finished ? "✓" : "○") + '</span><small>ФИНИШ</small>';
         line.append(start, road, finish);
 
-        const expand = document.createElement("span");
-        expand.className = "participant-expand";
-        const expandText = document.createElement("span");
-        expandText.textContent = "Открыть личный трек";
-        const expandArrow = document.createElement("span");
-        expandArrow.className = "participant-expand-arrow";
-        expandArrow.textContent = "↓";
-        expandArrow.setAttribute("aria-hidden", "true");
-        expand.append(expandText, expandArrow);
-
-        const details = document.createElement("div");
-        details.className = "participant-details";
-        details.id = "participant-details-" + index;
-        details.hidden = true;
-        details.setAttribute("role", "region");
-        details.setAttribute("aria-label", "Личный трек участника " + person.name);
-        main.setAttribute("aria-controls", details.id);
-
-        const detailsTitle = document.createElement("strong");
-        detailsTitle.textContent = "Последняя фиксация";
-        const detailsText = document.createElement("p");
-        detailsText.textContent = person.lastMark;
-        const detailsStats = document.createElement("div");
-        detailsStats.className = "participant-detail-stats";
-        detailsStats.setAttribute("aria-label", "Статистика личного трека");
+        const track = document.createElement("div");
+        track.className = "participant-track" + (person.entered && person.finished ? " is-complete" : "");
+        const trackTitle = document.createElement("strong");
+        trackTitle.textContent = "Личный трек";
+        const trackStats = document.createElement("div");
+        trackStats.className = "participant-track-stats";
+        trackStats.setAttribute("aria-label", "Статистика личного трека");
         [
           "🔥 Серия: " + formatLaps(stats.series),
           "🏁 Полных: " + stats.full,
@@ -1335,45 +1285,16 @@
         ].forEach(value => {
           const stat = document.createElement("span");
           stat.textContent = value;
-          detailsStats.appendChild(stat);
+          trackStats.appendChild(stat);
         });
-        details.append(detailsTitle, detailsText, detailsStats);
+        const trackNext = document.createElement("p");
+        trackNext.className = "participant-track-next";
+        trackNext.textContent = trackNextStep(person);
+        track.append(trackTitle, trackStats, trackNext);
 
-        main.append(top, line, expand);
-        card.append(main, details);
+        main.append(top, line, track);
+        card.appendChild(main);
 
-        if (person.profileUrl) {
-          const profile = document.createElement("a");
-          profile.className = "profile-link";
-          profile.href = person.profileUrl;
-          profile.target = "_blank";
-          profile.rel = "noopener noreferrer";
-          profile.textContent = "Открыть визитку в чате →";
-          profile.setAttribute("aria-label", "Открыть визитку участника " + person.name + " в Telegram");
-          card.appendChild(profile);
-        }
-
-        main.addEventListener("click", () => {
-          const wasOpen = !details.hidden;
-          container.querySelectorAll(".participant").forEach(item => {
-            item.classList.remove("is-selected");
-            const button = item.querySelector(".participant-main");
-            const panel = item.querySelector(".participant-details");
-            const label = item.querySelector(".participant-expand > span:first-child");
-            const arrow = item.querySelector(".participant-expand-arrow");
-            if (button) button.setAttribute("aria-expanded", "false");
-            if (panel) panel.hidden = true;
-            if (label) label.textContent = "Открыть личный трек";
-            if (arrow) arrow.textContent = "↓";
-          });
-          if (!wasOpen) {
-            card.classList.add("is-selected");
-            main.setAttribute("aria-expanded", "true");
-            details.hidden = false;
-            expandText.textContent = "Скрыть личный трек";
-            expandArrow.textContent = "↑";
-          }
-        });
         container.appendChild(card);
       });
     }
