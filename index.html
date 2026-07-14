@@ -738,7 +738,7 @@
     }
     .round-summary-shell {
       position: relative;
-      width: min(460px, 100%);
+      width: min(430px, 100%);
     }
     .round-summary-close {
       position: absolute;
@@ -761,9 +761,11 @@
     .round-summary-close:focus-visible { outline: 4px solid var(--orange-2); outline-offset: 3px; }
     .round-summary-card {
       position: relative;
-      max-height: calc(100vh - 90px);
-      overflow: auto;
-      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      aspect-ratio: 1;
+      overflow: hidden;
+      padding: 22px;
       color: var(--green);
       background:
         radial-gradient(circle at 100% 0, rgba(236,133,2,.15), transparent 32%),
@@ -783,65 +785,88 @@
       letter-spacing: .06em;
       text-transform: uppercase;
     }
-    .round-summary-card h2 { margin: 0; font-size: 1.8rem; font-weight: 900; line-height: 1.05; }
-    .summary-dates { margin: 7px 0 0; color: var(--muted); font-size: .82rem; font-weight: 800; }
+    .round-summary-card h2 { margin: 0; font-size: 1.55rem; font-weight: 900; line-height: 1.05; }
+    .summary-dates { margin: 5px 0 0; color: var(--muted); font-size: .74rem; font-weight: 800; }
     .summary-status {
       display: inline-flex;
-      margin-top: 14px;
-      padding: 6px 10px;
+      align-self: flex-start;
+      margin-top: 9px;
+      padding: 5px 9px;
       color: var(--white);
       background: var(--green);
       border-radius: 999px;
       font-size: .68rem;
       font-weight: 900;
     }
+    .summary-status[hidden] { display: none; }
     .summary-status.active { background: var(--orange); }
     .summary-total {
-      display: grid;
-      gap: 2px;
-      margin: 20px 0 12px;
-      padding: 16px 18px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 12px 0 8px;
+      padding: 10px 13px;
       color: var(--white);
       background: var(--green);
       border-radius: 18px;
     }
-    .summary-total span { font-size: .76rem; font-weight: 800; opacity: .86; }
-    .summary-total strong { font-size: 1.55rem; font-weight: 900; line-height: 1.1; }
-    .summary-names { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; }
-    .summary-name {
-      padding: 7px 10px;
-      color: var(--green);
-      background: rgba(255,255,255,.78);
-      border: 1px solid rgba(45,79,54,.13);
-      border-radius: 999px;
-      font-size: .72rem;
-      font-weight: 900;
-      white-space: nowrap;
-    }
-    .summary-empty { margin: 0 0 18px; color: var(--muted); font-size: .78rem; font-weight: 800; }
-    .summary-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .summary-total span { font-size: .7rem; font-weight: 800; opacity: .86; }
+    .summary-total strong { font-size: 1.15rem; font-weight: 900; line-height: 1.1; white-space: nowrap; }
+    .summary-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
     .summary-metric {
       display: grid;
       justify-items: center;
       gap: 3px;
-      padding: 13px 8px;
+      padding: 8px 6px;
       background: rgba(255,255,255,.66);
       border: 1px solid rgba(236,133,2,.18);
       border-radius: 15px;
       text-align: center;
     }
-    .summary-metric b { font-size: 1.25rem; }
-    .summary-metric strong { font-size: 1.2rem; font-weight: 900; }
-    .summary-metric span { color: var(--muted); font-size: .63rem; font-weight: 900; line-height: 1.2; }
+    .summary-metric b { font-size: 1rem; }
+    .summary-metric strong { font-size: 1rem; font-weight: 900; }
+    .summary-metric span { color: var(--muted); font-size: .56rem; font-weight: 900; line-height: 1.15; }
+    .summary-groups { display: grid; gap: 6px; margin-top: 10px; }
+    .summary-groups-title { margin: 0; color: var(--green); font-size: .68rem; font-weight: 900; }
+    .summary-personal-group {
+      display: grid;
+      grid-template-columns: minmax(125px, auto) 1fr;
+      gap: 7px;
+      align-items: center;
+    }
+    .summary-group-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--green);
+      font-size: .6rem;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .summary-group-label b { color: var(--orange); font-size: .68rem; }
+    .summary-group-names { display: flex; flex-wrap: wrap; gap: 4px; }
+    .summary-personal-name {
+      padding: 4px 7px;
+      color: var(--green);
+      background: rgba(255,255,255,.76);
+      border: 1px solid rgba(45,79,54,.12);
+      border-radius: 999px;
+      font-size: .58rem;
+      font-weight: 900;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+    .summary-empty { margin: 0; color: var(--muted); font-size: .68rem; font-weight: 800; }
     .summary-signature {
       display: flex;
       justify-content: space-between;
       gap: 10px;
-      margin-top: 20px;
-      padding-top: 13px;
+      margin-top: auto;
+      padding-top: 9px;
       border-top: 1px dashed rgba(45,79,54,.22);
       color: var(--muted);
-      font-size: .68rem;
+      font-size: .61rem;
       font-weight: 800;
     }
     .summary-signature strong { color: var(--green); }
@@ -965,9 +990,12 @@
     @media (max-width: 430px) {
       .metrics { grid-template-columns: 1fr; }
       .checkline { grid-template-columns: 50px 1fr 50px; }
-      .round-summary-card { padding: 23px 20px; border-radius: 25px; }
-      .round-summary-card h2 { font-size: 1.55rem; }
-      .summary-metric { padding: 11px 5px; }
+      .round-summary-card { padding: 17px; border-radius: 25px; }
+      .round-summary-card h2 { font-size: 1.35rem; }
+      .summary-kicker { margin-bottom: 5px; font-size: .61rem; }
+      .summary-personal-group { grid-template-columns: 128px 1fr; gap: 5px; }
+      .summary-group-label { font-size: .55rem; }
+      .summary-personal-name { padding: 3px 6px; font-size: .54rem; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1089,12 +1117,12 @@
         <p class="summary-dates" id="round-summary-dates"></p>
         <span class="summary-status" id="round-summary-status"></span>
         <div class="summary-total"><span>Приняли участие</span><strong id="round-summary-total"></strong></div>
-        <div class="summary-names" id="round-summary-names"></div>
         <div class="summary-metrics" aria-label="Показатели круга">
-          <div class="summary-metric"><b aria-hidden="true">🟢</b><strong id="round-summary-entered">0</strong><span>заехали<br>на трек</span></div>
-          <div class="summary-metric"><b aria-hidden="true">🏁</b><strong id="round-summary-finished">0</strong><span>отметили<br>финиш</span></div>
-          <div class="summary-metric"><b aria-hidden="true">✓</b><strong id="round-summary-full">0</strong><span>полный<br>круг</span></div>
+          <div class="summary-metric"><b aria-hidden="true">🟢</b><strong id="round-summary-entered">0</strong><span>заезды</span></div>
+          <div class="summary-metric"><b aria-hidden="true">🏁</b><strong id="round-summary-finished">0</strong><span>финиши</span></div>
+          <div class="summary-metric"><b aria-hidden="true">✓</b><strong id="round-summary-full">0</strong><span>полные круги</span></div>
         </div>
+        <div class="summary-groups" id="round-summary-names" aria-label="Личный вклад пилотов"></div>
         <div class="summary-signature"><strong>«Жажда порядка»</strong><span>Мягко, но едем.</span></div>
       </article>
     </div>
@@ -1305,15 +1333,6 @@
       path.appendChild(hint);
     }
 
-    function participantWord(count) {
-      const mod100 = count % 100;
-      const mod10 = count % 10;
-      if (mod100 >= 11 && mod100 <= 14) return "участников";
-      if (mod10 === 1) return "участник";
-      if (mod10 >= 2 && mod10 <= 4) return "участника";
-      return "участников";
-    }
-
     function openRoundSummary(round, opener) {
       const layer = document.getElementById("round-summary");
       const close = document.getElementById("round-summary-close");
@@ -1333,20 +1352,52 @@
       document.getElementById("round-summary-title").textContent = round.status === "active" ? "Круг " + round.number + " — сейчас едем" : "Итоги круга " + round.number;
       document.getElementById("round-summary-dates").textContent = round.dates;
       const status = document.getElementById("round-summary-status");
-      status.textContent = round.status === "active" ? "Данные на " + round.updated : round.status === "closed" ? "Круг завершён" : "Круг впереди";
+      status.hidden = round.status === "closed";
+      status.textContent = round.status === "active" ? "Данные на " + round.updated : round.status === "upcoming" ? "Круг впереди" : "";
       status.className = "summary-status" + (round.status === "active" ? " active" : "");
-      document.getElementById("round-summary-total").textContent = participants.length + " " + participantWord(participants.length);
+      document.getElementById("round-summary-total").textContent = participants.length;
       document.getElementById("round-summary-entered").textContent = entered;
       document.getElementById("round-summary-finished").textContent = finished;
       document.getElementById("round-summary-full").textContent = full;
 
       names.replaceChildren();
       if (participants.length) {
+        const title = document.createElement("p");
+        title.className = "summary-groups-title";
+        title.textContent = "Личный вклад";
+        names.appendChild(title);
+        const groups = [
+          { icon: "● + ⚑", label: "Оба чек-поинта", members: [] },
+          { icon: "●", label: "Только заезд", members: [] },
+          { icon: "⚑", label: "Только финиш", members: [] }
+        ];
         participants.forEach(member => {
-          const chip = document.createElement("span");
-          chip.className = "summary-name";
-          chip.textContent = member.name;
-          names.appendChild(chip);
+          const mark = round.marks[member.name] || {};
+          if (mark.entered && mark.finished) groups[0].members.push(member);
+          else if (mark.entered) groups[1].members.push(member);
+          else if (mark.finished) groups[2].members.push(member);
+        });
+        groups.filter(group => group.members.length).forEach(group => {
+          const block = document.createElement("div");
+          block.className = "summary-personal-group";
+          const label = document.createElement("span");
+          label.className = "summary-group-label";
+          const icon = document.createElement("b");
+          icon.textContent = group.icon;
+          icon.setAttribute("aria-hidden", "true");
+          const labelText = document.createElement("span");
+          labelText.textContent = group.label;
+          label.append(icon, labelText);
+          const groupNames = document.createElement("span");
+          groupNames.className = "summary-group-names";
+          group.members.forEach(member => {
+            const chip = document.createElement("span");
+            chip.className = "summary-personal-name";
+            chip.textContent = member.name;
+            groupNames.appendChild(chip);
+          });
+          block.append(label, groupNames);
+          names.appendChild(block);
         });
       } else {
         const empty = document.createElement("p");
