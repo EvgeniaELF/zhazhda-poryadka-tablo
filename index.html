@@ -1370,7 +1370,7 @@
       }).length;
       const groups = [
         { icon: "● + ⚑", label: "Оба чек-поинта", members: [] },
-        { icon: "●", label: "Только заезд", members: [] },
+        { icon: "●", label: "Заехали на трек", members: [] },
         { icon: "⚑", label: "Только финиш", members: [] }
       ];
       participants.forEach(member => {
@@ -1608,16 +1608,16 @@
         canvasCard(ctx, 80, 638, 470, 260, 28, cream, "rgba(236,133,2,.35)", 3);
         ctx.fillStyle = orange;
         canvasFont(ctx, 900, 21);
-        const nextKicker = round.status === "active" ? "СЛЕДУЮЩИЙ ЧЕК-ПОИНТ" : round.status === "closed" ? "КРУГ ЗАВЕРШЁН" : "СЛЕДУЮЩИЙ ШАГ";
+        const nextKicker = round.status === "active" ? "КРУГ ПРОДОЛЖАЕТСЯ" : round.status === "closed" ? "КРУГ ЗАВЕРШЁН" : "СЛЕДУЮЩИЙ ШАГ";
         ctx.fillText(nextKicker, 112, 686);
         ctx.fillStyle = green;
         canvasFont(ctx, 900, 38);
-        const nextTitle = round.status === "active" ? "Финиш в субботу" : round.status === "closed" ? "Движение отмечено" : "Заезд в понедельник";
-        canvasWrappedText(ctx, nextTitle, 112, 744, 398, 44, 2);
+        const nextTitle = round.status === "active" ? "У каждого — свой следующий шаг" : round.status === "closed" ? "Движение отмечено" : "Заезд в понедельник";
+        const nextTitleBottom = canvasWrappedText(ctx, nextTitle, 112, 744, 398, 44, 2);
         ctx.fillStyle = muted;
-        canvasFont(ctx, 700, 24);
-        const nextText = round.status === "active" ? "Отправляем субботний отчёт и отмечаем финиш круга." : round.status === "closed" ? "Вклад каждого пилота сохранён в истории сезона." : "Присоединиться можно с любого круга.";
-        canvasWrappedText(ctx, nextText, 112, 815, 390, 32, 3);
+        canvasFont(ctx, 700, 22);
+        const nextText = round.status === "active" ? "До пятницы можно заехать на трек. В субботу — отметить финиш." : round.status === "closed" ? "Вклад каждого пилота сохранён в истории сезона." : "Присоединиться можно с любого круга.";
+        canvasWrappedText(ctx, nextText, 112, Math.max(815, nextTitleBottom + 10), 390, 30, 2);
 
         canvasCard(ctx, 590, 280, 930, 618, 32, "rgba(255,255,255,.76)", "rgba(45,79,54,.14)", 3);
         ctx.fillStyle = green;
