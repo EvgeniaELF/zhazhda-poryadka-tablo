@@ -757,6 +757,27 @@
       font: 900 1.45rem/1 Nunito, sans-serif;
       cursor: pointer;
     }
+    .round-summary-download {
+      position: absolute;
+      left: 0;
+      top: -48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 8px 15px;
+      color: var(--white);
+      background: var(--orange);
+      border: 0;
+      border-radius: 999px;
+      box-shadow: 0 8px 22px rgba(0,0,0,.2);
+      font-size: .72rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .round-summary-download:hover { background: var(--orange-2); }
+    .round-summary-download:disabled { opacity: .68; cursor: wait; }
+    .round-summary-download:focus-visible { outline: 4px solid var(--white); outline-offset: 3px; }
     .round-summary-close:hover { color: var(--white); background: var(--orange); }
     .round-summary-close:focus-visible { outline: 4px solid var(--orange-2); outline-offset: 3px; }
     .round-summary-card {
@@ -1110,6 +1131,7 @@
 
   <div class="round-summary" id="round-summary" hidden>
     <div class="round-summary-shell" role="dialog" aria-modal="true" aria-labelledby="round-summary-title">
+      <button class="round-summary-download" id="round-summary-download" type="button">Скачать PNG · 1600 × 1200</button>
       <button class="round-summary-close" id="round-summary-close" type="button" aria-label="Закрыть сводку">×</button>
       <article class="round-summary-card">
         <p class="summary-kicker"><span aria-hidden="true">🏎️</span> Командная сводка</p>
@@ -1176,11 +1198,12 @@
         {
           number: 2,
           dates: "13–18 июля",
-          updated: "14 июля 2026",
+          updated: "15 июля 2026",
           status: "active",
           marks: {
             "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
             "Лена": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
+            "Юля": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
             "Женя · болид №9": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
             "Ира": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
             "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." }
@@ -1333,10 +1356,7 @@
       path.appendChild(hint);
     }
 
-    function openRoundSummary(round, opener) {
-      const layer = document.getElementById("round-summary");
-      const close = document.getElementById("round-summary-close");
-      const names = document.getElementById("round-summary-names");
+    function roundSummaryData(round) {
       const eligible = BOARD_DATA.members.filter(member => (member.joinedRound || 1) <= round.number);
       const participants = eligible.filter(member => {
         const mark = round.marks[member.name] || {};
@@ -1348,6 +1368,26 @@
         const mark = round.marks[member.name] || {};
         return Boolean(mark.entered && mark.finished);
       }).length;
+      const groups = [
+        { icon: "● + ⚑", label: "Оба чек-поинта", members: [] },
+        { icon: "●", label: "Только заезд", members: [] },
+        { icon: "⚑", label: "Только финиш", members: [] }
+      ];
+      participants.forEach(member => {
+        const mark = round.marks[member.name] || {};
+        if (mark.entered && mark.finished) groups[0].members.push(member);
+        else if (mark.entered) groups[1].members.push(member);
+        else if (mark.finished) groups[2].members.push(member);
+      });
+      return { participants, entered, finished, full, groups: groups.filter(group => group.members.length) };
+    }
+
+    function openRoundSummary(round, opener) {
+      const layer = document.getElementById("round-summary");
+      const close = document.getElementById("round-summary-close");
+      const download = document.getElementById("round-summary-download");
+      const names = document.getElementById("round-summary-names");
+      const summary = roundSummaryData(round);
 
       document.getElementById("round-summary-title").textContent = round.status === "active" ? "Круг " + round.number + " — сейчас едем" : "Итоги круга " + round.number;
       document.getElementById("round-summary-dates").textContent = round.dates;
@@ -1355,29 +1395,18 @@
       status.hidden = round.status === "closed";
       status.textContent = round.status === "active" ? "Данные на " + round.updated : round.status === "upcoming" ? "Круг впереди" : "";
       status.className = "summary-status" + (round.status === "active" ? " active" : "");
-      document.getElementById("round-summary-total").textContent = participants.length;
-      document.getElementById("round-summary-entered").textContent = entered;
-      document.getElementById("round-summary-finished").textContent = finished;
-      document.getElementById("round-summary-full").textContent = full;
+      document.getElementById("round-summary-total").textContent = summary.participants.length;
+      document.getElementById("round-summary-entered").textContent = summary.entered;
+      document.getElementById("round-summary-finished").textContent = summary.finished;
+      document.getElementById("round-summary-full").textContent = summary.full;
 
       names.replaceChildren();
-      if (participants.length) {
+      if (summary.participants.length) {
         const title = document.createElement("p");
         title.className = "summary-groups-title";
         title.textContent = "Личный вклад";
         names.appendChild(title);
-        const groups = [
-          { icon: "● + ⚑", label: "Оба чек-поинта", members: [] },
-          { icon: "●", label: "Только заезд", members: [] },
-          { icon: "⚑", label: "Только финиш", members: [] }
-        ];
-        participants.forEach(member => {
-          const mark = round.marks[member.name] || {};
-          if (mark.entered && mark.finished) groups[0].members.push(member);
-          else if (mark.entered) groups[1].members.push(member);
-          else if (mark.finished) groups[2].members.push(member);
-        });
-        groups.filter(group => group.members.length).forEach(group => {
+        summary.groups.forEach(group => {
           const block = document.createElement("div");
           block.className = "summary-personal-group";
           const label = document.createElement("span");
@@ -1408,6 +1437,9 @@
 
       layer.hidden = false;
       document.body.classList.add("summary-open");
+      download.disabled = false;
+      download.textContent = "Скачать PNG · 1600 × 1200";
+      download.onclick = () => downloadRoundSummary(round, download);
       close.focus();
 
       const dismiss = () => {
@@ -1424,6 +1456,229 @@
         dismiss();
       };
       document.addEventListener("keydown", onEscape);
+    }
+
+    function canvasRoundedRect(ctx, x, y, width, height, radius) {
+      const r = Math.min(radius, width / 2, height / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + width - r, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+      ctx.lineTo(x + width, y + height - r);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+      ctx.lineTo(x + r, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    function canvasCard(ctx, x, y, width, height, radius, fill, stroke, lineWidth) {
+      canvasRoundedRect(ctx, x, y, width, height, radius);
+      ctx.fillStyle = fill;
+      ctx.fill();
+      if (stroke) {
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = lineWidth || 2;
+        ctx.stroke();
+      }
+    }
+
+    function canvasFont(ctx, weight, size) {
+      ctx.font = weight + " " + size + "px Nunito, Arial, sans-serif";
+    }
+
+    function canvasWrappedText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
+      const words = text.split(/\s+/);
+      const lines = [];
+      let line = "";
+      words.forEach(word => {
+        const test = line ? line + " " + word : word;
+        if (ctx.measureText(test).width > maxWidth && line) {
+          lines.push(line);
+          line = word;
+        } else {
+          line = test;
+        }
+      });
+      if (line) lines.push(line);
+      lines.slice(0, maxLines || lines.length).forEach((value, index) => ctx.fillText(value, x, y + index * lineHeight));
+      return y + Math.min(lines.length, maxLines || lines.length) * lineHeight;
+    }
+
+    function canvasNameChips(ctx, names, x, y, maxWidth) {
+      let cursorX = x;
+      let cursorY = y;
+      const height = 52;
+      const gap = 12;
+      canvasFont(ctx, 900, 24);
+      names.forEach(name => {
+        const width = Math.min(maxWidth, Math.ceil(ctx.measureText(name).width) + 38);
+        if (cursorX > x && cursorX + width > x + maxWidth) {
+          cursorX = x;
+          cursorY += height + gap;
+        }
+        canvasCard(ctx, cursorX, cursorY, width, height, 26, "#fffdf7", "rgba(45,79,54,.18)", 2);
+        ctx.fillStyle = "#2d4f36";
+        ctx.textBaseline = "middle";
+        ctx.fillText(name, cursorX + 19, cursorY + height / 2 + 1);
+        cursorX += width + gap;
+      });
+      ctx.textBaseline = "alphabetic";
+      return cursorY + height;
+    }
+
+    async function downloadRoundSummary(round, button) {
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "Готовлю PNG…";
+      try {
+        if (document.fonts && document.fonts.ready) await document.fonts.ready;
+        const summary = roundSummaryData(round);
+        const canvas = document.createElement("canvas");
+        canvas.width = 1600;
+        canvas.height = 1200;
+        const ctx = canvas.getContext("2d");
+        const green = "#2d4f36";
+        const orange = "#ec8502";
+        const beige = "#ffefcd";
+        const cream = "#fff9ec";
+        const paper = "#fffdf7";
+        const muted = "#6f7d72";
+
+        const background = ctx.createLinearGradient(0, 0, 1600, 1200);
+        background.addColorStop(0, paper);
+        background.addColorStop(1, beige);
+        ctx.fillStyle = background;
+        ctx.fillRect(0, 0, 1600, 1200);
+        const glow = ctx.createRadialGradient(1510, 40, 10, 1510, 40, 360);
+        glow.addColorStop(0, "rgba(236,133,2,.22)");
+        glow.addColorStop(1, "rgba(236,133,2,0)");
+        ctx.fillStyle = glow;
+        ctx.fillRect(1100, 0, 500, 440);
+
+        ctx.fillStyle = orange;
+        canvasFont(ctx, 900, 28);
+        ctx.fillText("ЖАЖДА ПОРЯДКА · КОМАНДНАЯ СВОДКА", 80, 84);
+        ctx.fillStyle = green;
+        canvasFont(ctx, 900, 64);
+        const title = round.status === "active" ? "Круг " + round.number + " · сейчас едем" : "Итоги круга " + round.number;
+        ctx.fillText(title, 80, 166);
+        ctx.fillStyle = muted;
+        canvasFont(ctx, 800, 30);
+        ctx.fillText(round.dates, 80, 216);
+
+        if (round.status === "active") {
+          canvasCard(ctx, 1180, 72, 340, 58, 29, orange);
+          ctx.fillStyle = "#ffffff";
+          canvasFont(ctx, 900, 23);
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText("Данные на " + round.updated, 1350, 102);
+          ctx.textAlign = "left";
+          ctx.textBaseline = "alphabetic";
+        }
+
+        canvasCard(ctx, 80, 280, 470, 150, 30, green);
+        ctx.fillStyle = "rgba(255,255,255,.82)";
+        canvasFont(ctx, 800, 25);
+        ctx.fillText("Приняли участие", 115, 328);
+        ctx.fillStyle = "#ffffff";
+        canvasFont(ctx, 900, 78);
+        ctx.fillText(String(summary.participants.length), 112, 405);
+
+        const metrics = [
+          { icon: "●", value: summary.entered, label: "ЗАЕЗДЫ", color: green },
+          { icon: "⚑", value: summary.finished, label: "ФИНИШИ", color: orange },
+          { icon: "✓", value: summary.full, label: "ПОЛНЫЕ КРУГИ", color: green }
+        ];
+        metrics.forEach((metric, index) => {
+          const x = 80 + index * 158;
+          canvasCard(ctx, x, 454, 145, 154, 24, "rgba(255,255,255,.78)", "rgba(236,133,2,.22)", 2);
+          ctx.fillStyle = metric.color;
+          canvasFont(ctx, 900, 32);
+          ctx.fillText(metric.icon, x + 20, 494);
+          canvasFont(ctx, 900, 52);
+          ctx.fillText(String(metric.value), x + 20, 550);
+          ctx.fillStyle = muted;
+          canvasFont(ctx, 900, 17);
+          ctx.fillText(metric.label, x + 20, 584);
+        });
+
+        canvasCard(ctx, 80, 638, 470, 260, 28, cream, "rgba(236,133,2,.35)", 3);
+        ctx.fillStyle = orange;
+        canvasFont(ctx, 900, 21);
+        const nextKicker = round.status === "active" ? "СЛЕДУЮЩИЙ ЧЕК-ПОИНТ" : round.status === "closed" ? "КРУГ ЗАВЕРШЁН" : "СЛЕДУЮЩИЙ ШАГ";
+        ctx.fillText(nextKicker, 112, 686);
+        ctx.fillStyle = green;
+        canvasFont(ctx, 900, 38);
+        const nextTitle = round.status === "active" ? "Финиш в субботу" : round.status === "closed" ? "Движение отмечено" : "Заезд в понедельник";
+        canvasWrappedText(ctx, nextTitle, 112, 744, 398, 44, 2);
+        ctx.fillStyle = muted;
+        canvasFont(ctx, 700, 24);
+        const nextText = round.status === "active" ? "Отправляем субботний отчёт и отмечаем финиш круга." : round.status === "closed" ? "Вклад каждого пилота сохранён в истории сезона." : "Присоединиться можно с любого круга.";
+        canvasWrappedText(ctx, nextText, 112, 815, 390, 32, 3);
+
+        canvasCard(ctx, 590, 280, 930, 618, 32, "rgba(255,255,255,.76)", "rgba(45,79,54,.14)", 3);
+        ctx.fillStyle = green;
+        canvasFont(ctx, 900, 42);
+        ctx.fillText("Личный вклад", 640, 344);
+        ctx.fillStyle = muted;
+        canvasFont(ctx, 700, 23);
+        ctx.fillText("Без мест и сравнения скорости", 640, 382);
+
+        let groupY = 438;
+        if (summary.groups.length) {
+          summary.groups.forEach(group => {
+            ctx.fillStyle = orange;
+            canvasFont(ctx, 900, 25);
+            ctx.fillText(group.icon + "  " + group.label, 640, groupY);
+            groupY = canvasNameChips(ctx, group.members.map(member => member.name), 640, groupY + 22, 830) + 38;
+          });
+        } else {
+          ctx.fillStyle = muted;
+          canvasFont(ctx, 800, 28);
+          ctx.fillText("Первые чек-поинты ещё впереди.", 640, groupY);
+        }
+        ctx.fillStyle = muted;
+        canvasFont(ctx, 700, 20);
+        ctx.fillText("Порядок имён постоянный — это не рейтинг.", 640, 858);
+
+        ctx.strokeStyle = "rgba(45,79,54,.25)";
+        ctx.lineWidth = 3;
+        ctx.setLineDash([14, 14]);
+        ctx.beginPath();
+        ctx.moveTo(80, 1010);
+        ctx.lineTo(1520, 1010);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = green;
+        canvasFont(ctx, 900, 34);
+        ctx.fillText("«Жажда порядка»", 80, 1082);
+        ctx.fillStyle = muted;
+        canvasFont(ctx, 800, 28);
+        ctx.textAlign = "right";
+        ctx.fillText("Мягко, но едем.", 1520, 1082);
+        ctx.textAlign = "left";
+
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+        const link = document.createElement("a");
+        link.download = "zhazhda-poryadka-krug-" + round.number + ".png";
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          link.href = url;
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } else {
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        }
+        button.textContent = "PNG скачан ✓";
+        setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 1800);
+      } catch (error) {
+        button.textContent = "Не удалось скачать";
+        setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 2200);
+      }
     }
 
     function showCelebration() {
