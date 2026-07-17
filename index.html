@@ -582,11 +582,32 @@
       place-items: center;
       width: 32px;
       height: 32px;
+      padding: 0;
       color: var(--white);
       background: var(--green);
+      border: 0;
       border-radius: 50%;
-      font-size: .75rem;
+      box-shadow: 0 4px 10px rgba(45,79,54,.16);
+      font: 900 .75rem/1 Nunito, sans-serif;
+      cursor: pointer;
+      transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
     }
+    .history-initial:hover { background: var(--orange); transform: translateY(-2px) scale(1.06); box-shadow: 0 7px 15px rgba(236,133,2,.24); }
+    .history-initial:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+    .history-initial.is-loading { cursor: wait; animation: pulse-soft 1s ease-in-out infinite; }
+    .personal-story-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin: 0 0 12px;
+      padding: 7px 10px;
+      color: var(--green);
+      background: var(--beige);
+      border-radius: 999px;
+      font-size: .7rem;
+      font-weight: 900;
+    }
+    .personal-story-hint b { color: var(--orange); }
     .lap {
       display: grid;
       place-items: center;
@@ -905,6 +926,74 @@
     }
     .summary-signature strong { color: var(--green); }
 
+    .personal-story[hidden] { display: none; }
+    .personal-story {
+      position: fixed;
+      z-index: 35;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 66px 18px 18px;
+      background: rgba(29,54,37,.78);
+      backdrop-filter: blur(7px);
+    }
+    .personal-story-shell {
+      position: relative;
+      display: grid;
+      justify-items: center;
+      width: min(400px, 100%);
+      max-height: calc(100vh - 86px);
+    }
+    .personal-story-preview {
+      display: block;
+      width: 100%;
+      max-height: calc(100vh - 92px);
+      object-fit: contain;
+      background: var(--beige);
+      border: 5px solid var(--white);
+      border-radius: 28px;
+      box-shadow: 0 28px 80px rgba(0,0,0,.36);
+    }
+    .personal-story-download,
+    .personal-story-close {
+      position: absolute;
+      top: -48px;
+      min-height: 40px;
+      border: 0;
+      box-shadow: 0 8px 22px rgba(0,0,0,.22);
+      font-family: Nunito, sans-serif;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .personal-story-download {
+      left: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 15px;
+      color: var(--white);
+      background: var(--orange);
+      border-radius: 999px;
+      font-size: .72rem;
+    }
+    .personal-story-close {
+      right: 0;
+      display: grid;
+      place-items: center;
+      width: 40px;
+      padding: 0;
+      color: var(--green);
+      background: var(--white);
+      border-radius: 50%;
+      font-size: 1.45rem;
+      line-height: 1;
+    }
+    .personal-story-download:hover { background: var(--orange-2); }
+    .personal-story-close:hover { color: var(--white); background: var(--orange); }
+    .personal-story-download:focus-visible,
+    .personal-story-close:focus-visible { outline: 4px solid var(--white); outline-offset: 3px; }
+    .personal-story-download:disabled { opacity: .68; cursor: wait; }
+
     .celebration[hidden] { display: none; }
     .celebration {
       position: fixed;
@@ -1097,6 +1186,7 @@
           <span class="board-rule">Порядок участников не меняется: это не рейтинг</span>
         </div>
         <div class="history-wrap">
+          <p class="personal-story-hint"><b aria-hidden="true">↓</b> Нажмите на круг с буквой, чтобы открыть личный трек для Stories</p>
           <div class="history-grid" id="history-grid" role="table" aria-label="История кругов команды"></div>
           <div class="history-legend" aria-label="Обозначения истории">
             <span>● заезд на трек</span><span>⚑ финиш круга</span><span>● + ⚑ оба чек-поинта</span><span>🔧 пит-стоп</span>
@@ -1163,6 +1253,14 @@
         <div class="summary-groups" id="round-summary-names" aria-label="Личный вклад пилотов"></div>
         <div class="summary-signature"><strong>«Жажда порядка»</strong><span>Мягко, но едем.</span></div>
       </article>
+    </div>
+  </div>
+
+  <div class="personal-story" id="personal-story" hidden>
+    <div class="personal-story-shell" role="dialog" aria-modal="true" aria-label="Личный трек для Stories">
+      <button class="personal-story-download" id="personal-story-download" type="button">Скачать PNG · 1080 × 1920</button>
+      <button class="personal-story-close" id="personal-story-close" type="button" aria-label="Закрыть личный трек">×</button>
+      <img class="personal-story-preview" id="personal-story-preview" alt="">
     </div>
   </div>
 
@@ -1732,6 +1830,307 @@
       }
     }
 
+    function personalStoryState(mark) {
+      if (mark.entered && mark.finished) return { title: "Мой круг завершён", next: "Обе отметки собраны", color: "#ec8502" };
+      if (mark.finished) return { title: "Мой финиш отмечен", next: "Заезд можно добавить", color: "#ec8502" };
+      if (mark.entered) return { title: "Мой заезд отмечен", next: "Финиш впереди", color: "#2d4f36" };
+      if (mark.pit) return { title: "Мой пит-стоп отмечен", next: "Пауза тоже часть пути", color: "#2d4f36" };
+      return { title: "Мой старт впереди", next: "Присоединиться можно с любого круга", color: "#ec8502" };
+    }
+
+    function canvasStoryNode(ctx, x, y, active, color, symbol, label) {
+      ctx.beginPath();
+      ctx.arc(x, y, 55, 0, Math.PI * 2);
+      ctx.fillStyle = active ? color : "#fffdf7";
+      ctx.fill();
+      ctx.strokeStyle = active ? color : "rgba(45,79,54,.22)";
+      ctx.lineWidth = 5;
+      ctx.stroke();
+      ctx.fillStyle = active ? "#ffffff" : "rgba(45,79,54,.42)";
+      canvasFont(ctx, 900, 42);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(symbol, x, y + 1);
+      ctx.fillStyle = active ? color : "#6f7d72";
+      canvasFont(ctx, 900, 20);
+      ctx.textBaseline = "alphabetic";
+      ctx.fillText(label, x, y + 92);
+      ctx.textAlign = "left";
+    }
+
+    async function createPersonalStoryCanvas(person) {
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      const round = selectedRound();
+      const mark = { entered: false, finished: false, pit: false, ...(round.marks[person.name] || {}) };
+      const stats = pilotStats(person.name);
+      const storyState = personalStoryState(mark);
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1920;
+      const ctx = canvas.getContext("2d");
+      const green = "#2d4f36";
+      const orange = "#ec8502";
+      const beige = "#ffefcd";
+      const paper = "#fffdf7";
+      const cream = "#fff9ec";
+      const muted = "#6f7d72";
+      const [trackImage, elfImage, helmetImage] = await Promise.all([
+        canvasLoadImage("track.webp"),
+        canvasLoadImage("elf.webp"),
+        canvasLoadImage("helmet.webp")
+      ]);
+
+      const background = ctx.createLinearGradient(0, 0, 1080, 1920);
+      background.addColorStop(0, paper);
+      background.addColorStop(1, beige);
+      ctx.fillStyle = background;
+      ctx.fillRect(0, 0, 1080, 1920);
+      const glow = ctx.createRadialGradient(1010, 120, 10, 1010, 120, 440);
+      glow.addColorStop(0, "rgba(236,133,2,.22)");
+      glow.addColorStop(1, "rgba(236,133,2,0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(590, 0, 490, 520);
+
+      ctx.fillStyle = orange;
+      canvasFont(ctx, 900, 26);
+      ctx.fillText("ЖАЖДА ПОРЯДКА · ЛИЧНЫЙ ТРЕК", 70, 180);
+      const dateText = "ДАННЫЕ НА " + round.updated.toUpperCase();
+      canvasFont(ctx, 900, 18);
+      const dateWidth = Math.ceil(ctx.measureText(dateText).width) + 38;
+      canvasCard(ctx, 1010 - dateWidth, 142, dateWidth, 48, 24, orange);
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(dateText, 1010 - dateWidth / 2, 167);
+      ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
+
+      canvasCard(ctx, 70, 230, 940, 260, 42, "rgba(255,255,255,.76)", "rgba(45,79,54,.13)", 3);
+      ctx.fillStyle = orange;
+      canvasFont(ctx, 900, 21);
+      ctx.fillText("ИНФОРМАЦИОННЫЙ ГОНЩИК", 110, 285);
+      const bolidMatch = person.name.match(/^(.+?)\s*·\s*болид\s*(№\d+)$/i);
+      if (bolidMatch) {
+        ctx.fillStyle = green;
+        canvasFont(ctx, 900, 68);
+        ctx.fillText(bolidMatch[1], 110, 375);
+        const pilotNameWidth = ctx.measureText(bolidMatch[1]).width;
+        const bolidLabel = "БОЛИД " + bolidMatch[2];
+        canvasFont(ctx, 900, 18);
+        const bolidWidth = Math.ceil(ctx.measureText(bolidLabel).width) + 34;
+        canvasCard(ctx, 110 + pilotNameWidth + 22, 330, bolidWidth, 48, 24, orange);
+        ctx.fillStyle = "#ffffff";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(bolidLabel, 110 + pilotNameWidth + 22 + bolidWidth / 2, 355);
+        ctx.textAlign = "left";
+        ctx.textBaseline = "alphabetic";
+      } else {
+        ctx.fillStyle = green;
+        canvasFont(ctx, 900, person.name.length > 19 ? 52 : 68);
+        canvasWrappedText(ctx, person.name, 110, 375, 570, 64, 2);
+      }
+      ctx.fillStyle = muted;
+      canvasFont(ctx, 800, 24);
+      ctx.fillText("Мои чек-поинты · мой собственный темп", 110, 445);
+      if (helmetImage) {
+        ctx.save();
+        ctx.shadowColor = "rgba(45,79,54,.17)";
+        ctx.shadowBlur = 20;
+        ctx.shadowOffsetY = 10;
+        ctx.drawImage(helmetImage, 738, 226, 268, 268);
+        ctx.restore();
+      }
+
+      canvasCard(ctx, 70, 525, 940, 610, 44, "rgba(255,255,255,.78)", "rgba(236,133,2,.22)", 3);
+      if (trackImage) {
+        ctx.save();
+        canvasRoundedRect(ctx, 70, 525, 940, 610, 44);
+        ctx.clip();
+        ctx.globalAlpha = .085;
+        ctx.drawImage(trackImage, 360, 520, 760, 760);
+        ctx.restore();
+      }
+      ctx.fillStyle = orange;
+      canvasFont(ctx, 900, 23);
+      ctx.fillText("КРУГ " + round.number + " · " + round.dates.toUpperCase(), 110, 588);
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 52);
+      canvasWrappedText(ctx, storyState.title.toUpperCase(), 110, 670, 820, 60, 2);
+
+      ctx.strokeStyle = mark.entered && mark.finished ? orange : mark.entered ? green : "rgba(45,79,54,.25)";
+      ctx.lineWidth = 11;
+      ctx.setLineDash(mark.finished ? [] : [18, 16]);
+      ctx.beginPath();
+      ctx.moveTo(210, 830);
+      ctx.lineTo(870, 830);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      canvasStoryNode(ctx, 210, 830, mark.entered, green, mark.entered ? "✓" : "●", "ЗАЕЗД");
+      canvasStoryNode(ctx, 870, 830, mark.finished, orange, "⚑", "ФИНИШ");
+      if (mark.entered && !mark.finished && !mark.pit) {
+        ctx.fillStyle = green;
+        ctx.font = "52px 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("🏎️", 540, 812);
+        ctx.textAlign = "left";
+      }
+
+      canvasCard(ctx, 110, 985, 650, 105, 31, cream, "rgba(236,133,2,.32)", 2);
+      ctx.fillStyle = orange;
+      canvasFont(ctx, 900, 17);
+      ctx.fillText("СЛЕДУЮЩИЙ ПОВОРОТ", 140, 1022);
+      ctx.fillStyle = storyState.color;
+      canvasFont(ctx, 900, storyState.next.length > 24 ? 24 : 29);
+      ctx.fillText(storyState.next, 140, 1063);
+      if (elfImage) {
+        ctx.save();
+        ctx.shadowColor = "rgba(45,79,54,.18)";
+        ctx.shadowBlur = 18;
+        ctx.shadowOffsetY = 9;
+        ctx.drawImage(elfImage, 785, 920, 190, 190);
+        ctx.restore();
+      }
+
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 29);
+      ctx.fillText("МОЙ ПУТЬ В СЕЗОНЕ", 70, 1205);
+      const statCards = [
+        { value: stats.series, label: "КРУГОВ В СЕРИИ" },
+        { value: stats.full, label: "ПОЛНЫХ КРУГОВ" },
+        { value: stats.checkpoints, label: "ЧЕК-ПОИНТОВ" }
+      ];
+      statCards.forEach((stat, index) => {
+        const x = 70 + index * 320;
+        canvasCard(ctx, x, 1240, 300, 175, 34, index === 0 ? green : "rgba(255,255,255,.76)", index === 0 ? null : "rgba(45,79,54,.13)", 3);
+        ctx.fillStyle = index === 0 ? "#ffffff" : index === 1 ? orange : green;
+        canvasFont(ctx, 900, 62);
+        ctx.fillText(String(stat.value), x + 28, 1321);
+        ctx.fillStyle = index === 0 ? "rgba(255,255,255,.78)" : muted;
+        canvasFont(ctx, 900, 18);
+        ctx.fillText(stat.label, x + 28, 1372);
+      });
+
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 27);
+      ctx.fillText("МОЙ СЕЗОН", 70, 1480);
+      const personalRounds = BOARD_DATA.rounds.filter(item => item.number >= (person.joinedRound || 1)).slice(-4);
+      personalRounds.forEach((item, index) => {
+        const x = 70 + index * 230;
+        const itemMark = item.marks[person.name] || {};
+        canvasCard(ctx, x, 1512, 210, 142, 28, "rgba(255,255,255,.7)", "rgba(45,79,54,.13)", 2);
+        ctx.fillStyle = green;
+        canvasFont(ctx, 900, 21);
+        ctx.fillText("КРУГ " + item.number, x + 24, 1553);
+        ctx.beginPath();
+        ctx.arc(x + 56, 1605, 24, 0, Math.PI * 2);
+        ctx.fillStyle = itemMark.entered ? green : "rgba(45,79,54,.08)";
+        ctx.fill();
+        ctx.fillStyle = itemMark.entered ? "#ffffff" : "rgba(45,79,54,.35)";
+        canvasFont(ctx, 900, 18);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("●", x + 56, 1605);
+        ctx.beginPath();
+        ctx.arc(x + 135, 1605, 24, 0, Math.PI * 2);
+        ctx.fillStyle = itemMark.finished ? orange : "rgba(236,133,2,.08)";
+        ctx.fill();
+        ctx.fillStyle = itemMark.finished ? "#ffffff" : "rgba(236,133,2,.42)";
+        ctx.fillText("⚑", x + 135, 1605);
+        ctx.textAlign = "left";
+        ctx.textBaseline = "alphabetic";
+      });
+
+      ctx.strokeStyle = "rgba(45,79,54,.23)";
+      ctx.lineWidth = 3;
+      ctx.setLineDash([14, 14]);
+      ctx.beginPath();
+      ctx.moveTo(70, 1735);
+      ctx.lineTo(1010, 1735);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 32);
+      ctx.fillText("«Жажда порядка»", 70, 1802);
+      ctx.fillStyle = muted;
+      canvasFont(ctx, 900, 28);
+      ctx.textAlign = "right";
+      ctx.fillText("Мягко, но еду.", 1010, 1802);
+      ctx.fillStyle = orange;
+      canvasFont(ctx, 800, 22);
+      ctx.fillText("@ZhenyaHabatulina", 1010, 1845);
+      ctx.textAlign = "left";
+      return canvas;
+    }
+
+    function personalStorySlug(name) {
+      const map = { а:"a", б:"b", в:"v", г:"g", д:"d", е:"e", ё:"e", ж:"zh", з:"z", и:"i", й:"y", к:"k", л:"l", м:"m", н:"n", о:"o", п:"p", р:"r", с:"s", т:"t", у:"u", ф:"f", х:"h", ц:"c", ч:"ch", ш:"sh", щ:"sch", ъ:"", ы:"y", ь:"", э:"e", ю:"yu", я:"ya" };
+      return Array.from(name.toLowerCase()).map(char => map[char] ?? char).join("").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    }
+
+    async function downloadPersonalStory(person, canvas, button) {
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "Готовлю PNG…";
+      try {
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+        const link = document.createElement("a");
+        link.download = "zhazhda-poryadka-lichnyy-trek-" + personalStorySlug(person.name) + ".png";
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          link.href = url;
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } else {
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        }
+        button.textContent = "PNG скачан ✓";
+        setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 1800);
+      } catch (error) {
+        button.textContent = "Не удалось скачать";
+        setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 2200);
+      }
+    }
+
+    async function openPersonalStory(person, opener) {
+      const layer = document.getElementById("personal-story");
+      const close = document.getElementById("personal-story-close");
+      const download = document.getElementById("personal-story-download");
+      const preview = document.getElementById("personal-story-preview");
+      opener.classList.add("is-loading");
+      opener.setAttribute("aria-busy", "true");
+      try {
+        const canvas = await createPersonalStoryCanvas(person);
+        preview.src = canvas.toDataURL("image/png");
+        preview.alt = "Личный трек участника " + person.name;
+        layer.hidden = false;
+        document.body.classList.add("summary-open");
+        download.disabled = false;
+        download.textContent = "Скачать PNG · 1080 × 1920";
+        download.onclick = () => downloadPersonalStory(person, canvas, download);
+        close.focus();
+
+        const dismiss = () => {
+          if (layer.hidden) return;
+          layer.hidden = true;
+          document.body.classList.remove("summary-open");
+          document.removeEventListener("keydown", onEscape);
+          opener.focus();
+        };
+        close.onclick = dismiss;
+        layer.onclick = event => { if (event.target === layer) dismiss(); };
+        const onEscape = event => {
+          if (event.key !== "Escape" || layer.hidden) return;
+          dismiss();
+        };
+        document.addEventListener("keydown", onEscape);
+      } finally {
+        opener.classList.remove("is-loading");
+        opener.removeAttribute("aria-busy");
+      }
+    }
+
     function showCelebration() {
       const data = BOARD_DATA.celebration;
       if (!data || !data.id) return;
@@ -1911,10 +2310,13 @@
         const name = document.createElement("div");
         name.className = "history-name";
         name.setAttribute("role", "rowheader");
-        const avatar = document.createElement("span");
+        const avatar = document.createElement("button");
         avatar.className = "history-initial";
+        avatar.type = "button";
         avatar.textContent = initial(person.name);
-        avatar.setAttribute("aria-hidden", "true");
+        avatar.setAttribute("aria-label", "Открыть личный трек участника " + person.name + " для Stories");
+        avatar.title = "Открыть личный трек для Stories";
+        avatar.addEventListener("click", () => openPersonalStory(person, avatar));
         const nameText = document.createElement("span");
         nameText.textContent = person.name;
         name.append(avatar, nameText);
