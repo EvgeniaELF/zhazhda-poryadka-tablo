@@ -1893,17 +1893,15 @@
 
       ctx.fillStyle = orange;
       canvasFont(ctx, 900, 26);
-      ctx.fillText("ЖАЖДА ПОРЯДКА · ЛИЧНЫЙ ТРЕК", 70, 180);
-      const dateText = "ДАННЫЕ НА " + round.updated.toUpperCase();
-      canvasFont(ctx, 900, 18);
-      const dateWidth = Math.ceil(ctx.measureText(dateText).width) + 38;
-      canvasCard(ctx, 1010 - dateWidth, 142, dateWidth, 48, 24, orange);
-      ctx.fillStyle = "#ffffff";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(dateText, 1010 - dateWidth / 2, 167);
+      ctx.fillText("ЖАЖДА ПОРЯДКА · ЛИЧНЫЙ ТРЕК", 70, 176);
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 26);
+      ctx.textAlign = "right";
+      ctx.fillText("Мягко, но еду.", 1010, 150);
+      ctx.fillStyle = orange;
+      canvasFont(ctx, 800, 20);
+      ctx.fillText("@ZhenyaHabatulina", 1010, 184);
       ctx.textAlign = "left";
-      ctx.textBaseline = "alphabetic";
 
       canvasCard(ctx, 70, 230, 940, 260, 42, "rgba(255,255,255,.76)", "rgba(45,79,54,.13)", 3);
       ctx.fillStyle = orange;
@@ -1942,10 +1940,10 @@
         ctx.restore();
       }
 
-      canvasCard(ctx, 70, 525, 940, 610, 44, "rgba(255,255,255,.78)", "rgba(236,133,2,.22)", 3);
+      canvasCard(ctx, 70, 525, 940, 540, 44, "rgba(255,255,255,.78)", "rgba(236,133,2,.22)", 3);
       if (trackImage) {
         ctx.save();
-        canvasRoundedRect(ctx, 70, 525, 940, 610, 44);
+        canvasRoundedRect(ctx, 70, 525, 940, 540, 44);
         ctx.clip();
         ctx.globalAlpha = .085;
         ctx.drawImage(trackImage, 360, 520, 760, 760);
@@ -1954,47 +1952,46 @@
       ctx.fillStyle = orange;
       canvasFont(ctx, 900, 23);
       ctx.fillText("КРУГ " + round.number + " · " + round.dates.toUpperCase(), 110, 588);
-      ctx.fillStyle = green;
-      canvasFont(ctx, 900, 52);
-      canvasWrappedText(ctx, storyState.title.toUpperCase(), 110, 670, 820, 60, 2);
+      const dateText = "ДАННЫЕ НА " + round.updated.toUpperCase();
+      canvasFont(ctx, 900, 16);
+      const dateWidth = Math.ceil(ctx.measureText(dateText).width) + 34;
+      canvasCard(ctx, 970 - dateWidth, 550, dateWidth, 42, 21, orange);
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(dateText, 970 - dateWidth / 2, 572);
+      ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
 
       ctx.strokeStyle = mark.entered && mark.finished ? orange : mark.entered ? green : "rgba(45,79,54,.25)";
       ctx.lineWidth = 11;
       ctx.setLineDash(mark.finished ? [] : [18, 16]);
       ctx.beginPath();
-      ctx.moveTo(210, 830);
-      ctx.lineTo(870, 830);
+      ctx.moveTo(210, 750);
+      ctx.lineTo(870, 750);
       ctx.stroke();
       ctx.setLineDash([]);
-      canvasStoryNode(ctx, 210, 830, mark.entered, green, mark.entered ? "✓" : "●", "ЗАЕЗД");
-      canvasStoryNode(ctx, 870, 830, mark.finished, orange, "⚑", "ФИНИШ");
+      canvasStoryNode(ctx, 210, 750, mark.entered, green, mark.entered ? "✓" : "●", "ЗАЕЗД");
+      canvasStoryNode(ctx, 870, 750, mark.finished, orange, "⚑", "ФИНИШ");
       if (mark.entered && !mark.finished && !mark.pit) {
         ctx.fillStyle = green;
         ctx.font = "52px 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText("🏎️", 540, 812);
+        ctx.fillText("🏎️", 540, 732);
         ctx.textAlign = "left";
       }
 
-      canvasCard(ctx, 110, 985, 650, 105, 31, cream, "rgba(236,133,2,.32)", 2);
+      canvasCard(ctx, 110, 890, 650, 105, 31, cream, "rgba(236,133,2,.32)", 2);
       ctx.fillStyle = orange;
       canvasFont(ctx, 900, 17);
-      ctx.fillText("СЛЕДУЮЩИЙ ПОВОРОТ", 140, 1022);
+      ctx.fillText("СЛЕДУЮЩИЙ ПОВОРОТ", 140, 927);
       ctx.fillStyle = storyState.color;
       canvasFont(ctx, 900, storyState.next.length > 24 ? 24 : 29);
-      ctx.fillText(storyState.next, 140, 1063);
-      if (elfImage) {
-        ctx.save();
-        ctx.shadowColor = "rgba(45,79,54,.18)";
-        ctx.shadowBlur = 18;
-        ctx.shadowOffsetY = 9;
-        ctx.drawImage(elfImage, 785, 920, 190, 190);
-        ctx.restore();
-      }
+      ctx.fillText(storyState.next, 140, 968);
 
       ctx.fillStyle = green;
       canvasFont(ctx, 900, 29);
-      ctx.fillText("МОЙ ПУТЬ В СЕЗОНЕ", 70, 1205);
+      ctx.fillText("МОЙ ПУТЬ В СЕЗОНЕ", 70, 1135);
       const statCards = [
         { value: stats.series, label: "КРУГОВ В СЕРИИ" },
         { value: stats.full, label: "ПОЛНЫХ КРУГОВ" },
@@ -2002,64 +1999,22 @@
       ];
       statCards.forEach((stat, index) => {
         const x = 70 + index * 320;
-        canvasCard(ctx, x, 1240, 300, 175, 34, index === 0 ? green : "rgba(255,255,255,.76)", index === 0 ? null : "rgba(45,79,54,.13)", 3);
+        canvasCard(ctx, x, 1170, 300, 175, 34, index === 0 ? green : "rgba(255,255,255,.76)", index === 0 ? null : "rgba(45,79,54,.13)", 3);
         ctx.fillStyle = index === 0 ? "#ffffff" : index === 1 ? orange : green;
         canvasFont(ctx, 900, 62);
-        ctx.fillText(String(stat.value), x + 28, 1321);
+        ctx.fillText(String(stat.value), x + 28, 1251);
         ctx.fillStyle = index === 0 ? "rgba(255,255,255,.78)" : muted;
         canvasFont(ctx, 900, 18);
-        ctx.fillText(stat.label, x + 28, 1372);
+        ctx.fillText(stat.label, x + 28, 1302);
       });
-
-      ctx.fillStyle = green;
-      canvasFont(ctx, 900, 27);
-      ctx.fillText("МОЙ СЕЗОН", 70, 1480);
-      const personalRounds = BOARD_DATA.rounds.filter(item => item.number >= (person.joinedRound || 1)).slice(-4);
-      personalRounds.forEach((item, index) => {
-        const x = 70 + index * 230;
-        const itemMark = item.marks[person.name] || {};
-        canvasCard(ctx, x, 1512, 210, 142, 28, "rgba(255,255,255,.7)", "rgba(45,79,54,.13)", 2);
-        ctx.fillStyle = green;
-        canvasFont(ctx, 900, 21);
-        ctx.fillText("КРУГ " + item.number, x + 24, 1553);
-        ctx.beginPath();
-        ctx.arc(x + 56, 1605, 24, 0, Math.PI * 2);
-        ctx.fillStyle = itemMark.entered ? green : "rgba(45,79,54,.08)";
-        ctx.fill();
-        ctx.fillStyle = itemMark.entered ? "#ffffff" : "rgba(45,79,54,.35)";
-        canvasFont(ctx, 900, 18);
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("●", x + 56, 1605);
-        ctx.beginPath();
-        ctx.arc(x + 135, 1605, 24, 0, Math.PI * 2);
-        ctx.fillStyle = itemMark.finished ? orange : "rgba(236,133,2,.08)";
-        ctx.fill();
-        ctx.fillStyle = itemMark.finished ? "#ffffff" : "rgba(236,133,2,.42)";
-        ctx.fillText("⚑", x + 135, 1605);
-        ctx.textAlign = "left";
-        ctx.textBaseline = "alphabetic";
-      });
-
-      ctx.strokeStyle = "rgba(45,79,54,.23)";
-      ctx.lineWidth = 3;
-      ctx.setLineDash([14, 14]);
-      ctx.beginPath();
-      ctx.moveTo(70, 1735);
-      ctx.lineTo(1010, 1735);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = green;
-      canvasFont(ctx, 900, 32);
-      ctx.fillText("«Жажда порядка»", 70, 1802);
-      ctx.fillStyle = muted;
-      canvasFont(ctx, 900, 28);
-      ctx.textAlign = "right";
-      ctx.fillText("Мягко, но еду.", 1010, 1802);
-      ctx.fillStyle = orange;
-      canvasFont(ctx, 800, 22);
-      ctx.fillText("@ZhenyaHabatulina", 1010, 1845);
-      ctx.textAlign = "left";
+      if (elfImage) {
+        ctx.save();
+        ctx.shadowColor = "rgba(45,79,54,.18)";
+        ctx.shadowBlur = 24;
+        ctx.shadowOffsetY = 12;
+        ctx.drawImage(elfImage, 55, 1430, 350, 350);
+        ctx.restore();
+      }
       return canvas;
     }
 
