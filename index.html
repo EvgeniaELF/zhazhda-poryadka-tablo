@@ -1831,10 +1831,9 @@
     }
 
     function personalStoryState(mark) {
-      if (mark.entered && mark.finished) return { phrase: "Круг завершён. Мой путь продолжается." };
-      if (mark.entered || mark.finished) return { phrase: "Я уже на треке. Дальше — в своём темпе." };
-      if (mark.pit) return { phrase: "Пауза — тоже часть моего пути." };
-      return { phrase: "Мой старт — в моём темпе." };
+      if (mark.entered && mark.finished) return { phrase: "Выгружаем хаос. Настраиваем движение" };
+      if (mark.entered || mark.finished || mark.pit) return { phrase: "Выезжаем на трек ясности" };
+      return { phrase: "Пристегнись. Наводим порядок в делах" };
     }
 
     function canvasStoryNode(ctx, x, y, active, color, symbol, label) {
@@ -1897,6 +1896,11 @@
       const brandWidth = ctx.measureText(brandTitle).width;
       ctx.fillStyle = orange;
       ctx.fillText(" · ЛИЧНЫЙ ТРЕК", 70 + brandWidth, 176);
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 24);
+      ctx.textAlign = "right";
+      ctx.fillText("Мягко, но еду.", 1010, 176);
+      ctx.textAlign = "left";
 
       canvasCard(ctx, 70, 230, 940, 260, 42, "rgba(255,255,255,.76)", "rgba(45,79,54,.13)", 3);
       ctx.fillStyle = orange;
@@ -1935,10 +1939,10 @@
         ctx.restore();
       }
 
-      canvasCard(ctx, 70, 525, 940, 540, 44, "rgba(255,255,255,.78)", "rgba(236,133,2,.22)", 3);
+      canvasCard(ctx, 70, 525, 940, 400, 44, "rgba(255,255,255,.78)", "rgba(236,133,2,.22)", 3);
       if (trackImage) {
         ctx.save();
-        canvasRoundedRect(ctx, 70, 525, 940, 540, 44);
+        canvasRoundedRect(ctx, 70, 525, 940, 400, 44);
         ctx.clip();
         ctx.globalAlpha = .085;
         ctx.drawImage(trackImage, 360, 520, 760, 760);
@@ -1976,17 +1980,31 @@
         ctx.textAlign = "left";
       }
 
-      canvasCard(ctx, 110, 882, 650, 120, 31, cream, "rgba(236,133,2,.32)", 2);
+      canvasCard(ctx, 590, 965, 420, 240, 32, cream, "rgba(236,133,2,.32)", 2);
+      ctx.beginPath();
+      ctx.moveTo(620, 1204);
+      ctx.lineTo(690, 1204);
+      ctx.lineTo(555, 1250);
+      ctx.closePath();
+      ctx.fillStyle = cream;
+      ctx.fill();
+      ctx.strokeStyle = "rgba(236,133,2,.32)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(620, 1204);
+      ctx.lineTo(555, 1250);
+      ctx.lineTo(690, 1204);
+      ctx.stroke();
       ctx.fillStyle = orange;
-      canvasFont(ctx, 900, 48);
-      ctx.fillText("“", 138, 940);
+      canvasFont(ctx, 900, 18);
+      ctx.fillText("ЭЛЬФИЙКА-ШТУРМАН", 625, 1013);
       ctx.fillStyle = green;
-      canvasFont(ctx, 900, 31);
-      canvasWrappedText(ctx, storyState.phrase, 190, 930, 520, 37, 2);
+      canvasFont(ctx, 900, 36);
+      canvasWrappedText(ctx, storyState.phrase, 625, 1065, 345, 43, 4);
 
       ctx.fillStyle = green;
       canvasFont(ctx, 900, 34);
-      ctx.fillText("МОЙ ПУТЬ В СЕЗОНЕ", 590, 1135);
+      ctx.fillText("МОЙ ПУТЬ В СЕЗОНЕ", 590, 1290);
       const statCards = [
         { value: stats.series, label: "КРУГОВ В СЕРИИ" },
         { value: stats.full, label: "ПОЛНЫХ КРУГОВ" },
@@ -1994,7 +2012,7 @@
       ];
       statCards.forEach((stat, index) => {
         const x = 590;
-        const y = 1170 + index * 142;
+        const y = 1325 + index * 142;
         canvasCard(ctx, x, y, 420, 122, 31, index === 0 ? green : "rgba(255,255,255,.76)", index === 0 ? null : "rgba(45,79,54,.13)", 3);
         ctx.fillStyle = index === 0 ? "#ffffff" : index === 1 ? orange : green;
         canvasFont(ctx, 900, 56);
@@ -2003,18 +2021,17 @@
         canvasFont(ctx, 900, 22);
         ctx.fillText(stat.label, x + 120, y + 70);
       });
-      ctx.fillStyle = green;
-      canvasFont(ctx, 900, 32);
-      ctx.fillText("Мягко, но еду.", 590, 1640);
       ctx.fillStyle = orange;
       canvasFont(ctx, 800, 24);
-      ctx.fillText("@ZhenyaHabatulina", 590, 1678);
+      ctx.textAlign = "center";
+      ctx.fillText("@ZhenyaHabatulina", 295, 1720);
+      ctx.textAlign = "left";
       if (elfImage) {
         ctx.save();
         ctx.shadowColor = "rgba(45,79,54,.18)";
         ctx.shadowBlur = 24;
         ctx.shadowOffsetY = 12;
-        ctx.drawImage(elfImage, 45, 1175, 500, 500);
+        ctx.drawImage(elfImage, 15, 1090, 560, 560);
         ctx.restore();
       }
       return canvas;
