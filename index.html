@@ -276,6 +276,19 @@
       font-size: 1.3rem;
     }
 
+    .metric-awaiting {
+      background: linear-gradient(135deg, var(--white), #fff7e8);
+      border-color: rgba(236, 133, 2, .34);
+    }
+
+    .metric-awaiting .metric-icon {
+      background: var(--beige);
+    }
+
+    .metric-awaiting .metric-value {
+      color: var(--orange);
+    }
+
     .metric-value { color: var(--green); font-size: 1.55rem; font-weight: 900; line-height: 1; }
     .metric-label { color: var(--muted); font-size: .75rem; }
 
@@ -994,6 +1007,7 @@
       .action-banner { grid-template-columns: auto 1fr; }
       .action-button { grid-column: 1 / -1; }
       .metrics { grid-template-columns: 1fr 1fr; }
+      .metric-awaiting { grid-column: 1 / -1; }
       .board-head { flex-direction: column; padding: 21px 18px 16px; }
       .board-rule { max-width: none; text-align: left; }
       .participants { padding: 14px 17px 20px; }
@@ -1010,6 +1024,7 @@
 
     @media (max-width: 430px) {
       .metrics { grid-template-columns: 1fr; }
+      .metric-awaiting { grid-column: auto; }
       .checkline { grid-template-columns: 50px 1fr 50px; }
       .round-summary-card { padding: 17px; border-radius: 25px; }
       .round-summary-card h2 { font-size: 1.35rem; }
@@ -1060,6 +1075,7 @@
       </div>
 
       <div class="metrics" aria-label="Состояние текущего круга">
+        <article class="metric metric-awaiting"><span class="metric-icon" aria-hidden="true">🏎️</span><span class="metric-value" id="metric-awaiting">0</span><span class="metric-label" id="metric-awaiting-label">готовятся к старту</span></article>
         <article class="metric"><span class="metric-icon" aria-hidden="true">🟢</span><span class="metric-value" id="metric-entered">0</span><span class="metric-label">заехали на трек</span></article>
         <article class="metric"><span class="metric-icon" aria-hidden="true">🏁</span><span class="metric-value" id="metric-done">0</span><span class="metric-label">финишировали круг</span></article>
       </div>
@@ -1328,8 +1344,11 @@
       const participants = selectedParticipants();
       const entered = participants.filter(person => person.entered).length;
       const done = participants.filter(person => person.finished).length;
+      const awaiting = participants.filter(person => !person.entered && !person.finished && !person.pit).length;
       document.getElementById("metric-entered").textContent = entered;
       document.getElementById("metric-done").textContent = done;
+      document.getElementById("metric-awaiting").textContent = awaiting;
+      document.getElementById("metric-awaiting-label").textContent = awaiting === 1 ? "готовится к старту" : "готовятся к старту";
     }
 
     function renderSeasonPath() {
@@ -1531,6 +1550,15 @@
       return cursorY + height;
     }
 
+    function canvasLoadImage(src) {
+      return new Promise(resolve => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => resolve(null);
+        image.src = src;
+      });
+    }
+
     async function downloadRoundSummary(round, button) {
       const originalText = button.textContent;
       button.disabled = true;
@@ -1548,6 +1576,10 @@
         const cream = "#fff9ec";
         const paper = "#fffdf7";
         const muted = "#6f7d72";
+        const [trackImage, elfImage] = await Promise.all([
+          canvasLoadImage("track.webp"),
+          canvasLoadImage("elf.webp")
+        ]);
 
         const background = ctx.createLinearGradient(0, 0, 1600, 1200);
         background.addColorStop(0, paper);
@@ -1623,6 +1655,14 @@
         canvasWrappedText(ctx, nextText, 112, Math.max(815, nextTitleBottom + 10), 390, 30, 2);
 
         canvasCard(ctx, 590, 280, 930, 618, 32, "rgba(255,255,255,.76)", "rgba(45,79,54,.14)", 3);
+        if (trackImage) {
+          ctx.save();
+          canvasRoundedRect(ctx, 590, 280, 930, 618, 32);
+          ctx.clip();
+          ctx.globalAlpha = .055;
+          ctx.drawImage(trackImage, 860, 350, 760, 760);
+          ctx.restore();
+        }
         ctx.fillStyle = green;
         canvasFont(ctx, 900, 42);
         ctx.fillText("Личный вклад", 640, 344);
@@ -1636,7 +1676,7 @@
             ctx.fillStyle = orange;
             canvasFont(ctx, 900, 25);
             ctx.fillText(group.icon + "  " + group.label, 640, groupY);
-            groupY = canvasNameChips(ctx, group.members.map(member => member.name), 640, groupY + 22, 830) + 38;
+            groupY = canvasNameChips(ctx, group.members.map(member => member.name), 640, groupY + 22, 560) + 38;
           });
         } else {
           ctx.fillStyle = muted;
@@ -1646,6 +1686,14 @@
         ctx.fillStyle = muted;
         canvasFont(ctx, 700, 20);
         ctx.fillText("Порядок имён постоянный — это не рейтинг.", 640, 858);
+        if (elfImage) {
+          ctx.save();
+          ctx.shadowColor = "rgba(45,79,54,.18)";
+          ctx.shadowBlur = 20;
+          ctx.shadowOffsetY = 10;
+          ctx.drawImage(elfImage, 1210, 596, 288, 288);
+          ctx.restore();
+        }
 
         ctx.strokeStyle = "rgba(45,79,54,.25)";
         ctx.lineWidth = 3;
