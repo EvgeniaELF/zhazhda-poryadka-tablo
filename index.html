@@ -1897,14 +1897,6 @@
       const brandWidth = ctx.measureText(brandTitle).width;
       ctx.fillStyle = orange;
       ctx.fillText(" · ЛИЧНЫЙ ТРЕК", 70 + brandWidth, 176);
-      ctx.fillStyle = green;
-      canvasFont(ctx, 900, 26);
-      ctx.textAlign = "right";
-      ctx.fillText("Мягко, но еду.", 1010, 150);
-      ctx.fillStyle = orange;
-      canvasFont(ctx, 800, 20);
-      ctx.fillText("@ZhenyaHabatulina", 1010, 184);
-      ctx.textAlign = "left";
 
       canvasCard(ctx, 70, 230, 940, 260, 42, "rgba(255,255,255,.76)", "rgba(45,79,54,.13)", 3);
       ctx.fillStyle = orange;
@@ -2011,6 +2003,12 @@
         canvasFont(ctx, 900, 18);
         ctx.fillText(stat.label, x + 120, y + 70);
       });
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 27);
+      ctx.fillText("Мягко, но еду.", 590, 1640);
+      ctx.fillStyle = orange;
+      canvasFont(ctx, 800, 20);
+      ctx.fillText("@ZhenyaHabatulina", 590, 1678);
       if (elfImage) {
         ctx.save();
         ctx.shadowColor = "rgba(45,79,54,.18)";
