@@ -1851,7 +1851,7 @@
       ctx.textBaseline = "middle";
       ctx.fillText(symbol, x, y + 1);
       ctx.fillStyle = active ? color : "#6f7d72";
-      canvasFont(ctx, 900, 20);
+      canvasFont(ctx, 900, 24);
       ctx.textBaseline = "alphabetic";
       ctx.fillText(label, x, y + 92);
       ctx.textAlign = "left";
@@ -1891,7 +1891,7 @@
       ctx.fillRect(590, 0, 490, 520);
 
       ctx.fillStyle = green;
-      canvasFont(ctx, 900, 26);
+      canvasFont(ctx, 900, 32);
       const brandTitle = "ЖАЖДА ПОРЯДКА";
       ctx.fillText(brandTitle, 70, 176);
       const brandWidth = ctx.measureText(brandTitle).width;
@@ -1900,7 +1900,7 @@
 
       canvasCard(ctx, 70, 230, 940, 260, 42, "rgba(255,255,255,.76)", "rgba(45,79,54,.13)", 3);
       ctx.fillStyle = orange;
-      canvasFont(ctx, 900, 21);
+      canvasFont(ctx, 900, 26);
       ctx.fillText("ИНФОРМАЦИОННЫЙ ГОНЩИК", 110, 285);
       const bolidMatch = person.name.match(/^(.+?)\s*·\s*болид\s*(№\d+)$/i);
       if (bolidMatch) {
@@ -1909,9 +1909,9 @@
         ctx.fillText(bolidMatch[1], 110, 375);
         const pilotNameWidth = ctx.measureText(bolidMatch[1]).width;
         const bolidLabel = "БОЛИД " + bolidMatch[2];
-        canvasFont(ctx, 900, 18);
-        const bolidWidth = Math.ceil(ctx.measureText(bolidLabel).width) + 34;
-        canvasCard(ctx, 110 + pilotNameWidth + 22, 330, bolidWidth, 48, 24, orange);
+        canvasFont(ctx, 900, 22);
+        const bolidWidth = Math.ceil(ctx.measureText(bolidLabel).width) + 38;
+        canvasCard(ctx, 110 + pilotNameWidth + 22, 327, bolidWidth, 54, 27, orange);
         ctx.fillStyle = "#ffffff";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -1924,7 +1924,7 @@
         canvasWrappedText(ctx, person.name, 110, 375, 570, 64, 2);
       }
       ctx.fillStyle = muted;
-      canvasFont(ctx, 800, 24);
+      canvasFont(ctx, 800, 28);
       ctx.fillText("Мои чек-поинты · мой собственный темп", 110, 445);
       if (helmetImage) {
         ctx.save();
@@ -1945,12 +1945,12 @@
         ctx.restore();
       }
       ctx.fillStyle = orange;
-      canvasFont(ctx, 900, 23);
+      canvasFont(ctx, 900, 28);
       ctx.fillText("КРУГ " + round.number + " · " + round.dates.toUpperCase(), 110, 588);
       const dateText = "ДАННЫЕ НА " + round.updated.toUpperCase();
-      canvasFont(ctx, 900, 16);
-      const dateWidth = Math.ceil(ctx.measureText(dateText).width) + 34;
-      canvasCard(ctx, 970 - dateWidth, 550, dateWidth, 42, 21, orange);
+      canvasFont(ctx, 900, 20);
+      const dateWidth = Math.ceil(ctx.measureText(dateText).width) + 40;
+      canvasCard(ctx, 970 - dateWidth, 547, dateWidth, 48, 24, orange);
       ctx.fillStyle = "#ffffff";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
@@ -1981,11 +1981,11 @@
       canvasFont(ctx, 900, 48);
       ctx.fillText("“", 138, 940);
       ctx.fillStyle = green;
-      canvasFont(ctx, 900, 27);
-      canvasWrappedText(ctx, storyState.phrase, 190, 930, 520, 34, 2);
+      canvasFont(ctx, 900, 31);
+      canvasWrappedText(ctx, storyState.phrase, 190, 930, 520, 37, 2);
 
       ctx.fillStyle = green;
-      canvasFont(ctx, 900, 29);
+      canvasFont(ctx, 900, 34);
       ctx.fillText("МОЙ ПУТЬ В СЕЗОНЕ", 590, 1135);
       const statCards = [
         { value: stats.series, label: "КРУГОВ В СЕРИИ" },
@@ -2000,14 +2000,14 @@
         canvasFont(ctx, 900, 56);
         ctx.fillText(String(stat.value), x + 28, y + 78);
         ctx.fillStyle = index === 0 ? "rgba(255,255,255,.78)" : muted;
-        canvasFont(ctx, 900, 18);
+        canvasFont(ctx, 900, 22);
         ctx.fillText(stat.label, x + 120, y + 70);
       });
       ctx.fillStyle = green;
-      canvasFont(ctx, 900, 27);
+      canvasFont(ctx, 900, 32);
       ctx.fillText("Мягко, но еду.", 590, 1640);
       ctx.fillStyle = orange;
-      canvasFont(ctx, 800, 20);
+      canvasFont(ctx, 800, 24);
       ctx.fillText("@ZhenyaHabatulina", 590, 1678);
       if (elfImage) {
         ctx.save();
