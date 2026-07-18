@@ -855,19 +855,28 @@
     }
     .summary-status[hidden] { display: none; }
     .summary-status.active { background: var(--orange); }
-    .summary-total {
+    .summary-overview {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+      margin: 12px 0 8px;
+    }
+    .summary-total,
+    .summary-season-total {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
       gap: 10px;
-      margin: 12px 0 8px;
       padding: 10px 13px;
       color: var(--white);
       background: var(--green);
       border-radius: 18px;
     }
-    .summary-total span { font-size: .7rem; font-weight: 800; opacity: .86; }
-    .summary-total strong { font-size: 1.15rem; font-weight: 900; line-height: 1.1; white-space: nowrap; }
+    .summary-season-total { background: var(--orange); }
+    .summary-total span,
+    .summary-season-total span { font-size: .62rem; font-weight: 800; line-height: 1.08; opacity: .9; }
+    .summary-total strong,
+    .summary-season-total strong { font-size: 1.15rem; font-weight: 900; line-height: 1.1; white-space: nowrap; }
     .summary-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
     .summary-metric {
       display: grid;
@@ -1244,7 +1253,10 @@
         <h2 id="round-summary-title">Итоги круга</h2>
         <p class="summary-dates" id="round-summary-dates"></p>
         <span class="summary-status" id="round-summary-status"></span>
-        <div class="summary-total"><span>Приняли участие</span><strong id="round-summary-total"></strong></div>
+        <div class="summary-overview" aria-label="Итоги круга и сезона">
+          <div class="summary-total"><span>Участников в круге</span><strong id="round-summary-total"></strong></div>
+          <div class="summary-season-total"><span>Чек-поинтов за сезон</span><strong id="round-summary-season-checkpoints">0</strong></div>
+        </div>
         <div class="summary-metrics" aria-label="Показатели круга">
           <div class="summary-metric"><b aria-hidden="true">🟢</b><strong id="round-summary-entered">0</strong><span>заезды</span></div>
           <div class="summary-metric"><b aria-hidden="true">🏁</b><strong id="round-summary-finished">0</strong><span>финиши</span></div>
@@ -1499,7 +1511,16 @@
         else if (mark.entered) groups[1].members.push(member);
         else if (mark.finished) groups[2].members.push(member);
       });
-      return { participants, entered, finished, full, groups: groups.filter(group => group.members.length) };
+      const seasonCheckpoints = BOARD_DATA.rounds
+        .filter(item => item.number <= round.number)
+        .reduce((total, item) => {
+          const itemEligible = BOARD_DATA.members.filter(member => (member.joinedRound || 1) <= item.number);
+          return total + itemEligible.reduce((roundTotal, member) => {
+            const mark = item.marks[member.name] || {};
+            return roundTotal + Number(Boolean(mark.entered)) + Number(Boolean(mark.finished));
+          }, 0);
+        }, 0);
+      return { participants, entered, finished, full, seasonCheckpoints, groups: groups.filter(group => group.members.length) };
     }
 
     function openRoundSummary(round, opener) {
@@ -1516,6 +1537,7 @@
       status.textContent = round.status === "active" ? "Данные на " + round.updated : round.status === "upcoming" ? "Круг впереди" : "";
       status.className = "summary-status" + (round.status === "active" ? " active" : "");
       document.getElementById("round-summary-total").textContent = summary.participants.length;
+      document.getElementById("round-summary-season-checkpoints").textContent = summary.seasonCheckpoints;
       document.getElementById("round-summary-entered").textContent = summary.entered;
       document.getElementById("round-summary-finished").textContent = summary.finished;
       document.getElementById("round-summary-full").textContent = summary.full;
@@ -1715,7 +1737,7 @@
         canvasCard(ctx, 80, 280, 470, 150, 30, green);
         ctx.fillStyle = "rgba(255,255,255,.82)";
         canvasFont(ctx, 800, 25);
-        ctx.fillText("Приняли участие", 115, 328);
+        ctx.fillText("Участников в круге", 115, 328);
         ctx.fillStyle = "#ffffff";
         canvasFont(ctx, 900, 78);
         ctx.fillText(String(summary.participants.length), 112, 405);
@@ -1792,6 +1814,18 @@
           ctx.drawImage(elfImage, 1210, 596, 288, 288);
           ctx.restore();
         }
+
+        canvasCard(ctx, 80, 925, 1440, 68, 34, orange);
+        ctx.fillStyle = "rgba(255,255,255,.86)";
+        canvasFont(ctx, 900, 22);
+        ctx.textBaseline = "middle";
+        ctx.fillText("КОМАНДА СОБРАЛА", 115, 959);
+        ctx.fillStyle = "#ffffff";
+        canvasFont(ctx, 900, 40);
+        ctx.textAlign = "right";
+        ctx.fillText(summary.seasonCheckpoints + " ЧЕК-ПОИНТОВ ЗА СЕЗОН", 1485, 959);
+        ctx.textAlign = "left";
+        ctx.textBaseline = "alphabetic";
 
         ctx.strokeStyle = "rgba(45,79,54,.25)";
         ctx.lineWidth = 3;
@@ -2024,7 +2058,7 @@
       ctx.fillStyle = orange;
       canvasFont(ctx, 800, 24);
       ctx.textAlign = "center";
-      ctx.fillText("@ZhenyaHabatulina", 295, 1720);
+      ctx.fillText("@Zhenya_Habatulina", 295, 1720);
       ctx.textAlign = "left";
       if (elfImage) {
         ctx.save();
