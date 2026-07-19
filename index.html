@@ -1324,10 +1324,10 @@
         {
           number: 2,
           dates: "13–18 июля",
-          updated: "17 июля 2026",
+          updated: "19 июля 2026",
           status: "active",
           marks: {
-            "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
+            "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Лена": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
             "Юля": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
             "Женя · болид №9": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
@@ -1906,9 +1906,8 @@
       const paper = "#fffdf7";
       const cream = "#fff9ec";
       const muted = "#6f7d72";
-      const [trackImage, elfImage, helmetImage] = await Promise.all([
+      const [trackImage, helmetImage] = await Promise.all([
         canvasLoadImage("track.webp"),
-        canvasLoadImage("elf.webp"),
         canvasLoadImage("helmet.webp")
       ]);
 
@@ -1923,18 +1922,25 @@
       ctx.fillStyle = glow;
       ctx.fillRect(590, 0, 490, 520);
 
-      ctx.fillStyle = green;
-      canvasFont(ctx, 900, 32);
-      const brandTitle = "ЖАЖДА ПОРЯДКА";
-      ctx.fillText(brandTitle, 70, 176);
-      const brandWidth = ctx.measureText(brandTitle).width;
-      ctx.fillStyle = orange;
-      ctx.fillText(" · ЛИЧНЫЙ ТРЕК", 70 + brandWidth, 176);
-      ctx.fillStyle = green;
-      canvasFont(ctx, 900, 24);
-      ctx.textAlign = "right";
-      ctx.fillText("Мягко, но еду.", 1010, 176);
+      const storyHeaderParts = [
+        ["ЖАЖДА ПОРЯДКА", green],
+        [" • ЛИЧНЫЙ ТРЕК", orange],
+        [" • МЯГКО, НО ЕДУ", green]
+      ];
+      canvasFont(ctx, 900, 34);
       ctx.textAlign = "left";
+      const storyHeaderWidth = storyHeaderParts.reduce((width, [label]) => width + ctx.measureText(label).width, 0);
+      const storyHeaderScale = 940 / storyHeaderWidth;
+      let storyHeaderX = 0;
+      ctx.save();
+      ctx.translate(70, 0);
+      ctx.scale(storyHeaderScale, 1);
+      storyHeaderParts.forEach(([label, color]) => {
+        ctx.fillStyle = color;
+        ctx.fillText(label, storyHeaderX, 176);
+        storyHeaderX += ctx.measureText(label).width;
+      });
+      ctx.restore();
 
       canvasCard(ctx, 70, 230, 940, 260, 42, "rgba(255,255,255,.76)", "rgba(45,79,54,.13)", 3);
       ctx.fillStyle = orange;
@@ -2014,60 +2020,40 @@
         ctx.textAlign = "left";
       }
 
-      canvasCard(ctx, 590, 965, 420, 240, 32, cream, "rgba(236,133,2,.32)", 2);
-      ctx.beginPath();
-      ctx.moveTo(620, 1204);
-      ctx.lineTo(690, 1204);
-      ctx.lineTo(555, 1250);
-      ctx.closePath();
-      ctx.fillStyle = cream;
-      ctx.fill();
-      ctx.strokeStyle = "rgba(236,133,2,.32)";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(620, 1204);
-      ctx.lineTo(555, 1250);
-      ctx.lineTo(690, 1204);
-      ctx.stroke();
-      ctx.fillStyle = orange;
-      canvasFont(ctx, 900, 18);
-      ctx.fillText("ЭЛЬФИЙКА-ШТУРМАН", 625, 1013);
-      ctx.fillStyle = green;
-      canvasFont(ctx, 900, 36);
-      canvasWrappedText(ctx, storyState.phrase, 625, 1065, 345, 43, 4);
-
       ctx.fillStyle = green;
       canvasFont(ctx, 900, 34);
-      ctx.fillText("МОЙ ПУТЬ В СЕЗОНЕ", 590, 1290);
+      ctx.fillText("МОЙ ПУТЬ В СЕЗОНЕ", 70, 1005);
       const statCards = [
         { value: stats.series, label: "КРУГОВ В СЕРИИ" },
         { value: stats.full, label: "ПОЛНЫХ КРУГОВ" },
         { value: stats.checkpoints, label: "ЧЕК-ПОИНТОВ" }
       ];
       statCards.forEach((stat, index) => {
-        const x = 590;
-        const y = 1325 + index * 142;
-        canvasCard(ctx, x, y, 420, 122, 31, index === 0 ? green : "rgba(255,255,255,.76)", index === 0 ? null : "rgba(45,79,54,.13)", 3);
+        const x = 70 + index * 316;
+        const y = 1040;
+        canvasCard(ctx, x, y, 308, 184, 34, index === 0 ? green : "rgba(255,255,255,.76)", index === 0 ? null : "rgba(45,79,54,.13)", 3);
         ctx.fillStyle = index === 0 ? "#ffffff" : index === 1 ? orange : green;
-        canvasFont(ctx, 900, 56);
-        ctx.fillText(String(stat.value), x + 28, y + 78);
+        canvasFont(ctx, 900, 70);
+        ctx.textAlign = "center";
+        ctx.fillText(String(stat.value), x + 154, y + 86);
         ctx.fillStyle = index === 0 ? "rgba(255,255,255,.78)" : muted;
-        canvasFont(ctx, 900, 22);
-        ctx.fillText(stat.label, x + 120, y + 70);
+        canvasFont(ctx, 900, 21);
+        ctx.fillText(stat.label, x + 154, y + 143);
       });
-      ctx.fillStyle = orange;
-      canvasFont(ctx, 800, 24);
+
+      ctx.save();
+      ctx.translate(82, 1320);
+      ctx.rotate(-1.8 * Math.PI / 180);
       ctx.textAlign = "center";
-      ctx.fillText("@Zhenya_Habatulina", 295, 1720);
+      ctx.fillStyle = green;
+      ctx.font = "italic 900 72px Nunito, Arial, sans-serif";
+      canvasWrappedText(ctx, "«" + storyState.phrase + "»", 450, 100, 900, 88, 3);
+      ctx.restore();
+      ctx.fillStyle = orange;
+      canvasFont(ctx, 800, 28);
+      ctx.textAlign = "center";
+      ctx.fillText("@Zhenya_Habatulina", 540, 1735);
       ctx.textAlign = "left";
-      if (elfImage) {
-        ctx.save();
-        ctx.shadowColor = "rgba(45,79,54,.18)";
-        ctx.shadowBlur = 24;
-        ctx.shadowOffsetY = 12;
-        ctx.drawImage(elfImage, 15, 1090, 560, 560);
-        ctx.restore();
-      }
       return canvas;
     }
 
