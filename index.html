@@ -1324,15 +1324,15 @@
         {
           number: 2,
           dates: "13–18 июля",
-          updated: "19 июля 2026",
-          status: "active",
+          updated: "20 июля 2026",
+          status: "closed",
           marks: {
             "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Лена": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
-            "Юля": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
+            "Юля": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
-            "Ира": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
-            "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
+            "Ира": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
+            "Женя": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Нина": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен." }
           }
         }
@@ -1348,7 +1348,7 @@
         { name: "Юля · болид №17", joinedRound: 2 }
       ],
       celebration: {
-        id: "round-2-start-v4",
+        id: "round-2-finish-v1",
         round: 2
       }
     };
@@ -1446,6 +1446,7 @@
       const round = selectedRound();
       document.getElementById("week-updated").textContent = "Последняя отметка: " + round.updated;
       document.getElementById("current-round-title").textContent = "Круг " + round.number + " · " + round.dates;
+      document.querySelector(".current-round-label").textContent = round.status === "active" ? "Сейчас едем" : "Круг завершён";
       document.getElementById("season-title").textContent = "Сезон · " + BOARD_DATA.season.toLowerCase();
       document.getElementById("demo-badge").hidden = !BOARD_DATA.demo;
     }
@@ -2170,7 +2171,7 @@
       results.replaceChildren();
       if (round.status === "active") {
         title.textContent = "Круг " + data.round + " — мы уже едем!";
-        text.textContent = "Привет, информационные гонщики! Отмечаю первые чек-поинты команды:";
+        text.textContent = "Отмечаю чек-поинты команды:";
         prompt.textContent = "Ещё не на треке? Даже если первый круг прошёл без тебя, ничего не упущено — присоединяйся сейчас и отправляй понедельничный отчёт.";
         action.textContent = "Присоединиться к кругу " + data.round;
       } else {
