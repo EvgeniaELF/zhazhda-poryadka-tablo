@@ -1741,19 +1741,13 @@
           [" • КОМАНДНАЯ СВОДКА", orange],
           [" • МЯГКО, НО ЕДЕМ", green]
         ];
-        canvasFont(ctx, 900, 36);
-        const summaryHeaderWidth = summaryHeaderParts.reduce((width, [label]) => width + ctx.measureText(label).width, 0);
-        const summaryHeaderScale = 1440 / summaryHeaderWidth;
-        let summaryHeaderX = 0;
-        ctx.save();
-        ctx.translate(80, 0);
-        ctx.scale(summaryHeaderScale, 1);
+        canvasFont(ctx, 900, 30);
+        let summaryHeaderX = 80;
         summaryHeaderParts.forEach(([label, color]) => {
           ctx.fillStyle = color;
           ctx.fillText(label, summaryHeaderX, 84);
           summaryHeaderX += ctx.measureText(label).width;
         });
-        ctx.restore();
         ctx.fillStyle = green;
         canvasFont(ctx, 900, 64);
         const title = round.status === "active" ? "Круг " + round.number + " · сейчас едем" : "Итоги круга " + round.number;
@@ -1773,50 +1767,56 @@
           ctx.textBaseline = "alphabetic";
         }
 
-        canvasCard(ctx, 80, 280, 470, 240, 32, green);
+        canvasCard(ctx, 80, 280, 470, 160, 32, green);
         ctx.fillStyle = "rgba(255,255,255,.82)";
         canvasFont(ctx, 800, 25);
-        ctx.fillText("Участников в круге", 115, 334);
+        ctx.fillText("Участников в круге", 115, 326);
         ctx.fillStyle = "#ffffff";
-        canvasFont(ctx, 900, 108);
-        ctx.fillText(String(summary.participants.length), 112, 462);
+        canvasFont(ctx, 900, 84);
+        ctx.fillText(String(summary.participants.length), 112, 415);
 
-        canvasCard(ctx, 80, 550, 470, 240, 32, "rgba(255,255,255,.78)", "rgba(236,133,2,.34)", 3);
-        ctx.fillStyle = orange;
+        canvasCard(ctx, 80, 470, 470, 260, 32, orange);
+        ctx.fillStyle = "rgba(255,255,255,.84)";
         canvasFont(ctx, 900, 25);
-        ctx.fillText("Чек-поинтов за круг", 115, 604);
+        ctx.fillText("Чек-поинтов за круг", 115, 520);
+        ctx.fillStyle = "#ffffff";
+        canvasFont(ctx, 900, 96);
+        ctx.fillText(String(summary.entered + summary.finished), 112, 635);
+        canvasCard(ctx, 112, 662, 190, 48, 24, "rgba(255,255,255,.94)");
+        canvasCard(ctx, 318, 662, 200, 48, 24, "rgba(255,255,255,.94)");
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = green;
+        canvasFont(ctx, 900, 18);
+        ctx.fillText("● ЗАЕЗДЫ: " + summary.entered, 207, 687);
+        ctx.fillStyle = orange;
+        ctx.fillText("⚑ ФИНИШИ: " + summary.finished, 418, 687);
+        ctx.textAlign = "left";
+        ctx.textBaseline = "alphabetic";
+
+        canvasCard(ctx, 80, 760, 470, 230, 32, "rgba(255,255,255,.78)", "rgba(45,79,54,.2)", 3);
+        ctx.fillStyle = green;
+        canvasFont(ctx, 900, 25);
+        ctx.fillText("Чек-поинтов за сезон", 115, 810);
         ctx.fillStyle = green;
         canvasFont(ctx, 900, 88);
-        ctx.fillText(String(summary.entered + summary.finished), 112, 718);
-        ctx.fillStyle = muted;
-        canvasFont(ctx, 900, 16);
-        ctx.fillText("ИЗ НИХ", 115, 758);
+        ctx.fillText(String(summary.seasonCheckpoints), 112, 910);
+        canvasCard(ctx, 112, 925, 190, 46, 23, beige);
+        canvasCard(ctx, 318, 925, 200, 46, 23, beige);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
         ctx.fillStyle = green;
-        canvasFont(ctx, 900, 17);
-        ctx.fillText("● ЗАЕЗДЫ: " + summary.entered, 205, 758);
+        canvasFont(ctx, 900, 18);
+        ctx.fillText("● ЗАЕЗДЫ: " + summary.seasonEntered, 207, 949);
         ctx.fillStyle = orange;
-        ctx.fillText("⚑ ФИНИШИ: " + summary.finished, 365, 758);
+        ctx.fillText("⚑ ФИНИШИ: " + summary.seasonFinished, 418, 949);
+        ctx.textAlign = "left";
+        ctx.textBaseline = "alphabetic";
 
-        canvasCard(ctx, 80, 820, 470, 240, 32, "rgba(255,255,255,.78)", "rgba(45,79,54,.2)", 3);
-        ctx.fillStyle = green;
-        canvasFont(ctx, 900, 25);
-        ctx.fillText("Чек-поинтов за сезон", 115, 874);
-        ctx.fillStyle = orange;
-        canvasFont(ctx, 900, 88);
-        ctx.fillText(String(summary.seasonCheckpoints), 112, 988);
-        ctx.fillStyle = muted;
-        canvasFont(ctx, 900, 16);
-        ctx.fillText("ИЗ НИХ", 115, 1028);
-        ctx.fillStyle = green;
-        canvasFont(ctx, 900, 17);
-        ctx.fillText("● ЗАЕЗДЫ: " + summary.seasonEntered, 205, 1028);
-        ctx.fillStyle = orange;
-        ctx.fillText("⚑ ФИНИШИ: " + summary.seasonFinished, 365, 1028);
-
-        canvasCard(ctx, 590, 280, 930, 780, 32, "rgba(255,255,255,.76)", "rgba(45,79,54,.14)", 3);
+        canvasCard(ctx, 590, 280, 930, 710, 32, "rgba(255,255,255,.76)", "rgba(45,79,54,.14)", 3);
         if (trackImage) {
           ctx.save();
-          canvasRoundedRect(ctx, 590, 280, 930, 780, 32);
+          canvasRoundedRect(ctx, 590, 280, 930, 710, 32);
           ctx.clip();
           ctx.globalAlpha = .055;
           ctx.drawImage(trackImage, 860, 350, 760, 760);
@@ -1844,7 +1844,7 @@
         }
         ctx.fillStyle = muted;
         canvasFont(ctx, 700, 20);
-        ctx.fillText("Порядок имён постоянный — это не рейтинг.", 640, 1020);
+        ctx.fillText("Порядок имён постоянный — это не рейтинг.", 640, 950);
         if (elfImage) {
           ctx.save();
           ctx.shadowColor = "rgba(45,79,54,.18)";
