@@ -772,7 +772,20 @@
     }
     .round-summary-shell {
       position: relative;
-      width: min(430px, 100%);
+      display: grid;
+      justify-items: center;
+      width: min(1040px, 100%);
+      max-height: calc(100vh - 86px);
+    }
+    .round-summary-preview {
+      display: block;
+      width: 100%;
+      max-height: calc(100vh - 92px);
+      object-fit: contain;
+      background: var(--beige);
+      border: 5px solid var(--white);
+      border-radius: 30px;
+      box-shadow: 0 28px 80px rgba(0,0,0,.32);
     }
     .round-summary-close {
       position: absolute;
@@ -1245,26 +1258,10 @@
   </main>
 
   <div class="round-summary" id="round-summary" hidden>
-    <div class="round-summary-shell" role="dialog" aria-modal="true" aria-labelledby="round-summary-title">
-      <button class="round-summary-download" id="round-summary-download" type="button">Скачать PNG · 1600 × 1200</button>
+    <div class="round-summary-shell" role="dialog" aria-modal="true" aria-label="Командная сводка круга">
+      <button class="round-summary-download" id="round-summary-download" type="button">Скачать PNG · 1600 × 1050</button>
       <button class="round-summary-close" id="round-summary-close" type="button" aria-label="Закрыть сводку">×</button>
-      <article class="round-summary-card">
-        <p class="summary-kicker"><span aria-hidden="true">🏎️</span> Командная сводка</p>
-        <h2 id="round-summary-title">Итоги круга</h2>
-        <p class="summary-dates" id="round-summary-dates"></p>
-        <span class="summary-status" id="round-summary-status"></span>
-        <div class="summary-overview" aria-label="Итоги круга и сезона">
-          <div class="summary-total"><span>Участников в круге</span><strong id="round-summary-total"></strong></div>
-          <div class="summary-season-total"><span>Чек-поинтов за сезон</span><strong id="round-summary-season-checkpoints">0</strong></div>
-        </div>
-        <div class="summary-metrics" aria-label="Показатели круга">
-          <div class="summary-metric"><b aria-hidden="true">🟢</b><strong id="round-summary-entered">0</strong><span>заезды</span></div>
-          <div class="summary-metric"><b aria-hidden="true">🏁</b><strong id="round-summary-finished">0</strong><span>финиши</span></div>
-          <div class="summary-metric"><b aria-hidden="true">✓</b><strong id="round-summary-full">0</strong><span>полные круги</span></div>
-        </div>
-        <div class="summary-groups" id="round-summary-names" aria-label="Личный вклад пилотов"></div>
-        <div class="summary-signature"><strong>«Жажда порядка»</strong><span>Мягко, но едем.</span></div>
-      </article>
+      <img class="round-summary-preview" id="round-summary-preview" alt="">
     </div>
   </div>
 
@@ -1547,81 +1544,44 @@
       };
     }
 
-    function openRoundSummary(round, opener) {
+    async function openRoundSummary(round, opener) {
       const layer = document.getElementById("round-summary");
       const close = document.getElementById("round-summary-close");
       const download = document.getElementById("round-summary-download");
-      const names = document.getElementById("round-summary-names");
-      const summary = roundSummaryData(round);
+      const preview = document.getElementById("round-summary-preview");
+      opener.classList.add("is-loading");
+      opener.setAttribute("aria-busy", "true");
+      try {
+        download.disabled = true;
+        download.textContent = "Готовлю превью…";
+        const canvas = await createRoundSummaryCanvas(round);
+        preview.src = canvas.toDataURL("image/png");
+        preview.alt = "Командная сводка: круг " + round.number + ", " + round.dates;
+        layer.hidden = false;
+        document.body.classList.add("summary-open");
+        download.disabled = false;
+        download.textContent = "Скачать PNG · 1600 × 1050";
+        download.onclick = () => downloadRoundSummary(round, canvas, download);
+        close.focus();
 
-      document.getElementById("round-summary-title").textContent = round.status === "active" ? "Круг " + round.number + " — сейчас едем" : "Итоги круга " + round.number;
-      document.getElementById("round-summary-dates").textContent = round.dates;
-      const status = document.getElementById("round-summary-status");
-      status.hidden = round.status === "closed";
-      status.textContent = round.status === "active" ? "Данные на " + round.updated : round.status === "upcoming" ? "Круг впереди" : "";
-      status.className = "summary-status" + (round.status === "active" ? " active" : "");
-      document.getElementById("round-summary-total").textContent = summary.participants.length;
-      document.getElementById("round-summary-season-checkpoints").textContent = summary.seasonCheckpoints;
-      document.getElementById("round-summary-entered").textContent = summary.entered;
-      document.getElementById("round-summary-finished").textContent = summary.finished;
-      document.getElementById("round-summary-full").textContent = summary.full;
-
-      names.replaceChildren();
-      if (summary.participants.length) {
-        const title = document.createElement("p");
-        title.className = "summary-groups-title";
-        title.textContent = "Личный вклад";
-        names.appendChild(title);
-        summary.groups.forEach(group => {
-          const block = document.createElement("div");
-          block.className = "summary-personal-group";
-          const label = document.createElement("span");
-          label.className = "summary-group-label";
-          const icon = document.createElement("b");
-          icon.textContent = group.icon;
-          icon.setAttribute("aria-hidden", "true");
-          const labelText = document.createElement("span");
-          labelText.textContent = group.label;
-          label.append(icon, labelText);
-          const groupNames = document.createElement("span");
-          groupNames.className = "summary-group-names";
-          group.members.forEach(member => {
-            const chip = document.createElement("span");
-            chip.className = "summary-personal-name";
-            chip.textContent = member.name;
-            groupNames.appendChild(chip);
-          });
-          block.append(label, groupNames);
-          names.appendChild(block);
-        });
-      } else {
-        const empty = document.createElement("p");
-        empty.className = "summary-empty";
-        empty.textContent = "Первые отметки ещё впереди.";
-        names.appendChild(empty);
+        const dismiss = () => {
+          if (layer.hidden) return;
+          layer.hidden = true;
+          document.body.classList.remove("summary-open");
+          document.removeEventListener("keydown", onEscape);
+          opener.focus();
+        };
+        close.onclick = dismiss;
+        layer.onclick = event => { if (event.target === layer) dismiss(); };
+        const onEscape = event => {
+          if (event.key !== "Escape" || layer.hidden) return;
+          dismiss();
+        };
+        document.addEventListener("keydown", onEscape);
+      } finally {
+        opener.classList.remove("is-loading");
+        opener.removeAttribute("aria-busy");
       }
-
-      layer.hidden = false;
-      document.body.classList.add("summary-open");
-      download.disabled = false;
-      download.textContent = "Скачать PNG · 1600 × 1200";
-      download.onclick = () => downloadRoundSummary(round, download);
-      close.focus();
-
-      const dismiss = () => {
-        if (layer.hidden) return;
-        layer.hidden = true;
-        document.body.classList.remove("summary-open");
-        document.removeEventListener("keydown", onEscape);
-        opener.focus();
-      };
-      close.onclick = dismiss;
-      layer.onclick = event => { if (event.target === layer) dismiss(); };
-      const onEscape = event => {
-        if (event.key !== "Escape" || layer.hidden) return;
-        dismiss();
-      };
-      document.addEventListener("keydown", onEscape);
     }
 
     function canvasRoundedRect(ctx, x, y, width, height, radius) {
@@ -1703,11 +1663,7 @@
       });
     }
 
-    async function downloadRoundSummary(round, button) {
-      const originalText = button.textContent;
-      button.disabled = true;
-      button.textContent = "Готовлю PNG…";
-      try {
+    async function createRoundSummaryCanvas(round) {
         if (document.fonts && document.fonts.ready) await document.fonts.ready;
         const summary = roundSummaryData(round);
         const canvas = document.createElement("canvas");
@@ -1854,6 +1810,14 @@
           ctx.restore();
         }
 
+        return canvas;
+    }
+
+    async function downloadRoundSummary(round, canvas, button) {
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "Готовлю PNG…";
+      try {
         const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
         const link = document.createElement("a");
         link.download = "zhazhda-poryadka-krug-" + round.number + ".png";
