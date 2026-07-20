@@ -1307,7 +1307,7 @@
     const BOARD_DATA = {
       demo: false,
       season: "Июль",
-      selectedRound: 2,
+      selectedRound: 3,
       rounds: [
         {
           number: 1,
@@ -1335,6 +1335,16 @@
             "Женя": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Нина": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен." }
           }
+        },
+        {
+          number: 3,
+          dates: "20–25 июля",
+          updated: "20 июля 2026",
+          status: "active",
+          marks: {
+            "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
+            "Болид №7": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." }
+          }
         }
       ],
       members: [
@@ -1345,11 +1355,12 @@
         { name: "Женя", profileUrl: "https://t.me/c/4389010152/2/197", joinedRound: 2 },
         { name: "Ира", joinedRound: 2 },
         { name: "Нина", joinedRound: 2 },
-        { name: "Юля · болид №17", joinedRound: 2 }
+        { name: "Юля · болид №17", joinedRound: 2 },
+        { name: "Болид №7", joinedRound: 3 }
       ],
       celebration: {
-        id: "round-2-finish-v1",
-        round: 2
+        id: "round-3-start-v2",
+        round: 3
       }
     };
 
@@ -2171,7 +2182,7 @@
       results.replaceChildren();
       if (round.status === "active") {
         title.textContent = "Круг " + data.round + " — мы уже едем!";
-        text.textContent = "Отмечаю чек-поинты команды:";
+        text.textContent = "Привет, информационные гонщики! Отмечаю чек-поинты команды:";
         prompt.textContent = "Ещё не на треке? Даже если первый круг прошёл без тебя, ничего не упущено — присоединяйся сейчас и отправляй понедельничный отчёт.";
         action.textContent = "Присоединиться к кругу " + data.round;
       } else {
