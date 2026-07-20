@@ -1712,7 +1712,7 @@
         const summary = roundSummaryData(round);
         const canvas = document.createElement("canvas");
         canvas.width = 1600;
-        canvas.height = 1200;
+        canvas.height = 1050;
         const ctx = canvas.getContext("2d");
         const green = "#2d4f36";
         const orange = "#ec8502";
@@ -1725,11 +1725,11 @@
           canvasLoadImage("elf.webp")
         ]);
 
-        const background = ctx.createLinearGradient(0, 0, 1600, 1200);
+        const background = ctx.createLinearGradient(0, 0, 1600, 1050);
         background.addColorStop(0, paper);
         background.addColorStop(1, beige);
         ctx.fillStyle = background;
-        ctx.fillRect(0, 0, 1600, 1200);
+        ctx.fillRect(0, 0, 1600, 1050);
         const glow = ctx.createRadialGradient(1510, 40, 10, 1510, 40, 360);
         glow.addColorStop(0, "rgba(236,133,2,.22)");
         glow.addColorStop(1, "rgba(236,133,2,0)");
@@ -1850,7 +1850,7 @@
           ctx.shadowColor = "rgba(45,79,54,.18)";
           ctx.shadowBlur = 20;
           ctx.shadowOffsetY = 10;
-          ctx.drawImage(elfImage, 1210, 596, 288, 288);
+          ctx.drawImage(elfImage, 1120, 650, 400, 400);
           ctx.restore();
         }
 
