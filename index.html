@@ -1304,6 +1304,7 @@
     const BOARD_DATA = {
       demo: false,
       season: "Июль",
+      timeZone: "Europe/Moscow",
       selectedRound: 3,
       rounds: [
         {
@@ -1336,7 +1337,7 @@
         {
           number: 3,
           dates: "20–25 июля",
-          updated: "25 июля 2026",
+          updated: "26 июля 2026",
           status: "active",
           marks: {
             "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
@@ -1350,18 +1351,18 @@
         }
       ],
       members: [
-        { name: "Аня", profileUrl: "https://t.me/c/4389010152/2/80", joinedRound: 1 },
-        { name: "Юля", joinedRound: 1 },
-        { name: "Лена", profileUrl: "https://t.me/c/4389010152/2/201", joinedRound: 1 },
-        { name: "Женя · болид №9", joinedRound: 1 },
-        { name: "Женя", profileUrl: "https://t.me/c/4389010152/2/197", joinedRound: 2 },
-        { name: "Ира", joinedRound: 2 },
-        { name: "Нина", joinedRound: 2 },
+        { name: "Аня", profileUrl: "https://t.me/c/4389010152/2/80", joinedRound: 1, firstReport: "2026-07-06" },
+        { name: "Юля", joinedRound: 1, firstReport: "2026-07-06" },
+        { name: "Лена", profileUrl: "https://t.me/c/4389010152/2/201", joinedRound: 1, firstReport: "2026-07-06" },
+        { name: "Женя · болид №9", joinedRound: 1, firstReport: "2026-07-06" },
+        { name: "Женя", profileUrl: "https://t.me/c/4389010152/2/197", joinedRound: 2, firstReport: "2026-07-13" },
+        { name: "Ира", joinedRound: 2, firstReport: "2026-07-14" },
+        { name: "Нина", joinedRound: 2, firstReport: "2026-07-17" },
         { name: "Юля · болид №17", joinedRound: 3 },
-        { name: "Болид №7", joinedRound: 3 },
-        { name: "Света", profileUrl: "https://t.me/c/4389010152/2/75", joinedRound: 3 },
+        { name: "Болид №7", joinedRound: 3, firstReport: "2026-07-20" },
+        { name: "Света", profileUrl: "https://t.me/c/4389010152/2/75", joinedRound: 3, firstReport: "2026-07-22" },
         { name: "Даша", joinedRound: 3 },
-        { name: "Ира · болид №8", joinedRound: 3 }
+        { name: "Ира · болид №8", joinedRound: 3, firstReport: "2026-07-26" }
       ],
       celebration: {
         id: "round-3-start-v2",
@@ -1434,15 +1435,40 @@
       return count + " чек-поинтов";
     }
 
+    function formatDays(count) {
+      const lastTwo = count % 100;
+      const last = count % 10;
+      if (lastTwo >= 11 && lastTwo <= 14) return count + " дней";
+      if (last === 1) return count + " день";
+      if (last >= 2 && last <= 4) return count + " дня";
+      return count + " дней";
+    }
+
+    function daysOnTrack(firstReport) {
+      if (!firstReport) return 0;
+      const [year, month, day] = firstReport.split("-").map(Number);
+      const now = new Date();
+      const todayParts = new Intl.DateTimeFormat("ru-RU", {
+        timeZone: BOARD_DATA.timeZone,
+        year: "numeric",
+        month: "numeric",
+        day: "numeric"
+      }).formatToParts(now).reduce((parts, part) => {
+        if (part.type !== "literal") parts[part.type] = Number(part.value);
+        return parts;
+      }, {});
+      const todayUtc = Date.UTC(todayParts.year, todayParts.month - 1, todayParts.day);
+      const firstReportUtc = Date.UTC(year, month - 1, day);
+      return Math.max(0, Math.floor((todayUtc - firstReportUtc) / 86400000) + 1);
+    }
+
     function pilotStats(name) {
-      let full = 0;
       let checkpoints = 0;
       BOARD_DATA.rounds.forEach(round => {
         const mark = round.marks[name] || {};
         const entered = Boolean(mark.entered);
         const finished = Boolean(mark.finished);
         checkpoints += Number(entered) + Number(finished);
-        if (entered && finished) full += 1;
       });
 
       let series = 0;
@@ -1455,7 +1481,8 @@
         if (!participated) break;
         series += 1;
       }
-      return { series, full, checkpoints };
+      const member = BOARD_DATA.members.find(person => person.name === name);
+      return { series, checkpoints, days: daysOnTrack(member && member.firstReport) };
     }
 
     function renderHeader() {
@@ -2007,8 +2034,8 @@
       ctx.fillText("МОЙ ПУТЬ В СЕЗОНЕ", 70, 1005);
       const statCards = [
         { value: stats.series, label: "КРУГОВ В СЕРИИ" },
-        { value: stats.full, label: "ПОЛНЫХ КРУГОВ" },
-        { value: stats.checkpoints, label: "ЧЕК-ПОИНТОВ" }
+        { value: stats.checkpoints, label: "ЧЕК-ПОИНТОВ" },
+        { value: stats.days, label: "ДНЕЙ НА ТРЕКЕ" }
       ];
       statCards.forEach((stat, index) => {
         const x = 70 + index * 316;
@@ -2251,8 +2278,8 @@
         trackStats.setAttribute("aria-label", "Статистика личного трека");
         [
           "🔥 Серия: " + formatLaps(stats.series),
-          "🏁 Полных: " + stats.full,
-          "✓ " + formatCheckpoints(stats.checkpoints)
+          "✓ " + formatCheckpoints(stats.checkpoints),
+          "🏎️ " + formatDays(stats.days) + " на треке"
         ].forEach(value => {
           const stat = document.createElement("span");
           stat.textContent = value;
