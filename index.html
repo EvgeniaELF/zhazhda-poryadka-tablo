@@ -1887,7 +1887,13 @@
     }
 
     function personalStoryState(mark) {
-      if (mark.entered && mark.finished) return { phrase: "Между «хочу» и «сделано» — ещё один круг", outerQuotes: false };
+      if (mark.entered && mark.finished) {
+        return {
+          phrase: "Между «хочу» и «сделано» — ещё один круг",
+          lines: ["Между", "«хочу» и «сделано»", "— ещё один круг"],
+          outerQuotes: false
+        };
+      }
       if (mark.entered || mark.finished || mark.pit) return { phrase: "Выезжаем на трек ясности" };
       return { phrase: "Пристегнись. Наводим порядок в делах" };
     }
@@ -2072,7 +2078,11 @@
       const storyPhrase = storyState.outerQuotes === false
         ? storyState.phrase
         : "«" + storyState.phrase + "»";
-      canvasWrappedText(ctx, storyPhrase, 450, 100, 900, 88, 3);
+      if (storyState.lines) {
+        storyState.lines.forEach((line, index) => ctx.fillText(line, 450, 100 + index * 88));
+      } else {
+        canvasWrappedText(ctx, storyPhrase, 450, 100, 900, 88, 3);
+      }
       ctx.restore();
       ctx.fillStyle = orange;
       canvasFont(ctx, 800, 28);
