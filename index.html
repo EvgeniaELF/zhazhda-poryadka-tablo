@@ -1444,6 +1444,19 @@
       return count + " дней";
     }
 
+    function currentDataDate() {
+      const parts = new Intl.DateTimeFormat("ru-RU", {
+        timeZone: BOARD_DATA.timeZone,
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      }).formatToParts(new Date()).reduce((result, part) => {
+        if (part.type !== "literal") result[part.type] = part.value;
+        return result;
+      }, {});
+      return parts.day + " " + parts.month + " " + parts.year;
+    }
+
     function daysOnTrack(firstReport) {
       if (!firstReport) return 0;
       const [year, month, day] = firstReport.split("-").map(Number);
@@ -1753,7 +1766,7 @@
           canvasFont(ctx, 900, 23);
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.fillText("Данные на " + round.updated, 1350, 190);
+          ctx.fillText("Данные на " + currentDataDate(), 1350, 190);
           ctx.textAlign = "left";
           ctx.textBaseline = "alphabetic";
         }
@@ -1874,7 +1887,7 @@
     }
 
     function personalStoryState(mark) {
-      if (mark.entered && mark.finished) return { phrase: "Между «хочу» и «сделано» — ещё один круг" };
+      if (mark.entered && mark.finished) return { phrase: "Между «хочу» и «сделано» — ещё один круг", outerQuotes: false };
       if (mark.entered || mark.finished || mark.pit) return { phrase: "Выезжаем на трек ясности" };
       return { phrase: "Пристегнись. Наводим порядок в делах" };
     }
@@ -2000,7 +2013,7 @@
       ctx.fillStyle = orange;
       canvasFont(ctx, 900, 28);
       ctx.fillText("КРУГ " + round.number + " · " + round.dates.toUpperCase(), 110, 588);
-      const dateText = "ДАННЫЕ НА " + round.updated.toUpperCase();
+      const dateText = "ДАННЫЕ НА " + currentDataDate().toUpperCase();
       canvasFont(ctx, 900, 20);
       const dateWidth = Math.ceil(ctx.measureText(dateText).width) + 40;
       canvasCard(ctx, 970 - dateWidth, 547, dateWidth, 48, 24, orange);
@@ -2056,7 +2069,10 @@
       ctx.textAlign = "center";
       ctx.fillStyle = green;
       ctx.font = "italic 900 72px Nunito, Arial, sans-serif";
-      canvasWrappedText(ctx, "«" + storyState.phrase + "»", 450, 100, 900, 88, 3);
+      const storyPhrase = storyState.outerQuotes === false
+        ? storyState.phrase
+        : "«" + storyState.phrase + "»";
+      canvasWrappedText(ctx, storyPhrase, 450, 100, 900, 88, 3);
       ctx.restore();
       ctx.fillStyle = orange;
       canvasFont(ctx, 800, 28);
