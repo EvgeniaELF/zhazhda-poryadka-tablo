@@ -370,6 +370,55 @@
 
     .participant:hover { transform: translateY(-2px); border-color: rgba(236,133,2,.35); }
 
+    .pit-stop-divider {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 5px 0 0;
+      color: rgba(45,79,54,.55);
+      font-size: .67rem;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .pit-stop-divider::before,
+    .pit-stop-divider::after {
+      content: "";
+      height: 1px;
+      flex: 1 1 auto;
+      background: rgba(45,79,54,.14);
+    }
+    .participant.is-pit {
+      color: var(--muted);
+      background: rgba(255,255,255,.48);
+      border-color: rgba(45,79,54,.11);
+      box-shadow: none;
+    }
+    .participant.is-pit:hover {
+      transform: none;
+      border-color: rgba(45,79,54,.18);
+    }
+    .participant.is-pit .helmet-wrap {
+      filter: grayscale(.65);
+      opacity: .55;
+      box-shadow: none;
+    }
+    .participant.is-pit .participant-title-line strong,
+    .participant.is-pit .profile-inline-link {
+      color: rgba(45,79,54,.62);
+    }
+    .participant.is-pit .checkline,
+    .participant.is-pit .participant-track {
+      opacity: .58;
+      filter: grayscale(.45);
+    }
+    .pit-stop-mark {
+      color: rgba(45,79,54,.5);
+      font-size: .9rem;
+      line-height: 1;
+    }
+
     .participant-main {
       display: grid;
       gap: 13px;
@@ -618,7 +667,22 @@
       border-radius: 14px;
       font-weight: 900;
     }
-    .lap.pit { color: var(--muted); background: var(--beige); border-color: rgba(236,133,2,.22); }
+    .history-pit-stop-divider { margin: 9px 0 1px; }
+    .history-name.is-pit,
+    .lap-total.is-pit {
+      color: rgba(45,79,54,.52);
+    }
+    .history-name.is-pit .history-initial {
+      color: rgba(45,79,54,.62);
+      background: rgba(45,79,54,.1);
+      box-shadow: none;
+    }
+    .lap.pit {
+      color: rgba(45,79,54,.5);
+      background: transparent;
+      border-color: rgba(45,79,54,.12);
+      font-size: .82rem;
+    }
     .lap.future { background: rgba(255,255,255,.55); }
     .lap.not-joined { background: transparent; border-color: transparent; box-shadow: none; }
     .lap-marks { display: flex; gap: 6px; align-items: center; justify-content: center; }
@@ -1298,6 +1362,9 @@
       pit — участник обозначил паузу;
       late — поздний старт (он всё равно считается входом на круг).
       joinedRound — круг, с которого участник присоединился к сезону.
+      trackPauses — паузы в счётчике дней на треке:
+        pausedAt — последний день, который входит в счётчик перед паузой;
+        resumedAt — первый день после возвращения на трек (null, пока пауза продолжается).
 
       История строится автоматически из двух независимых отметок: entered и finished.
     */
@@ -1337,13 +1404,15 @@
         {
           number: 3,
           dates: "20–25 июля",
-          updated: "26 июля 2026",
+          updated: "27 июля 2026",
           status: "active",
           marks: {
-            "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
+            "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Лена": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
+            "Юля": { entered: false, finished: false, pit: true, late: false, lastMark: "Пит-стоп отмечен. Вернуться на трек можно в своём темпе." },
             "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
+            "Ира": { entered: false, finished: false, pit: true, late: false, lastMark: "Пит-стоп отмечен. Вернуться на трек можно в своём темпе." },
             "Ира · болид №8": { entered: false, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Болид №7": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Света": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен." }
@@ -1352,11 +1421,11 @@
       ],
       members: [
         { name: "Аня", profileUrl: "https://t.me/c/4389010152/2/80", joinedRound: 1, firstReport: "2026-07-06" },
-        { name: "Юля", joinedRound: 1, firstReport: "2026-07-06" },
+        { name: "Юля", joinedRound: 1, firstReport: "2026-07-06", trackPauses: [{ pausedAt: "2026-07-27", resumedAt: null }] },
         { name: "Лена", profileUrl: "https://t.me/c/4389010152/2/201", joinedRound: 1, firstReport: "2026-07-06" },
         { name: "Женя · болид №9", joinedRound: 1, firstReport: "2026-07-06" },
         { name: "Женя", profileUrl: "https://t.me/c/4389010152/2/197", joinedRound: 2, firstReport: "2026-07-13" },
-        { name: "Ира", joinedRound: 2, firstReport: "2026-07-14" },
+        { name: "Ира", joinedRound: 2, firstReport: "2026-07-14", trackPauses: [{ pausedAt: "2026-07-27", resumedAt: null }] },
         { name: "Нина", joinedRound: 2, firstReport: "2026-07-17" },
         { name: "Болид №7", joinedRound: 3, firstReport: "2026-07-20" },
         { name: "Света", profileUrl: "https://t.me/c/4389010152/2/75", joinedRound: 3, firstReport: "2026-07-22" },
@@ -1365,7 +1434,7 @@
         { name: "Юля · болид №17", joinedRound: 3 }
       ],
       celebration: {
-        id: "round-3-start-v2",
+        id: "round-3-start-v1",
         round: 3
       }
     };
@@ -1394,7 +1463,8 @@
           late: false,
           lastMark: "Заезд на этот круг ещё не отмечен.",
           ...(round.marks[member.name] || {})
-        }));
+        }))
+        .filter(person => !person.pit);
     }
 
     function currentState(person) {
@@ -1457,10 +1527,12 @@
       return parts.day + " " + parts.month + " " + parts.year;
     }
 
-    function daysOnTrack(firstReport) {
-      if (!firstReport) return 0;
-      const [year, month, day] = firstReport.split("-").map(Number);
-      const now = new Date();
+    function dateStringToUtc(dateString) {
+      const [year, month, day] = dateString.split("-").map(Number);
+      return Date.UTC(year, month - 1, day);
+    }
+
+    function todayUtcInBoardTimeZone(now = new Date()) {
       const todayParts = new Intl.DateTimeFormat("ru-RU", {
         timeZone: BOARD_DATA.timeZone,
         year: "numeric",
@@ -1470,9 +1542,23 @@
         if (part.type !== "literal") parts[part.type] = Number(part.value);
         return parts;
       }, {});
-      const todayUtc = Date.UTC(todayParts.year, todayParts.month - 1, todayParts.day);
-      const firstReportUtc = Date.UTC(year, month - 1, day);
-      return Math.max(0, Math.floor((todayUtc - firstReportUtc) / 86400000) + 1);
+      return Date.UTC(todayParts.year, todayParts.month - 1, todayParts.day);
+    }
+
+    function daysOnTrack(member, now = new Date()) {
+      if (!member || !member.firstReport) return 0;
+      const dayMs = 86400000;
+      const todayUtc = todayUtcInBoardTimeZone(now);
+      const firstReportUtc = dateStringToUtc(member.firstReport);
+      const totalDays = Math.max(0, Math.floor((todayUtc - firstReportUtc) / dayMs) + 1);
+      const pausedDays = (member.trackPauses || []).reduce((total, pause) => {
+        if (!pause.pausedAt) return total;
+        const firstPausedDayUtc = Math.max(firstReportUtc, dateStringToUtc(pause.pausedAt) + dayMs);
+        const resumeUtc = pause.resumedAt ? dateStringToUtc(pause.resumedAt) : todayUtc + dayMs;
+        const pauseEndUtc = Math.min(todayUtc + dayMs, resumeUtc);
+        return total + Math.max(0, Math.floor((pauseEndUtc - firstPausedDayUtc) / dayMs));
+      }, 0);
+      return Math.max(0, totalDays - pausedDays);
     }
 
     function pilotStats(name) {
@@ -1495,7 +1581,7 @@
         series += 1;
       }
       const member = BOARD_DATA.members.find(person => person.name === name);
-      return { series, checkpoints, days: daysOnTrack(member && member.firstReport) };
+      return { series, checkpoints, days: daysOnTrack(member) };
     }
 
     function renderHeader() {
@@ -1560,7 +1646,7 @@
       const groups = [
         { icon: "● + ⚑", label: "Оба чек-поинта", members: [] },
         { icon: "●", label: "Заехали на трек", members: [] },
-        { icon: "⚑", label: "Только финиш", members: [] }
+        { icon: "⚑", label: "Финишировали", members: [] }
       ];
       participants.forEach(member => {
         const mark = round.marks[member.name] || {};
@@ -2177,7 +2263,7 @@
       const title = document.getElementById("celebration-title");
       const text = document.getElementById("celebration-text");
       const prompt = document.getElementById("celebration-prompt");
-      const groups = { full: [], start: [], finish: [], empty: [] };
+      const groups = { full: [], start: [], finish: [], pit: [], empty: [] };
 
       BOARD_DATA.members
         .filter(member => (member.joinedRound || 1) <= round.number)
@@ -2186,6 +2272,7 @@
           if (mark.entered && mark.finished) groups.full.push(member.name);
           else if (mark.entered) groups.start.push(member.name);
           else if (mark.finished) groups.finish.push(member.name);
+          else if (mark.pit) groups.pit.push(member.name);
           else groups.empty.push(member.name);
         });
 
@@ -2217,6 +2304,7 @@
       if (groups.full.length) addResult("🏁", joinNames(groups.full) + " — заезд и финиш отмечены.");
       if (groups.start.length) addResult("🟢", joinNames(groups.start) + (round.status === "active" ? " — уже на треке." : " — заезд отмечен, финиш ещё можно добавить."));
       if (groups.finish.length) addResult("⚑", joinNames(groups.finish) + " — финиш отмечен, заезд пока без отметки.");
+      if (groups.pit.length) addResult("🔧", joinNames(groups.pit) + " — на пит-стопе.");
       if (groups.empty.length) addResult("○", joinNames(groups.empty) + (groups.empty.length === 1 ? " — чек-поинт ещё не отмечен." : " — чек-поинты ещё не отмечены."));
       layer.hidden = false;
       close.focus();
@@ -2335,9 +2423,26 @@
         grid.appendChild(head);
       });
 
-      BOARD_DATA.members.forEach(person => {
+      const round = selectedRound();
+      const historyMembers = [...BOARD_DATA.members].sort((a, b) => {
+        const aOnPitStop = Boolean(round.marks[a.name]?.pit);
+        const bOnPitStop = Boolean(round.marks[b.name]?.pit);
+        return Number(aOnPitStop) - Number(bOnPitStop);
+      });
+      let pitStopSectionAdded = false;
+
+      historyMembers.forEach(person => {
+        const isOnPitStop = Boolean(round.marks[person.name]?.pit);
+        if (isOnPitStop && !pitStopSectionAdded) {
+          const divider = document.createElement("div");
+          divider.className = "pit-stop-divider history-pit-stop-divider";
+          divider.textContent = "На пит-стопе";
+          divider.setAttribute("role", "separator");
+          grid.appendChild(divider);
+          pitStopSectionAdded = true;
+        }
         const name = document.createElement("div");
-        name.className = "history-name";
+        name.className = "history-name" + (isOnPitStop ? " is-pit" : "");
         name.setAttribute("role", "rowheader");
         const avatar = document.createElement("button");
         avatar.className = "history-initial";
@@ -2360,7 +2465,7 @@
           return sum + Number(Boolean(mark.entered)) + Number(Boolean(mark.finished));
         }, 0);
         const total = document.createElement("div");
-        total.className = "lap-total";
+        total.className = "lap-total" + (isOnPitStop ? " is-pit" : "");
         total.setAttribute("role", "cell");
         const totalRounds = document.createElement("strong");
         totalRounds.textContent = formatLaps(participationCount);
