@@ -2249,7 +2249,10 @@
       const beige = "#ffefcd";
       const paper = "#fffdf7";
       const muted = "#6f7d72";
-      const trackImage = await canvasLoadImage("track.webp");
+      const [trackImage, helmetImage] = await Promise.all([
+        canvasLoadImage("track.webp"),
+        canvasLoadImage("helmet.webp")
+      ]);
 
       const background = ctx.createLinearGradient(0, 0, 1080, 1920);
       background.addColorStop(0, paper);
@@ -2263,6 +2266,9 @@
       topGlow.addColorStop(1, "rgba(236,133,2,0)");
       ctx.fillStyle = topGlow;
       ctx.fillRect(540, 0, 540, 530);
+
+      ctx.save();
+      ctx.translate(0, 60);
 
       if (trackImage) {
         ctx.save();
@@ -2317,6 +2323,14 @@
       ctx.fillStyle = muted;
       canvasFont(ctx, 800, 28);
       ctx.fillText("Сейчас в боксах", 110, 366);
+      if (helmetImage) {
+        ctx.save();
+        ctx.shadowColor = "rgba(45,79,54,.17)";
+        ctx.shadowBlur = 20;
+        ctx.shadowOffsetY = 10;
+        ctx.drawImage(helmetImage, 756, 160, 246, 246);
+        ctx.restore();
+      }
 
       const pitHeadingParts = [
         ["БЕРЕЖНАЯ ПЕРЕНАСТРОЙКА", orange],
@@ -2338,7 +2352,6 @@
         pitHeadingX += ctx.measureText(label).width;
       });
       ctx.restore();
-
       const pitStatuses = [
         { icon: "resource", label: "РЕСУРС", state: "пополняется" },
         { icon: "tempo", label: "ТЕМП", state: "замедляется" },
@@ -2384,6 +2397,18 @@
       ctx.textAlign = "left";
       ctx.textBaseline = "alphabetic";
 
+      const dateText = "ДАННЫЕ НА " + currentDataDate().toUpperCase();
+      canvasFont(ctx, 900, 20);
+      const dateWidth = Math.ceil(ctx.measureText(dateText).width) + 40;
+      const dateCenterX = 779;
+      canvasCard(ctx, dateCenterX - dateWidth / 2, 1148, dateWidth, 48, 24, orange);
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(dateText, dateCenterX, 1173);
+      ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
+
       ctx.save();
       ctx.translate(82, 1270);
       ctx.rotate(-1.8 * Math.PI / 180);
@@ -2401,6 +2426,7 @@
       ctx.textAlign = "center";
       ctx.fillText("@Zhenya_Habatulina", 540, 1742);
       ctx.textAlign = "left";
+      ctx.restore();
       return canvas;
     }
 
