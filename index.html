@@ -1372,7 +1372,7 @@
       demo: false,
       season: "Июль",
       timeZone: "Europe/Moscow",
-      selectedRound: 3,
+      selectedRound: 4,
       rounds: [
         {
           number: 1,
@@ -1405,17 +1405,28 @@
           number: 3,
           dates: "20–25 июля",
           updated: "28 июля 2026",
-          status: "active",
+          status: "closed",
           marks: {
             "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Лена": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Юля": { entered: false, finished: false, pit: true, late: false, lastMark: "Пит-стоп отмечен. Вернуться на трек можно в своём темпе." },
             "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
-            "Женя": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
+            "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
             "Ира": { entered: false, finished: false, pit: true, late: false, lastMark: "Пит-стоп отмечен. Вернуться на трек можно в своём темпе." },
             "Ира · болид №8": { entered: false, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Болид №7": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Света": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен." }
+          }
+        },
+        {
+          number: 4,
+          dates: "27 июля–1 августа",
+          updated: "28 июля 2026",
+          status: "active",
+          marks: {
+            "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Лена": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Ира · болид №8": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." }
           }
         }
       ],
@@ -1429,13 +1440,13 @@
         { name: "Нина", joinedRound: 2, firstReport: "2026-07-17" },
         { name: "Болид №7", joinedRound: 3, firstReport: "2026-07-20" },
         { name: "Света", profileUrl: "https://t.me/c/4389010152/2/75", joinedRound: 3, firstReport: "2026-07-22" },
-        { name: "Даша", joinedRound: 3 },
         { name: "Ира · болид №8", joinedRound: 3, firstReport: "2026-07-26" },
-        { name: "Юля · болид №17", joinedRound: 3 }
+        { name: "Юля · болид №17", joinedRound: 4 },
+        { name: "Даша", joinedRound: 4 }
       ],
       celebration: {
-        id: "round-3-start-v1",
-        round: 3
+        id: "round-4-start-v1",
+        round: 4
       }
     };
 
@@ -1451,10 +1462,15 @@
       return BOARD_DATA.rounds.find(round => round.number === BOARD_DATA.selectedRound) || BOARD_DATA.rounds[0];
     }
 
+    function isOnActivePitStop(member) {
+      return Boolean((member.trackPauses || []).some(pause => pause.pausedAt && !pause.resumedAt));
+    }
+
     function selectedParticipants() {
       const round = selectedRound();
       return BOARD_DATA.members
         .filter(member => (member.joinedRound || 1) <= round.number)
+        .filter(member => !isOnActivePitStop(member))
         .map(member => ({
           ...member,
           entered: false,
@@ -2437,8 +2453,7 @@
 
     async function downloadPersonalStory(person, canvas, button) {
       const originalText = button.textContent;
-      const round = selectedRound();
-      const isPitStop = Boolean(round.marks[person.name]?.pit);
+      const isPitStop = isOnActivePitStop(person);
       button.disabled = true;
       button.textContent = "Готовлю PNG…";
       try {
@@ -2471,8 +2486,7 @@
       opener.classList.add("is-loading");
       opener.setAttribute("aria-busy", "true");
       try {
-        const round = selectedRound();
-        const isPitStop = Boolean(round.marks[person.name]?.pit);
+        const isPitStop = isOnActivePitStop(person);
         const canvas = isPitStop
           ? await createPitStopStoryCanvas(person)
           : await createPersonalStoryCanvas(person);
@@ -2689,14 +2703,17 @@
 
       const round = selectedRound();
       const historyMembers = [...BOARD_DATA.members].sort((a, b) => {
-        const aOnPitStop = Boolean(round.marks[a.name]?.pit);
-        const bOnPitStop = Boolean(round.marks[b.name]?.pit);
+        const aOnPitStop = isOnActivePitStop(a);
+        const bOnPitStop = isOnActivePitStop(b);
         return Number(aOnPitStop) - Number(bOnPitStop);
       });
       let pitStopSectionAdded = false;
 
       historyMembers.forEach(person => {
-        const isOnPitStop = Boolean(round.marks[person.name]?.pit);
+        const isOnPitStop = isOnActivePitStop(person);
+        const activePitStopRound = isOnPitStop
+          ? BOARD_DATA.rounds.find(item => Boolean(item.marks[person.name]?.pit))?.number
+          : null;
         if (isOnPitStop && !pitStopSectionAdded) {
           const divider = document.createElement("div");
           divider.className = "pit-stop-divider history-pit-stop-divider";
@@ -2750,11 +2767,12 @@
           const hasFinish = Boolean(mark.finished);
           const isPit = Boolean(mark.pit) && !hasStart && !hasFinish;
           const notJoined = (person.joinedRound || 1) > round.number;
-          const value = notJoined ? "not-joined" : isPit ? "pit" : hasStart && hasFinish ? "both" : hasStart ? "start-only" : hasFinish ? "finish-only" : "future";
+          const pitStopContinues = activePitStopRound != null && round.number > activePitStopRound;
+          const value = notJoined ? "not-joined" : pitStopContinues ? "paused" : isPit ? "pit" : hasStart && hasFinish ? "both" : hasStart ? "start-only" : hasFinish ? "finish-only" : "future";
           const cell = document.createElement("div");
-          cell.className = "lap " + value;
+          cell.className = "lap " + (value === "paused" ? "not-joined" : value);
           cell.setAttribute("role", "cell");
-          if (notJoined) {
+          if (notJoined || pitStopContinues) {
             // Пустой фон: участник ещё не был на этом круге.
           } else if (isPit) {
             cell.textContent = "🔧";
@@ -2772,7 +2790,7 @@
             marks.append(start, finish);
             cell.appendChild(marks);
           }
-          const readable = notJoined ? "ещё не участвовала" : { both: "заезд и финиш отмечены", "start-only": "отмечен только заезд", "finish-only": "отмечен только финиш", pit: "пит-стоп", future: "отметок ещё нет" }[value];
+          const readable = notJoined ? "ещё не участвовала" : pitStopContinues ? "пит-стоп продолжается" : { both: "заезд и финиш отмечены", "start-only": "отмечен только заезд", "finish-only": "отмечен только финиш", pit: "пит-стоп", future: "отметок ещё нет" }[value];
           cell.setAttribute("aria-label", person.name + ", " + lapName + ": " + readable);
           grid.appendChild(cell);
         });
