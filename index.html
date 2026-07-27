@@ -1408,7 +1408,7 @@
           status: "active",
           marks: {
             "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
-            "Лена": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
+            "Лена": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Юля": { entered: false, finished: false, pit: true, late: false, lastMark: "Пит-стоп отмечен. Вернуться на трек можно в своём темпе." },
             "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Понедельничный чек-поинт принят. Заезд на трек отмечен." },
@@ -2004,6 +2004,65 @@
       ctx.textAlign = "left";
     }
 
+    function canvasPitStopIcon(ctx, type, cx, cy, color) {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 9;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      if (type === "resource") {
+        canvasRoundedRect(ctx, cx - 42, cy - 29, 76, 58, 12);
+        ctx.stroke();
+        ctx.fillRect(cx + 36, cy - 11, 10, 22);
+        canvasRoundedRect(ctx, cx - 29, cy - 16, 42, 32, 7);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(cx + 24, cy - 11);
+        ctx.lineTo(cx + 24, cy + 11);
+        ctx.stroke();
+      } else if (type === "tempo") {
+        ctx.beginPath();
+        ctx.arc(cx, cy + 15, 43, Math.PI, 0);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx - 43, cy + 15);
+        ctx.lineTo(cx + 43, cy + 15);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx, cy + 15);
+        ctx.lineTo(cx + 28, cy - 13);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx, cy + 15, 7, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (type === "route") {
+        ctx.beginPath();
+        ctx.moveTo(cx - 38, cy + 24);
+        ctx.bezierCurveTo(cx - 8, cy + 24, cx - 20, cy - 26, cx + 11, cy - 26);
+        ctx.bezierCurveTo(cx + 31, cy - 26, cx + 26, cy + 14, cx + 40, cy + 14);
+        ctx.stroke();
+        [[-38, 24], [11, -26], [40, 14]].forEach(([dx, dy]) => {
+          ctx.beginPath();
+          ctx.arc(cx + dx, cy + dy, 8, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      } else if (type === "wrench") {
+        ctx.lineWidth = 13;
+        ctx.beginPath();
+        ctx.moveTo(cx - 29, cy + 29);
+        ctx.lineTo(cx + 20, cy - 20);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx - 35, cy + 35, 13, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(cx + 30, cy - 30, 24, .35 * Math.PI, 1.65 * Math.PI);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
     async function createPersonalStoryCanvas(person) {
       if (document.fonts && document.fonts.ready) await document.fonts.ready;
       const round = selectedRound();
@@ -2178,6 +2237,173 @@
       return canvas;
     }
 
+    async function createPitStopStoryCanvas(person) {
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      const stats = pilotStats(person.name);
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1920;
+      const ctx = canvas.getContext("2d");
+      const green = "#2d4f36";
+      const orange = "#ec8502";
+      const beige = "#ffefcd";
+      const paper = "#fffdf7";
+      const muted = "#6f7d72";
+      const trackImage = await canvasLoadImage("track.webp");
+
+      const background = ctx.createLinearGradient(0, 0, 1080, 1920);
+      background.addColorStop(0, paper);
+      background.addColorStop(.58, "#fff9ec");
+      background.addColorStop(1, beige);
+      ctx.fillStyle = background;
+      ctx.fillRect(0, 0, 1080, 1920);
+
+      const topGlow = ctx.createRadialGradient(1010, 60, 10, 1010, 60, 470);
+      topGlow.addColorStop(0, "rgba(236,133,2,.25)");
+      topGlow.addColorStop(1, "rgba(236,133,2,0)");
+      ctx.fillStyle = topGlow;
+      ctx.fillRect(540, 0, 540, 530);
+
+      if (trackImage) {
+        ctx.save();
+        ctx.globalAlpha = .045;
+        ctx.drawImage(trackImage, 510, 40, 700, 700);
+        ctx.restore();
+      }
+
+      const headerParts = [
+        ["ЖАЖДА ПОРЯДКА", green],
+        [" • ЛИЧНЫЙ ТРЕК", orange],
+        [" • ПИТ-СТОП", green]
+      ];
+      canvasFont(ctx, 900, 34);
+      ctx.textAlign = "left";
+      const headerWidth = headerParts.reduce((width, [label]) => width + ctx.measureText(label).width, 0);
+      const headerScale = Math.min(1, 940 / headerWidth);
+      let headerX = 0;
+      ctx.save();
+      ctx.translate(70, 0);
+      ctx.scale(headerScale, 1);
+      headerParts.forEach(([label, color]) => {
+        ctx.fillStyle = color;
+        ctx.fillText(label, headerX, 116);
+        headerX += ctx.measureText(label).width;
+      });
+      ctx.restore();
+
+      canvasCard(ctx, 70, 156, 940, 250, 42, "rgba(255,255,255,.78)", "rgba(45,79,54,.13)", 3);
+      ctx.fillStyle = orange;
+      canvasFont(ctx, 900, 26);
+      ctx.fillText("ИНФОРМАЦИОННЫЙ ГОНЩИК", 110, 216);
+      const bolidMatch = person.name.match(/^(.+?)\s*·\s*болид\s*(№\d+)$/i);
+      ctx.fillStyle = green;
+      const pilotName = bolidMatch ? bolidMatch[1] : person.name;
+      canvasFont(ctx, 900, pilotName.length > 19 ? 52 : 68);
+      ctx.fillText(pilotName, 110, 306);
+      if (bolidMatch) {
+        const nameWidth = ctx.measureText(pilotName).width;
+        const bolidLabel = "БОЛИД " + bolidMatch[2];
+        canvasFont(ctx, 900, 22);
+        const bolidWidth = Math.ceil(ctx.measureText(bolidLabel).width) + 38;
+        const bolidX = Math.min(970 - bolidWidth, 110 + nameWidth + 22);
+        canvasCard(ctx, bolidX, 258, bolidWidth, 54, 27, orange);
+        ctx.fillStyle = "#ffffff";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(bolidLabel, bolidX + bolidWidth / 2, 286);
+        ctx.textAlign = "left";
+        ctx.textBaseline = "alphabetic";
+      }
+      ctx.fillStyle = muted;
+      canvasFont(ctx, 800, 28);
+      ctx.fillText("Сейчас в боксах", 110, 366);
+
+      const pitHeadingParts = [
+        ["БЕРЕЖНАЯ ПЕРЕНАСТРОЙКА", orange],
+        [" • ПУТЬ СОХРАНЕН", green]
+      ];
+      canvasFont(ctx, 900, 36);
+      const pitHeadingWidth = pitHeadingParts.reduce(
+        (width, [label]) => width + ctx.measureText(label).width,
+        0
+      );
+      const pitHeadingScale = Math.min(1, 940 / pitHeadingWidth);
+      let pitHeadingX = 0;
+      ctx.save();
+      ctx.translate(70, 0);
+      ctx.scale(pitHeadingScale, 1);
+      pitHeadingParts.forEach(([label, color]) => {
+        ctx.fillStyle = color;
+        ctx.fillText(label, pitHeadingX, 510);
+        pitHeadingX += ctx.measureText(label).width;
+      });
+      ctx.restore();
+
+      const pitStatuses = [
+        { icon: "resource", label: "РЕСУРС", state: "пополняется" },
+        { icon: "tempo", label: "ТЕМП", state: "замедляется" },
+        { icon: "route", label: "МАРШРУТ", state: "уточняется" },
+        { icon: "path" }
+      ];
+      pitStatuses.forEach((status, index) => {
+        const column = index % 2;
+        const row = Math.floor(index / 2);
+        const x = 70 + column * 478;
+        const y = 590 + row * 278;
+        const isAccent = false;
+        const isPath = status.icon === "path";
+        canvasCard(
+          ctx,
+          x,
+          y,
+          462,
+          260,
+          36,
+          isAccent || isPath ? green : "rgba(255,255,255,.82)",
+          isAccent || isPath ? null : "rgba(45,79,54,.15)",
+          3
+        );
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        if (isPath) {
+          ctx.fillStyle = "#ffffff";
+          canvasFont(ctx, 900, 92);
+          ctx.fillText(String(stats.days), x + 231, y + 102);
+          canvasFont(ctx, 900, 34);
+          ctx.fillText("дней на треке", x + 231, y + 181);
+        } else {
+          canvasPitStopIcon(ctx, status.icon, x + 231, y + 68, isAccent ? "#ffffff" : orange);
+          ctx.fillStyle = isAccent ? "#ffffff" : green;
+          canvasFont(ctx, 900, 32);
+          ctx.fillText(status.label, x + 231, y + 158);
+          ctx.fillStyle = muted;
+          canvasFont(ctx, 900, 36);
+          ctx.fillText(status.state, x + 231, y + 211);
+        }
+      });
+      ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
+
+      ctx.save();
+      ctx.translate(82, 1270);
+      ctx.rotate(-1.8 * Math.PI / 180);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "alphabetic";
+      ctx.fillStyle = green;
+      ctx.font = "italic 900 62px Nunito, Arial, sans-serif";
+      ctx.fillText("«После пит-стопа", 450, 95);
+      ctx.fillText("продолжу с той же", 450, 180);
+      ctx.fillText("точки на треке»", 450, 265);
+      ctx.restore();
+
+      ctx.fillStyle = orange;
+      canvasFont(ctx, 800, 27);
+      ctx.textAlign = "center";
+      ctx.fillText("@Zhenya_Habatulina", 540, 1742);
+      ctx.textAlign = "left";
+      return canvas;
+    }
+
     function personalStorySlug(name) {
       const map = { а:"a", б:"b", в:"v", г:"g", д:"d", е:"e", ё:"e", ж:"zh", з:"z", и:"i", й:"y", к:"k", л:"l", м:"m", н:"n", о:"o", п:"p", р:"r", с:"s", т:"t", у:"u", ф:"f", х:"h", ц:"c", ч:"ch", ш:"sh", щ:"sch", ъ:"", ы:"y", ь:"", э:"e", ю:"yu", я:"ya" };
       return Array.from(name.toLowerCase()).map(char => map[char] ?? char).join("").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -2185,12 +2411,14 @@
 
     async function downloadPersonalStory(person, canvas, button) {
       const originalText = button.textContent;
+      const round = selectedRound();
+      const isPitStop = Boolean(round.marks[person.name]?.pit);
       button.disabled = true;
       button.textContent = "Готовлю PNG…";
       try {
         const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
         const link = document.createElement("a");
-        link.download = "zhazhda-poryadka-lichnyy-trek-" + personalStorySlug(person.name) + ".png";
+        link.download = "zhazhda-poryadka-" + (isPitStop ? "pit-stop-" : "lichnyy-trek-") + personalStorySlug(person.name) + ".png";
         if (blob) {
           const url = URL.createObjectURL(blob);
           link.href = url;
@@ -2213,16 +2441,26 @@
       const close = document.getElementById("personal-story-close");
       const download = document.getElementById("personal-story-download");
       const preview = document.getElementById("personal-story-preview");
+      const shell = layer.querySelector(".personal-story-shell");
       opener.classList.add("is-loading");
       opener.setAttribute("aria-busy", "true");
       try {
-        const canvas = await createPersonalStoryCanvas(person);
+        const round = selectedRound();
+        const isPitStop = Boolean(round.marks[person.name]?.pit);
+        const canvas = isPitStop
+          ? await createPitStopStoryCanvas(person)
+          : await createPersonalStoryCanvas(person);
         preview.src = canvas.toDataURL("image/png");
-        preview.alt = "Личный трек участника " + person.name;
+        preview.alt = isPitStop
+          ? "Карточка пит-стопа участника " + person.name
+          : "Личный трек участника " + person.name;
+        shell.setAttribute("aria-label", isPitStop ? "Карточка пит-стопа для Stories" : "Личный трек для Stories");
         layer.hidden = false;
         document.body.classList.add("summary-open");
         download.disabled = false;
-        download.textContent = "Скачать PNG · 1080 × 1920";
+        download.textContent = isPitStop
+          ? "Получить карточку пит-стопа 🔧"
+          : "Скачать PNG · 1080 × 1920";
         download.onclick = () => downloadPersonalStory(person, canvas, download);
         close.focus();
 
@@ -2448,8 +2686,13 @@
         avatar.className = "history-initial";
         avatar.type = "button";
         avatar.textContent = initial(person.name);
-        avatar.setAttribute("aria-label", "Открыть личный трек участника " + person.name + " для Stories");
-        avatar.title = "Открыть личный трек для Stories";
+        avatar.setAttribute(
+          "aria-label",
+          isOnPitStop
+            ? "Открыть карточку пит-стопа участника " + person.name + " для Stories"
+            : "Открыть личный трек участника " + person.name + " для Stories"
+        );
+        avatar.title = isOnPitStop ? "Получить карточку пит-стопа" : "Открыть личный трек для Stories";
         avatar.addEventListener("click", () => openPersonalStory(person, avatar));
         const nameText = document.createElement("span");
         nameText.textContent = person.name;
