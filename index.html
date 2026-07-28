@@ -1426,7 +1426,8 @@
           marks: {
             "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
             "Лена": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
-            "Ира · болид №8": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." }
+            "Ира · болид №8": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Аня · болид №22": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." }
           }
         }
       ],
@@ -1442,7 +1443,8 @@
         { name: "Света", profileUrl: "https://t.me/c/4389010152/2/75", joinedRound: 3, firstReport: "2026-07-22" },
         { name: "Ира · болид №8", joinedRound: 3, firstReport: "2026-07-26" },
         { name: "Юля · болид №17", joinedRound: 4 },
-        { name: "Даша", joinedRound: 4 }
+        { name: "Даша", joinedRound: 4 },
+        { name: "Аня · болид №22", joinedRound: 4, firstReport: "2026-07-28" }
       ],
       celebration: {
         id: "round-4-start-v1",
@@ -2545,6 +2547,7 @@
 
       BOARD_DATA.members
         .filter(member => (member.joinedRound || 1) <= round.number)
+        .filter(member => !isOnActivePitStop(member) && !round.marks[member.name]?.pit)
         .forEach(member => {
           const mark = round.marks[member.name] || {};
           if (mark.entered && mark.finished) groups.full.push(member.name);
