@@ -1187,7 +1187,33 @@
       .board-rule { max-width: none; text-align: left; }
       .participants { padding: 14px 17px 20px; }
       .participant-top { align-items: flex-start; flex-wrap: wrap; }
-      .season-path { gap: 55px; }
+      .season-path {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 28px;
+        row-gap: 42px;
+        min-height: 0;
+        padding: 28px 28px 54px;
+        background:
+          linear-gradient(rgba(255,253,247,.92), rgba(255,253,247,.92)),
+          url("track.webp") center / 430px auto no-repeat;
+      }
+      .season-path::before {
+        left: 27%;
+        right: 27%;
+        top: 61px;
+        height: 155px;
+        background: none;
+        border-top: 5px dashed var(--green);
+        border-right: 5px dashed var(--green);
+        border-bottom: 5px dashed var(--green);
+        border-radius: 0 52px 52px 0;
+      }
+      .path-stop[data-round="1"] { grid-column: 1; grid-row: 1; }
+      .path-stop[data-round="2"] { grid-column: 2; grid-row: 1; }
+      .path-stop[data-round="3"] { grid-column: 2; grid-row: 2; }
+      .path-stop[data-round="4"] { grid-column: 1; grid-row: 2; }
+      .season-path-hint { bottom: 12px; }
       .logic-card { display: block; }
       .logic-visual { height: 190px; }
       .principles { grid-template-columns: 1fr; }
@@ -1632,6 +1658,7 @@
         const stop = document.createElement("button");
         stop.type = "button";
         stop.className = "path-stop " + round.status;
+        stop.dataset.round = String(round.number);
         if (round.number === BOARD_DATA.selectedRound) stop.setAttribute("aria-current", "step");
         stop.setAttribute("aria-label", "Открыть сводку круга " + round.number + ", " + round.dates);
         stop.title = "Открыть итоги круга " + round.number;
