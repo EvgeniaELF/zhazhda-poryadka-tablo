@@ -1163,6 +1163,7 @@
       .hero-elf { width: 390px; right: -42px; }
       .metrics { grid-template-columns: repeat(2, 1fr); }
       .participants { grid-template-columns: 1fr; }
+      .season-path { gap: clamp(28px, 6vw, 70px); }
       .logic-grid { grid-template-columns: 1fr; }
       .logic-card { display: grid; grid-template-columns: 210px 1fr; }
       .logic-visual { height: 100%; min-height: 200px; }
@@ -1209,10 +1210,21 @@
         border-bottom: 5px dashed var(--green);
         border-radius: 0 52px 52px 0;
       }
+      .season-path::after {
+        content: "";
+        position: absolute;
+        left: 27%;
+        top: 216px;
+        height: 155px;
+        border-left: 5px dashed var(--green);
+        opacity: .35;
+        pointer-events: none;
+      }
       .path-stop[data-round="1"] { grid-column: 1; grid-row: 1; }
       .path-stop[data-round="2"] { grid-column: 2; grid-row: 1; }
       .path-stop[data-round="3"] { grid-column: 2; grid-row: 2; }
       .path-stop[data-round="4"] { grid-column: 1; grid-row: 2; }
+      .path-stop[data-round="5"] { grid-column: 1; grid-row: 3; }
       .season-path-hint { bottom: 12px; }
       .logic-card { display: block; }
       .logic-visual { height: 190px; }
@@ -1398,7 +1410,7 @@
       demo: false,
       season: "Июль",
       timeZone: "Europe/Moscow",
-      selectedRound: 4,
+      selectedRound: 5,
       rounds: [
         {
           number: 1,
@@ -1448,7 +1460,7 @@
           number: 4,
           dates: "27 июля–1 августа",
           updated: "2 августа 2026",
-          status: "active",
+          status: "closed",
           marks: {
             "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Лена": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
@@ -1459,6 +1471,19 @@
             "Женя": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Болид №7": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Таня": { entered: false, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." }
+          }
+        },
+        {
+          number: 5,
+          dates: "3–8 августа",
+          updated: "3 августа 2026",
+          status: "active",
+          marks: {
+            "Аня · болид №22": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Женя · болид №9": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Таня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." }
           }
         }
       ],
@@ -1479,8 +1504,8 @@
         { name: "Таня", joinedRound: 4, firstReport: "2026-08-02" }
       ],
       celebration: {
-        id: "round-4-start-v1",
-        round: 4
+        id: "round-5-start-v1",
+        round: 5
       }
     };
 
