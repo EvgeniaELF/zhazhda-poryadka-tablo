@@ -1214,9 +1214,12 @@
         content: "";
         position: absolute;
         left: 27%;
+        right: 27%;
         top: 216px;
         height: 155px;
         border-left: 5px dashed var(--green);
+        border-bottom: 5px dashed var(--green);
+        border-radius: 0 0 0 52px;
         opacity: .35;
         pointer-events: none;
       }
@@ -1225,6 +1228,7 @@
       .path-stop[data-round="3"] { grid-column: 2; grid-row: 2; }
       .path-stop[data-round="4"] { grid-column: 1; grid-row: 2; }
       .path-stop[data-round="5"] { grid-column: 1; grid-row: 3; }
+      .path-stop[data-round="6"] { grid-column: 2; grid-row: 3; }
       .season-path-hint { bottom: 12px; }
       .logic-card { display: block; }
       .logic-visual { height: 190px; }
@@ -1410,7 +1414,7 @@
       demo: false,
       season: "Июль",
       timeZone: "Europe/Moscow",
-      selectedRound: 5,
+      selectedRound: 6,
       rounds: [
         {
           number: 1,
@@ -1477,7 +1481,7 @@
           number: 5,
           dates: "3–8 августа",
           updated: "10 августа 2026",
-          status: "active",
+          status: "closed",
           marks: {
             "Аня · болид №22": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
@@ -1487,6 +1491,19 @@
             "Лена": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Болид №7": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Лена · болид №3": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." }
+          }
+        },
+        {
+          number: 6,
+          dates: "10–15 августа",
+          updated: "11 августа 2026",
+          status: "active",
+          marks: {
+            "Таня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Лена · болид №3": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Болид №7": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Женя · болид №9": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." }
           }
         }
       ],
@@ -1508,8 +1525,8 @@
         { name: "Лена · болид №3", joinedRound: 5, firstReport: "2026-08-05" }
       ],
       celebration: {
-        id: "round-5-start-v1",
-        round: 5
+        id: "round-6-start-v1",
+        round: 6
       }
     };
 
