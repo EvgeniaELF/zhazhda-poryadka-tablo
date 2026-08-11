@@ -658,15 +658,40 @@
     }
     .personal-story-hint b { color: var(--orange); }
     .lap {
+      position: relative;
       display: grid;
       place-items: center;
       min-height: 50px;
+      padding: 0;
       color: var(--green);
       background: var(--white);
       border: 1px solid var(--line);
       border-radius: 14px;
+      font: inherit;
       font-weight: 900;
     }
+    .lap.is-story {
+      cursor: pointer;
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+    .lap.is-story::after {
+      content: "↓";
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      color: var(--orange);
+      font-size: .62rem;
+      line-height: 1;
+      opacity: .66;
+    }
+    .lap.is-story:hover {
+      z-index: 1;
+      border-color: rgba(236,133,2,.52);
+      box-shadow: 0 8px 18px rgba(45,79,54,.12);
+      transform: translateY(-2px);
+    }
+    .lap.is-story:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+    .lap.is-story.is-loading { cursor: wait; animation: pulse-soft 1s ease-in-out infinite; }
     .history-pit-stop-divider { margin: 9px 0 1px; }
     .history-name.is-pit,
     .lap-total.is-pit {
@@ -1314,7 +1339,7 @@
           <span class="board-rule">Порядок участников не меняется: это не рейтинг</span>
         </div>
         <div class="history-wrap">
-          <p class="personal-story-hint"><b aria-hidden="true">↓</b> Нажмите на круг с буквой, чтобы открыть личный трек для Stories</p>
+          <p class="personal-story-hint"><b aria-hidden="true">↓</b> Нажмите на отметки нужного круга, чтобы открыть и скачать личную карточку</p>
           <div class="history-grid" id="history-grid" role="table" aria-label="История кругов команды"></div>
           <div class="history-legend" aria-label="Обозначения истории">
             <span>● заезд на трек</span><span>⚑ финиш круга</span><span>● + ⚑ оба чек-поинта</span><span>🔧 пит-стоп</span>
@@ -1485,7 +1510,7 @@
           marks: {
             "Аня · болид №22": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
-            "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Женя": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Таня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Лена": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
@@ -1503,7 +1528,8 @@
             "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
             "Лена · болид №3": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
             "Болид №7": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
-            "Женя · болид №9": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." }
+            "Женя · болид №9": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." }
           }
         }
       ],
@@ -1657,9 +1683,10 @@
       return Math.max(0, totalDays - pausedDays);
     }
 
-    function pilotStats(name) {
+    function pilotStats(name, throughRoundNumber = BOARD_DATA.selectedRound) {
+      const countedRounds = BOARD_DATA.rounds.filter(round => round.number <= throughRoundNumber);
       let checkpoints = 0;
-      BOARD_DATA.rounds.forEach(round => {
+      countedRounds.forEach(round => {
         const mark = round.marks[name] || {};
         const entered = Boolean(mark.entered);
         const finished = Boolean(mark.finished);
@@ -1667,8 +1694,8 @@
       });
 
       let series = 0;
-      for (let index = BOARD_DATA.rounds.length - 1; index >= 0; index -= 1) {
-        const round = BOARD_DATA.rounds[index];
+      for (let index = countedRounds.length - 1; index >= 0; index -= 1) {
+        const round = countedRounds[index];
         if (round.status === "upcoming") continue;
         const mark = round.marks[name] || {};
         const participated = Boolean(mark.entered || mark.finished);
@@ -2160,11 +2187,10 @@
       ctx.restore();
     }
 
-    async function createPersonalStoryCanvas(person) {
+    async function createPersonalStoryCanvas(person, round = selectedRound()) {
       if (document.fonts && document.fonts.ready) await document.fonts.ready;
-      const round = selectedRound();
       const mark = { entered: false, finished: false, pit: false, ...(round.marks[person.name] || {}) };
-      const stats = pilotStats(person.name);
+      const stats = pilotStats(person.name, round.number);
       const storyState = personalStoryState(mark);
       const canvas = document.createElement("canvas");
       canvas.width = 1080;
@@ -2532,15 +2558,14 @@
       return Array.from(name.toLowerCase()).map(char => map[char] ?? char).join("").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     }
 
-    async function downloadPersonalStory(person, canvas, button) {
+    async function downloadPersonalStory(person, canvas, button, round = selectedRound(), isPitStop = false) {
       const originalText = button.textContent;
-      const isPitStop = isOnActivePitStop(person);
       button.disabled = true;
       button.textContent = "Готовлю PNG…";
       try {
         const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
         const link = document.createElement("a");
-        link.download = "zhazhda-poryadka-" + (isPitStop ? "pit-stop-" : "lichnyy-trek-") + personalStorySlug(person.name) + ".png";
+        link.download = "zhazhda-poryadka-" + (isPitStop ? "pit-stop-" : "lichnyy-trek-") + personalStorySlug(person.name) + "-krug-" + round.number + ".png";
         if (blob) {
           const url = URL.createObjectURL(blob);
           link.href = url;
@@ -2558,7 +2583,7 @@
       }
     }
 
-    async function openPersonalStory(person, opener) {
+    async function openPersonalStory(person, opener, round = selectedRound()) {
       const layer = document.getElementById("personal-story");
       const close = document.getElementById("personal-story-close");
       const download = document.getElementById("personal-story-download");
@@ -2567,14 +2592,17 @@
       opener.classList.add("is-loading");
       opener.setAttribute("aria-busy", "true");
       try {
-        const isPitStop = isOnActivePitStop(person);
+        const roundMark = round.marks[person.name] || {};
+        const isPitStop = round.number === BOARD_DATA.selectedRound
+          ? isOnActivePitStop(person)
+          : Boolean(roundMark.pit && !roundMark.entered && !roundMark.finished);
         const canvas = isPitStop
           ? await createPitStopStoryCanvas(person)
-          : await createPersonalStoryCanvas(person);
+          : await createPersonalStoryCanvas(person, round);
         preview.src = canvas.toDataURL("image/png");
         preview.alt = isPitStop
           ? "Карточка пит-стопа участника " + person.name
-          : "Личный трек участника " + person.name;
+          : "Личный трек участника " + person.name + ", круг " + round.number;
         shell.setAttribute("aria-label", isPitStop ? "Карточка пит-стопа для Stories" : "Личный трек для Stories");
         layer.hidden = false;
         document.body.classList.add("summary-open");
@@ -2582,7 +2610,7 @@
         download.textContent = isPitStop
           ? "Получить карточку пит-стопа 🔧"
           : "Скачать PNG · 1080 × 1920";
-        download.onclick = () => downloadPersonalStory(person, canvas, download);
+        download.onclick = () => downloadPersonalStory(person, canvas, download, round, isPitStop);
         close.focus();
 
         const dismiss = () => {
@@ -2851,8 +2879,10 @@
           const notJoined = (person.joinedRound || 1) > round.number;
           const pitStopContinues = activePitStopRound != null && round.number > activePitStopRound;
           const value = notJoined ? "not-joined" : pitStopContinues ? "paused" : isPit ? "pit" : hasStart && hasFinish ? "both" : hasStart ? "start-only" : hasFinish ? "finish-only" : "future";
-          const cell = document.createElement("div");
-          cell.className = "lap " + (value === "paused" ? "not-joined" : value);
+          const canOpenStory = !notJoined && !pitStopContinues && !isPit && (hasStart || hasFinish);
+          const cell = document.createElement(canOpenStory ? "button" : "div");
+          if (canOpenStory) cell.type = "button";
+          cell.className = "lap " + (value === "paused" ? "not-joined" : value) + (canOpenStory ? " is-story" : "");
           cell.setAttribute("role", "cell");
           if (notJoined || pitStopContinues) {
             // Пустой фон: участник ещё не был на этом круге.
@@ -2873,7 +2903,13 @@
             cell.appendChild(marks);
           }
           const readable = notJoined ? "ещё не участвовала" : pitStopContinues ? "пит-стоп продолжается" : { both: "заезд и финиш отмечены", "start-only": "отмечен только заезд", "finish-only": "отмечен только финиш", pit: "пит-стоп", future: "отметок ещё нет" }[value];
-          cell.setAttribute("aria-label", person.name + ", " + lapName + ": " + readable);
+          if (canOpenStory) {
+            cell.title = "Открыть и скачать карточку: " + person.name + ", " + lapName;
+            cell.setAttribute("aria-label", "Открыть и скачать личную карточку: " + person.name + ", " + lapName + ", " + readable);
+            cell.addEventListener("click", () => openPersonalStory(person, cell, round));
+          } else {
+            cell.setAttribute("aria-label", person.name + ", " + lapName + ": " + readable);
+          }
           grid.appendChild(cell);
         });
 
