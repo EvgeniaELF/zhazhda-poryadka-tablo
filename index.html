@@ -1693,16 +1693,11 @@
         checkpoints += Number(entered) + Number(finished);
       });
 
-      let series = 0;
-      for (let index = countedRounds.length - 1; index >= 0; index -= 1) {
-        const round = countedRounds[index];
-        if (round.status === "upcoming") continue;
+      const series = countedRounds.filter(round => {
+        if (round.status === "upcoming") return false;
         const mark = round.marks[name] || {};
-        const participated = Boolean(mark.entered || mark.finished);
-        if (round.status === "active" && !participated) continue;
-        if (!participated) break;
-        series += 1;
-      }
+        return Boolean(mark.entered || mark.finished);
+      }).length;
       const member = BOARD_DATA.members.find(person => person.name === name);
       return { series, checkpoints, days: daysOnTrack(member) };
     }
