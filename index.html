@@ -2092,12 +2092,21 @@
       }
     }
 
-    function personalStoryState(mark) {
+    function personalStoryState(mark, roundNumber) {
       if (mark.entered && mark.finished) {
         return {
           phrase: "Между «хочу» и «сделано» — ещё один круг",
           lines: ["Между", "«хочу» и «сделано»", "— ещё один круг"],
           outerQuotes: false
+        };
+      }
+      if (roundNumber >= 6 && mark.entered && !mark.finished && !mark.pit) {
+        return {
+          phrase: "Свой ритм — не про медленнее. Он про то, чтобы хотелось продолжать.",
+          lines: ["Свой ритм —", "не про медленнее.", "Он про то, чтобы хотелось", "продолжать."],
+          outerQuotes: false,
+          fontSize: 62,
+          lineHeight: 78
         };
       }
       if (mark.entered || mark.finished || mark.pit) return { phrase: "Выезжаем на трек ясности" };
@@ -2187,7 +2196,7 @@
       if (document.fonts && document.fonts.ready) await document.fonts.ready;
       const mark = { entered: false, finished: false, pit: false, ...(round.marks[person.name] || {}) };
       const stats = pilotStats(person.name, round.number);
-      const storyState = personalStoryState(mark);
+      const storyState = personalStoryState(mark, round.number);
       const canvas = document.createElement("canvas");
       canvas.width = 1080;
       canvas.height = 1920;
@@ -2338,12 +2347,13 @@
       ctx.rotate(-1.8 * Math.PI / 180);
       ctx.textAlign = "center";
       ctx.fillStyle = green;
-      ctx.font = "italic 900 72px Nunito, Arial, sans-serif";
+      ctx.font = "italic 900 " + (storyState.fontSize || 72) + "px Nunito, Arial, sans-serif";
       const storyPhrase = storyState.outerQuotes === false
         ? storyState.phrase
         : "«" + storyState.phrase + "»";
       if (storyState.lines) {
-        storyState.lines.forEach((line, index) => ctx.fillText(line, 450, 100 + index * 88));
+        const storyLineHeight = storyState.lineHeight || 88;
+        storyState.lines.forEach((line, index) => ctx.fillText(line, 450, 100 + index * storyLineHeight));
       } else {
         canvasWrappedText(ctx, storyPhrase, 450, 100, 900, 88, 3);
       }
