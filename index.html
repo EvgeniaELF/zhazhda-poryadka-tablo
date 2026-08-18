@@ -545,7 +545,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 115px;
+      gap: clamp(32px, 5vw, 96px);
       min-height: 198px;
       margin-bottom: 16px;
       padding: 24px;
@@ -557,15 +557,22 @@
       border-radius: var(--radius-xl);
       box-shadow: var(--shadow-small);
     }
-    .season-path::before {
-      content: "";
+    .season-route {
       position: absolute;
-      left: 20%;
-      right: 20%;
-      top: 50%;
-      height: 5px;
-      background: repeating-linear-gradient(90deg, var(--green) 0 13px, transparent 13px 21px);
-      border-radius: 999px;
+      inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+    }
+    .season-route path {
+      fill: none;
+      stroke: var(--green);
+      stroke-width: 5;
+      stroke-dasharray: 13 8;
+      stroke-linecap: butt;
+      stroke-linejoin: round;
       opacity: .35;
     }
     .path-stop {
@@ -1224,36 +1231,6 @@
           linear-gradient(rgba(255,253,247,.92), rgba(255,253,247,.92)),
           url("track.webp") center / 430px auto no-repeat;
       }
-      .season-path::before {
-        left: 27%;
-        right: 27%;
-        top: 61px;
-        height: 155px;
-        background: none;
-        border-top: 5px dashed var(--green);
-        border-right: 5px dashed var(--green);
-        border-bottom: 5px dashed var(--green);
-        border-radius: 0 52px 52px 0;
-      }
-      .season-path::after {
-        content: "";
-        position: absolute;
-        left: 27%;
-        right: 27%;
-        top: 216px;
-        height: 155px;
-        border-left: 5px dashed var(--green);
-        border-bottom: 5px dashed var(--green);
-        border-radius: 0 0 0 52px;
-        opacity: .35;
-        pointer-events: none;
-      }
-      .path-stop[data-round="1"] { grid-column: 1; grid-row: 1; }
-      .path-stop[data-round="2"] { grid-column: 2; grid-row: 1; }
-      .path-stop[data-round="3"] { grid-column: 2; grid-row: 2; }
-      .path-stop[data-round="4"] { grid-column: 1; grid-row: 2; }
-      .path-stop[data-round="5"] { grid-column: 1; grid-row: 3; }
-      .path-stop[data-round="6"] { grid-column: 2; grid-row: 3; }
       .season-path-hint { bottom: 12px; }
       .logic-card { display: block; }
       .logic-visual { height: 190px; }
@@ -1439,7 +1416,7 @@
       demo: false,
       season: "Июль",
       timeZone: "Europe/Moscow",
-      selectedRound: 6,
+      selectedRound: 7,
       rounds: [
         {
           number: 1,
@@ -1522,15 +1499,29 @@
         {
           number: 6,
           dates: "10–15 августа",
-          updated: "11 августа 2026",
-          status: "active",
+          updated: "18 августа 2026",
+          status: "closed",
           marks: {
-            "Таня · болид №11": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
-            "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Таня · болид №11": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
+            "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Лена · болид №3": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
             "Болид №7": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
-            "Женя · болид №9": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
-            "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." }
+            "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
+            "Женя": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
+            "Лена": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Юля · болид №17": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Аня · болид №22": { entered: false, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." }
+          }
+        },
+        {
+          number: 7,
+          dates: "17–22 августа",
+          updated: "18 августа 2026",
+          status: "active",
+          marks: {
+            "Аня · болид №22": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Таня · болид №11": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." }
           }
         }
       ],
@@ -1552,8 +1543,8 @@
         { name: "Лена · болид №3", joinedRound: 5, firstReport: "2026-08-05" }
       ],
       celebration: {
-        id: "round-6-start-v1",
-        round: 6
+        id: "round-7-start-v1",
+        round: 7
       }
     };
 
@@ -1723,14 +1714,46 @@
       document.getElementById("metric-awaiting-label").textContent = awaiting === 1 ? "готовится к старту" : "готовятся к старту";
     }
 
+    let seasonRouteFrame = 0;
+
+    function drawSeasonRoute() {
+      const container = document.getElementById("season-path");
+      const svg = container.querySelector(".season-route");
+      const route = svg?.querySelector("path");
+      const nodes = Array.from(container.querySelectorAll(".path-node"));
+      const bounds = container.getBoundingClientRect();
+      if (!svg || !route || nodes.length < 2 || !bounds.width || !bounds.height) return;
+      svg.setAttribute("viewBox", `0 0 ${bounds.width} ${bounds.height}`);
+      const points = nodes.map(node => {
+        const box = node.getBoundingClientRect();
+        return [box.left - bounds.left + box.width / 2, box.top - bounds.top + box.height / 2];
+      });
+      route.setAttribute("d", points.map(([x, y], index) => `${index ? "L" : "M"} ${x} ${y}`).join(" "));
+    }
+
+    function scheduleSeasonRouteDraw() {
+      cancelAnimationFrame(seasonRouteFrame);
+      seasonRouteFrame = requestAnimationFrame(drawSeasonRoute);
+    }
+
     function renderSeasonPath() {
       const path = document.getElementById("season-path");
       path.replaceChildren();
-      BOARD_DATA.rounds.forEach(round => {
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.classList.add("season-route");
+      svg.setAttribute("aria-hidden", "true");
+      const route = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      svg.appendChild(route);
+      path.appendChild(svg);
+      BOARD_DATA.rounds.forEach((round, index) => {
         const stop = document.createElement("button");
         stop.type = "button";
         stop.className = "path-stop " + round.status;
         stop.dataset.round = String(round.number);
+        const row = Math.floor(index / 2) + 1;
+        const column = row % 2 ? index % 2 + 1 : 2 - (index % 2);
+        stop.style.gridColumn = String(column);
+        stop.style.gridRow = String(row);
         if (round.number === BOARD_DATA.selectedRound) stop.setAttribute("aria-current", "step");
         stop.setAttribute("aria-label", "Открыть сводку круга " + round.number + ", " + round.dates);
         stop.title = "Открыть итоги круга " + round.number;
@@ -1749,6 +1772,7 @@
       hint.className = "season-path-hint";
       hint.textContent = "Нажмите на круг, чтобы открыть командную сводку";
       path.appendChild(hint);
+      scheduleSeasonRouteDraw();
     }
 
     function roundSummaryData(round) {
@@ -2930,6 +2954,7 @@
           item.setAttribute("aria-selected", active ? "true" : "false");
           document.getElementById(item.getAttribute("aria-controls")).hidden = !active;
         });
+        if (tab.getAttribute("aria-controls") === "view-history") scheduleSeasonRouteDraw();
       });
       tab.addEventListener("keydown", event => {
         if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
@@ -2946,6 +2971,8 @@
     renderParticipants();
     renderHistory();
     renderSeasonPath();
+    window.addEventListener("resize", scheduleSeasonRouteDraw, { passive: true });
+    document.fonts?.ready.then(scheduleSeasonRouteDraw);
     showCelebration();
   </script>
 </body>
