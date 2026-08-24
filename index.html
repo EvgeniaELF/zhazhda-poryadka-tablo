@@ -1436,12 +1436,14 @@
     const BOARD_DATA = {
       demo: false,
       season: "Старт сезона 26 июня",
+      seasonStarted: "2026-06-26",
       timeZone: "Europe/Moscow",
       selectedRound: 8,
       rounds: [
         {
           number: 1,
           dates: "26 июня–11 июля",
+          endDate: "2026-07-11",
           updated: "13 июля 2026",
           status: "closed",
           marks: {
@@ -1454,6 +1456,7 @@
         {
           number: 2,
           dates: "13–18 июля",
+          endDate: "2026-07-18",
           updated: "20 июля 2026",
           status: "closed",
           marks: {
@@ -1469,6 +1472,7 @@
         {
           number: 3,
           dates: "20–25 июля",
+          endDate: "2026-07-25",
           updated: "30 июля 2026",
           status: "closed",
           marks: {
@@ -1486,6 +1490,7 @@
         {
           number: 4,
           dates: "27 июля–1 августа",
+          endDate: "2026-08-01",
           updated: "2 августа 2026",
           status: "closed",
           marks: {
@@ -1503,6 +1508,7 @@
         {
           number: 5,
           dates: "3–8 августа",
+          endDate: "2026-08-08",
           updated: "11 августа 2026",
           status: "closed",
           marks: {
@@ -1520,6 +1526,7 @@
         {
           number: 6,
           dates: "10–15 августа",
+          endDate: "2026-08-15",
           updated: "24 августа 2026",
           status: "closed",
           marks: {
@@ -1537,6 +1544,7 @@
         {
           number: 7,
           dates: "17–22 августа",
+          endDate: "2026-08-22",
           updated: "24 августа 2026",
           status: "closed",
           marks: {
@@ -1553,6 +1561,7 @@
         {
           number: 8,
           dates: "24–29 августа",
+          endDate: "2026-08-29",
           updated: "24 августа 2026",
           status: "active",
           marks: {
@@ -1695,6 +1704,17 @@
         return parts;
       }, {});
       return Date.UTC(todayParts.year, todayParts.month - 1, todayParts.day);
+    }
+
+    function seasonDaysForRound(round, now = new Date()) {
+      if (!round || !BOARD_DATA.seasonStarted) return 0;
+      const dayMs = 86400000;
+      const startUtc = dateStringToUtc(BOARD_DATA.seasonStarted);
+      const roundEndUtc = round.endDate ? dateStringToUtc(round.endDate) : todayUtcInBoardTimeZone(now);
+      const referenceUtc = round.status === "active"
+        ? Math.min(todayUtcInBoardTimeZone(now), roundEndUtc)
+        : roundEndUtc;
+      return Math.max(0, Math.floor((referenceUtc - startUtc) / dayMs) + 1);
     }
 
     function daysOnTrack(member, now = new Date()) {
@@ -2141,6 +2161,7 @@
     async function createRoundStoryCanvas(round) {
       if (document.fonts && document.fonts.ready) await document.fonts.ready;
       const summary = roundSummaryData(round);
+      const seasonDays = seasonDaysForRound(round);
       const canvas = document.createElement("canvas");
       canvas.width = 1080;
       canvas.height = 1920;
@@ -2203,10 +2224,13 @@
       canvasCard(ctx, 70, 320, 940, 290, 38, green);
       ctx.fillStyle = "rgba(255,255,255,.82)";
       canvasFont(ctx, 900, 30);
-      ctx.fillText("УЧАСТНИКОВ В КРУГЕ", 115, 385);
+      ctx.fillText("СЕЗОН НА ТРЕКЕ", 115, 385);
       ctx.fillStyle = "#ffffff";
       canvasFont(ctx, 900, 132);
-      ctx.fillText(String(summary.participants.length), 110, 555);
+      ctx.fillText(String(seasonDays), 110, 535);
+      ctx.fillStyle = "rgba(255,255,255,.86)";
+      canvasFont(ctx, 900, 28);
+      ctx.fillText("ДНЕЙ С 26 ИЮНЯ", 115, 580);
 
       canvasCard(ctx, 70, 650, 940, 420, 38, orange);
       ctx.fillStyle = "rgba(255,255,255,.86)";
@@ -2215,15 +2239,26 @@
       ctx.fillStyle = "#ffffff";
       canvasFont(ctx, 900, 142);
       ctx.fillText(String(summary.entered + summary.finished), 110, 900);
-      canvasCard(ctx, 110, 955, 400, 76, 38, "rgba(255,255,255,.94)");
-      canvasCard(ctx, 570, 955, 400, 76, 38, "rgba(255,255,255,.94)");
+      canvasCard(ctx, 110, 940, 250, 96, 34, "rgba(255,255,255,.94)");
+      canvasCard(ctx, 415, 940, 250, 96, 34, "rgba(255,255,255,.94)");
+      canvasCard(ctx, 720, 940, 250, 96, 34, "rgba(255,255,255,.94)");
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillStyle = green;
-      canvasFont(ctx, 900, 25);
-      ctx.fillText("● ЗАЕЗДЫ: " + summary.entered, 310, 993);
+      canvasFont(ctx, 900, 34);
+      ctx.fillText(String(summary.entered), 235, 970);
+      canvasFont(ctx, 900, 17);
+      ctx.fillText("ЗАЕЗДОВ", 235, 1012);
       ctx.fillStyle = orange;
-      ctx.fillText("⚑ ФИНИШИ: " + summary.finished, 770, 993);
+      canvasFont(ctx, 900, 34);
+      ctx.fillText(String(summary.finished), 540, 970);
+      canvasFont(ctx, 900, 17);
+      ctx.fillText("ФИНИШЕЙ", 540, 1012);
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 34);
+      ctx.fillText(String(summary.participants.length), 845, 970);
+      canvasFont(ctx, 900, 17);
+      ctx.fillText("УЧАСТНИКОВ", 845, 1012);
       ctx.textAlign = "left";
       ctx.textBaseline = "alphabetic";
 
