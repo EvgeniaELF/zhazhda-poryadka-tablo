@@ -900,10 +900,14 @@
       font: 900 1.45rem/1 Nunito, sans-serif;
       cursor: pointer;
     }
-    .round-summary-download {
+    .round-summary-downloads {
       position: absolute;
       left: 0;
       top: -48px;
+      display: flex;
+      gap: 8px;
+    }
+    .round-summary-download {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -917,6 +921,7 @@
       font-size: .72rem;
       font-weight: 900;
       cursor: pointer;
+      white-space: nowrap;
     }
     .round-summary-download:hover { background: var(--orange-2); }
     .round-summary-download:disabled { opacity: .68; cursor: wait; }
@@ -1253,6 +1258,19 @@
       .summary-personal-name { padding: 3px 6px; font-size: .54rem; }
     }
 
+    @media (max-width: 640px) {
+      .round-summary { padding-top: 112px; }
+      .round-summary-shell { max-height: calc(100vh - 132px); }
+      .round-summary-preview { max-height: calc(100vh - 140px); }
+      .round-summary-downloads {
+        top: -94px;
+        right: 0;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .round-summary-download { min-height: 38px; padding: 7px 8px; font-size: .56rem; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       * { scroll-behavior: auto !important; transition: none !important; }
     }
@@ -1312,7 +1330,7 @@
       <div class="season-path" id="season-path" aria-label="Трасса сезона"></div>
       <div class="board">
         <div class="board-head">
-          <div><h2 id="season-title">Сезон · июль</h2><p>Круг за кругом — личная история устойчивого движения</p></div>
+          <div><h2 id="season-title">Старт сезона 26 июня</h2><p>Круг за кругом — личная история устойчивого движения</p></div>
           <span class="board-rule">Порядок участников не меняется: это не рейтинг</span>
         </div>
         <div class="history-wrap">
@@ -1367,7 +1385,10 @@
 
   <div class="round-summary" id="round-summary" hidden>
     <div class="round-summary-shell" role="dialog" aria-modal="true" aria-label="Командная сводка круга">
-      <button class="round-summary-download" id="round-summary-download" type="button">Скачать PNG · 1600 × 1050</button>
+      <div class="round-summary-downloads">
+        <button class="round-summary-download" id="round-summary-download" type="button">Скачать PNG · 1600 × 1050</button>
+        <button class="round-summary-download" id="round-summary-story-download" type="button">Скачать PNG · 1080 × 1920</button>
+      </div>
       <button class="round-summary-close" id="round-summary-close" type="button" aria-label="Закрыть сводку">×</button>
       <img class="round-summary-preview" id="round-summary-preview" alt="">
     </div>
@@ -1414,18 +1435,18 @@
     */
     const BOARD_DATA = {
       demo: false,
-      season: "Июль",
+      season: "Старт сезона 26 июня",
       timeZone: "Europe/Moscow",
-      selectedRound: 7,
+      selectedRound: 8,
       rounds: [
         {
           number: 1,
-          dates: "29 июня–11 июля",
+          dates: "26 июня–11 июля",
           updated: "13 июля 2026",
           status: "closed",
           marks: {
             "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
-            "Лена": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
+            "Лена · болид №10": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Юля": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
             "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." }
           }
@@ -1437,7 +1458,7 @@
           status: "closed",
           marks: {
             "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
-            "Лена": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
+            "Лена · болид №10": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Юля": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Ира": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
@@ -1452,7 +1473,7 @@
           status: "closed",
           marks: {
             "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
-            "Лена": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
+            "Лена · болид №10": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Юля": { entered: false, finished: false, pit: true, late: false, lastMark: "Пит-стоп отмечен. Вернуться на трек можно в своём темпе." },
             "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Женя": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
@@ -1469,7 +1490,7 @@
           status: "closed",
           marks: {
             "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
-            "Лена": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Лена · болид №10": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
             "Ира · болид №8": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
             "Аня · болид №22": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Даша": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
@@ -1490,7 +1511,7 @@
             "Женя": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Таня · болид №11": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
-            "Лена": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
+            "Лена · болид №10": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Болид №7": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Лена · болид №3": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Юля · болид №17": { entered: false, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." }
@@ -1499,16 +1520,16 @@
         {
           number: 6,
           dates: "10–15 августа",
-          updated: "18 августа 2026",
+          updated: "24 августа 2026",
           status: "closed",
           marks: {
             "Таня · болид №11": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
-            "Лена · болид №3": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Лена · болид №3": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Болид №7": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
             "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Женя": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
-            "Лена": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Лена · болид №10": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Юля · болид №17": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
             "Аня · болид №22": { entered: false, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." }
           }
@@ -1516,19 +1537,36 @@
         {
           number: 7,
           dates: "17–22 августа",
-          updated: "18 августа 2026",
+          updated: "24 августа 2026",
+          status: "closed",
+          marks: {
+            "Аня · болид №22": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
+            "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Таня · болид №11": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
+            "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
+            "Лена · болид №10": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
+            "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
+            "Болид №7": { entered: false, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
+            "Лена · болид №3": { entered: false, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." }
+          }
+        },
+        {
+          number: 8,
+          dates: "24–29 августа",
+          updated: "24 августа 2026",
           status: "active",
           marks: {
+            "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
             "Аня · болид №22": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
-            "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
-            "Таня · болид №11": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." }
+            "Таня · болид №11": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Лена · болид №3": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." }
           }
         }
       ],
       members: [
         { name: "Аня", profileUrl: "https://t.me/c/4389010152/2/80", joinedRound: 1, firstReport: "2026-07-06" },
         { name: "Юля", joinedRound: 1, firstReport: "2026-07-06", trackPauses: [{ pausedAt: "2026-07-27", resumedAt: null }] },
-        { name: "Лена", profileUrl: "https://t.me/c/4389010152/2/201", joinedRound: 1, firstReport: "2026-07-06" },
+        { name: "Лена · болид №10", profileUrl: "https://t.me/c/4389010152/2/201", joinedRound: 1, firstReport: "2026-07-06" },
         { name: "Женя · болид №9", joinedRound: 1, firstReport: "2026-07-06" },
         { name: "Женя", profileUrl: "https://t.me/c/4389010152/2/197", joinedRound: 2, firstReport: "2026-07-13" },
         { name: "Ира", joinedRound: 2, firstReport: "2026-07-14", trackPauses: [{ pausedAt: "2026-07-27", resumedAt: null }] },
@@ -1543,8 +1581,8 @@
         { name: "Лена · болид №3", joinedRound: 5, firstReport: "2026-08-05" }
       ],
       celebration: {
-        id: "round-7-start-v1",
-        round: 7
+        id: "round-8-start-v1",
+        round: 8
       }
     };
 
@@ -1699,7 +1737,7 @@
       document.getElementById("week-updated").textContent = "Последняя отметка: " + round.updated;
       document.getElementById("current-round-title").textContent = "Круг " + round.number + " · " + round.dates;
       document.querySelector(".current-round-label").textContent = round.status === "active" ? "Сейчас едем" : "Круг завершён";
-      document.getElementById("season-title").textContent = "Сезон · " + BOARD_DATA.season.toLowerCase();
+      document.getElementById("season-title").textContent = BOARD_DATA.season;
       document.getElementById("demo-badge").hidden = !BOARD_DATA.demo;
     }
 
@@ -1826,11 +1864,13 @@
       const layer = document.getElementById("round-summary");
       const close = document.getElementById("round-summary-close");
       const download = document.getElementById("round-summary-download");
+      const storyDownload = document.getElementById("round-summary-story-download");
       const preview = document.getElementById("round-summary-preview");
       opener.classList.add("is-loading");
       opener.setAttribute("aria-busy", "true");
       try {
         download.disabled = true;
+        storyDownload.disabled = true;
         download.textContent = "Готовлю превью…";
         const canvas = await createRoundSummaryCanvas(round);
         preview.src = canvas.toDataURL("image/png");
@@ -1838,8 +1878,15 @@
         layer.hidden = false;
         document.body.classList.add("summary-open");
         download.disabled = false;
+        storyDownload.disabled = false;
         download.textContent = "Скачать PNG · 1600 × 1050";
+        storyDownload.textContent = "Скачать PNG · 1080 × 1920";
         download.onclick = () => downloadRoundSummary(round, canvas, download);
+        let storyCanvas = null;
+        storyDownload.onclick = async () => {
+          if (!storyCanvas) storyCanvas = await createRoundStoryCanvas(round);
+          downloadRoundStory(round, storyCanvas, storyDownload);
+        };
         close.focus();
 
         const dismiss = () => {
@@ -2091,6 +2138,142 @@
         return canvas;
     }
 
+    async function createRoundStoryCanvas(round) {
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      const summary = roundSummaryData(round);
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1920;
+      const ctx = canvas.getContext("2d");
+      const green = "#2d4f36";
+      const orange = "#ec8502";
+      const beige = "#ffefcd";
+      const paper = "#fffdf7";
+      const muted = "#6f7d72";
+      const trackImage = await canvasLoadImage("track.webp");
+
+      const background = ctx.createLinearGradient(0, 0, 1080, 1920);
+      background.addColorStop(0, paper);
+      background.addColorStop(.58, "#fffaf0");
+      background.addColorStop(1, beige);
+      ctx.fillStyle = background;
+      ctx.fillRect(0, 0, 1080, 1920);
+
+      const topGlow = ctx.createRadialGradient(1010, 30, 10, 1010, 30, 420);
+      topGlow.addColorStop(0, "rgba(236,133,2,.22)");
+      topGlow.addColorStop(1, "rgba(236,133,2,0)");
+      ctx.fillStyle = topGlow;
+      ctx.fillRect(560, 0, 520, 480);
+      if (trackImage) {
+        ctx.save();
+        ctx.globalAlpha = .045;
+        ctx.drawImage(trackImage, 420, 1050, 880, 880);
+        ctx.restore();
+      }
+
+      const headerParts = [
+        ["ЖАЖДА ПОРЯДКА", green],
+        [" • КОМАНДНАЯ СВОДКА", orange]
+      ];
+      canvasFont(ctx, 900, 25);
+      let headerX = 70;
+      headerParts.forEach(([label, color]) => {
+        ctx.fillStyle = color;
+        ctx.fillText(label, headerX, 86);
+        headerX += ctx.measureText(label).width;
+      });
+
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 62);
+      const title = round.status === "active" ? "КРУГ " + round.number + " · СЕЙЧАС ЕДЕМ" : "ИТОГИ КРУГА " + round.number;
+      ctx.fillText(title, 70, 178);
+      ctx.fillStyle = muted;
+      canvasFont(ctx, 800, 29);
+      ctx.fillText(round.dates, 72, 228);
+
+      ctx.strokeStyle = "rgba(45,79,54,.25)";
+      ctx.lineWidth = 4;
+      ctx.setLineDash([14, 14]);
+      ctx.beginPath();
+      ctx.moveTo(70, 275);
+      ctx.lineTo(1010, 275);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      canvasCard(ctx, 70, 320, 940, 290, 38, green);
+      ctx.fillStyle = "rgba(255,255,255,.82)";
+      canvasFont(ctx, 900, 30);
+      ctx.fillText("УЧАСТНИКОВ В КРУГЕ", 115, 385);
+      ctx.fillStyle = "#ffffff";
+      canvasFont(ctx, 900, 132);
+      ctx.fillText(String(summary.participants.length), 110, 555);
+
+      canvasCard(ctx, 70, 650, 940, 420, 38, orange);
+      ctx.fillStyle = "rgba(255,255,255,.86)";
+      canvasFont(ctx, 900, 30);
+      ctx.fillText("ЧЕК-ПОИНТОВ ЗА КРУГ", 115, 718);
+      ctx.fillStyle = "#ffffff";
+      canvasFont(ctx, 900, 142);
+      ctx.fillText(String(summary.entered + summary.finished), 110, 900);
+      canvasCard(ctx, 110, 955, 400, 76, 38, "rgba(255,255,255,.94)");
+      canvasCard(ctx, 570, 955, 400, 76, 38, "rgba(255,255,255,.94)");
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 25);
+      ctx.fillText("● ЗАЕЗДЫ: " + summary.entered, 310, 993);
+      ctx.fillStyle = orange;
+      ctx.fillText("⚑ ФИНИШИ: " + summary.finished, 770, 993);
+      ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
+
+      canvasCard(ctx, 70, 1110, 940, 430, 38, "rgba(255,255,255,.8)", "rgba(45,79,54,.18)", 3);
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 30);
+      ctx.fillText("ЧЕК-ПОИНТОВ ЗА СЕЗОН", 115, 1180);
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 142);
+      ctx.fillText(String(summary.seasonCheckpoints), 110, 1365);
+      canvasCard(ctx, 110, 1430, 400, 76, 38, beige);
+      canvasCard(ctx, 570, 1430, 400, 76, 38, beige);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 25);
+      ctx.fillText("● ЗАЕЗДЫ: " + summary.seasonEntered, 310, 1468);
+      ctx.fillStyle = orange;
+      ctx.fillText("⚑ ФИНИШИ: " + summary.seasonFinished, 770, 1468);
+      ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
+
+      canvasCard(ctx, 70, 1585, 940, 185, 34, "rgba(255,255,255,.66)");
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 46);
+      ctx.fillText("МЯГКО, НО ЕДЕМ.", 115, 1660);
+      ctx.fillStyle = muted;
+      canvasFont(ctx, 800, 25);
+      ctx.fillText("Цифры показывают движение команды, а не сравнивают скорость.", 115, 1715);
+
+      ctx.strokeStyle = "rgba(45,79,54,.23)";
+      ctx.lineWidth = 3;
+      ctx.setLineDash([14, 14]);
+      ctx.beginPath();
+      ctx.moveTo(70, 1815);
+      ctx.lineTo(1010, 1815);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 28);
+      ctx.fillText("«Жажда порядка»", 70, 1870);
+      ctx.fillStyle = orange;
+      canvasFont(ctx, 800, 22);
+      ctx.textAlign = "right";
+      ctx.fillText("@ZhenyaHabatulina", 1010, 1870);
+      ctx.textAlign = "left";
+
+      return canvas;
+    }
+
     async function downloadRoundSummary(round, canvas, button) {
       const originalText = button.textContent;
       button.disabled = true;
@@ -2099,6 +2282,31 @@
         const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
         const link = document.createElement("a");
         link.download = "zhazhda-poryadka-krug-" + round.number + ".png";
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          link.href = url;
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } else {
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        }
+        button.textContent = "PNG скачан ✓";
+        setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 1800);
+      } catch (error) {
+        button.textContent = "Не удалось скачать";
+        setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 2200);
+      }
+    }
+
+    async function downloadRoundStory(round, canvas, button) {
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "Готовлю PNG…";
+      try {
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+        const link = document.createElement("a");
+        link.download = "zhazhda-poryadka-krug-" + round.number + "-stories.png";
         if (blob) {
           const url = URL.createObjectURL(blob);
           link.href = url;
