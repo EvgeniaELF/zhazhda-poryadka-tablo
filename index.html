@@ -1438,6 +1438,10 @@
       season: "Старт сезона 26 июня",
       seasonStarted: "2026-06-26",
       timeZone: "Europe/Moscow",
+      projectPlaces: {
+        occupied: 11,
+        capacity: 16
+      },
       selectedRound: 8,
       rounds: [
         {
@@ -2161,7 +2165,9 @@
     async function createRoundStoryCanvas(round) {
       if (document.fonts && document.fonts.ready) await document.fonts.ready;
       const summary = roundSummaryData(round);
-      const seasonDays = seasonDaysForRound(round);
+      const participantsInRace = summary.participants.length;
+      const occupiedPlaces = BOARD_DATA.projectPlaces.occupied;
+      const placeCapacity = BOARD_DATA.projectPlaces.capacity;
       const canvas = document.createElement("canvas");
       canvas.width = 1080;
       canvas.height = 1920;
@@ -2221,63 +2227,57 @@
       ctx.stroke();
       ctx.setLineDash([]);
 
-      canvasCard(ctx, 70, 320, 940, 290, 38, green);
-      ctx.fillStyle = "rgba(255,255,255,.82)";
-      canvasFont(ctx, 900, 30);
-      ctx.fillText("СЕЗОН НА ТРЕКЕ", 115, 385);
+      canvasCard(ctx, 70, 320, 450, 450, 38, green);
+      ctx.fillStyle = "rgba(255,255,255,.84)";
+      canvasFont(ctx, 900, 27);
+      ctx.fillText("МЕСТ НА ТРЕКЕ", 110, 390);
+      ctx.fillText("ЗАНЯТО", 110, 430);
       ctx.fillStyle = "#ffffff";
-      canvasFont(ctx, 900, 132);
-      ctx.fillText(String(seasonDays), 110, 535);
-      ctx.fillStyle = "rgba(255,255,255,.86)";
-      canvasFont(ctx, 900, 28);
-      ctx.fillText("ДНЕЙ С 26 ИЮНЯ", 115, 580);
+      canvasFont(ctx, 900, 92);
+      ctx.fillText(occupiedPlaces + " ИЗ " + placeCapacity, 105, 675);
 
-      canvasCard(ctx, 70, 650, 940, 420, 38, orange);
-      ctx.fillStyle = "rgba(255,255,255,.86)";
-      canvasFont(ctx, 900, 30);
-      ctx.fillText("ЧЕК-ПОИНТОВ ЗА КРУГ", 115, 718);
+      canvasCard(ctx, 560, 320, 450, 450, 38, orange);
+      ctx.fillStyle = "rgba(255,255,255,.88)";
+      canvasFont(ctx, 900, 27);
+      ctx.fillText("В ЗАЕЗДЕ", 600, 390);
+      ctx.fillText("ЭТОГО КРУГА", 600, 430);
       ctx.fillStyle = "#ffffff";
-      canvasFont(ctx, 900, 142);
-      ctx.fillText(String(summary.entered + summary.finished), 110, 900);
-      canvasCard(ctx, 110, 940, 250, 96, 34, "rgba(255,255,255,.94)");
-      canvasCard(ctx, 415, 940, 250, 96, 34, "rgba(255,255,255,.94)");
-      canvasCard(ctx, 720, 940, 250, 96, 34, "rgba(255,255,255,.94)");
+      canvasFont(ctx, 900, 138);
+      ctx.fillText(String(participantsInRace), 595, 690);
+
+      canvasCard(ctx, 70, 820, 940, 340, 38, "rgba(255,255,255,.84)", "rgba(236,133,2,.28)", 3);
+      ctx.fillStyle = orange;
+      canvasFont(ctx, 900, 30);
+      ctx.fillText("ЧЕК-ПОИНТОВ ЗА КРУГ", 115, 885);
+      canvasFont(ctx, 900, 118);
+      ctx.fillText(String(summary.entered + summary.finished), 110, 1035);
+      canvasCard(ctx, 110, 1060, 400, 70, 34, beige);
+      canvasCard(ctx, 570, 1060, 400, 70, 34, beige);
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillStyle = green;
-      canvasFont(ctx, 900, 34);
-      ctx.fillText(String(summary.entered), 235, 970);
-      canvasFont(ctx, 900, 17);
-      ctx.fillText("ЗАЕЗДОВ", 235, 1012);
+      canvasFont(ctx, 900, 24);
+      ctx.fillText("● ЗАЕЗДЫ: " + summary.entered, 310, 1095);
       ctx.fillStyle = orange;
-      canvasFont(ctx, 900, 34);
-      ctx.fillText(String(summary.finished), 540, 970);
-      canvasFont(ctx, 900, 17);
-      ctx.fillText("ФИНИШЕЙ", 540, 1012);
-      ctx.fillStyle = green;
-      canvasFont(ctx, 900, 34);
-      ctx.fillText(String(summary.participants.length), 845, 970);
-      canvasFont(ctx, 900, 17);
-      ctx.fillText("УЧАСТНИКОВ", 845, 1012);
+      ctx.fillText("⚑ ФИНИШИ: " + summary.finished, 770, 1095);
       ctx.textAlign = "left";
       ctx.textBaseline = "alphabetic";
 
-      canvasCard(ctx, 70, 1110, 940, 430, 38, "rgba(255,255,255,.8)", "rgba(45,79,54,.18)", 3);
+      canvasCard(ctx, 70, 1200, 940, 340, 38, "rgba(255,255,255,.84)", "rgba(45,79,54,.18)", 3);
       ctx.fillStyle = green;
       canvasFont(ctx, 900, 30);
-      ctx.fillText("ЧЕК-ПОИНТОВ ЗА СЕЗОН", 115, 1180);
-      ctx.fillStyle = green;
-      canvasFont(ctx, 900, 142);
-      ctx.fillText(String(summary.seasonCheckpoints), 110, 1365);
-      canvasCard(ctx, 110, 1430, 400, 76, 38, beige);
-      canvasCard(ctx, 570, 1430, 400, 76, 38, beige);
+      ctx.fillText("ЧЕК-ПОИНТОВ ЗА СЕЗОН", 115, 1265);
+      canvasFont(ctx, 900, 118);
+      ctx.fillText(String(summary.seasonCheckpoints), 110, 1415);
+      canvasCard(ctx, 110, 1440, 400, 70, 34, beige);
+      canvasCard(ctx, 570, 1440, 400, 70, 34, beige);
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillStyle = green;
-      canvasFont(ctx, 900, 25);
-      ctx.fillText("● ЗАЕЗДЫ: " + summary.seasonEntered, 310, 1468);
+      canvasFont(ctx, 900, 24);
+      ctx.fillText("● ЗАЕЗДЫ: " + summary.seasonEntered, 310, 1475);
       ctx.fillStyle = orange;
-      ctx.fillText("⚑ ФИНИШИ: " + summary.seasonFinished, 770, 1468);
+      ctx.fillText("⚑ ФИНИШИ: " + summary.seasonFinished, 770, 1475);
       ctx.textAlign = "left";
       ctx.textBaseline = "alphabetic";
 
