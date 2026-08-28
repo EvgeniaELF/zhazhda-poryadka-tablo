@@ -715,6 +715,16 @@
       border-color: rgba(45,79,54,.12);
       font-size: .82rem;
     }
+    .lap.pit-bridge { overflow: visible; }
+    .lap.pit-bridge::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      border-top: 3px dashed rgba(45,79,54,.28);
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+    .lap.pit-bridge::after { left: -10px; right: -10px; }
     .lap.future { background: rgba(255,255,255,.55); }
     .lap.not-joined { background: transparent; border-color: transparent; box-shadow: none; }
     .lap-marks { display: flex; gap: 6px; align-items: center; justify-content: center; }
@@ -1527,7 +1537,7 @@
           number: 6,
           dates: "10–15 августа",
           endDate: "2026-08-15",
-          updated: "24 августа 2026",
+          updated: "28 августа 2026",
           status: "closed",
           marks: {
             "Таня · болид №11": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
@@ -1538,7 +1548,8 @@
             "Женя": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Лена · болид №10": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Юля · болид №17": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
-            "Аня · болид №22": { entered: false, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." }
+            "Аня · болид №22": { entered: false, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
+            "Нина": { entered: false, finished: false, pit: true, late: false, lastMark: "Пит-стоп отмечен. Вернуться на трек можно в своём темпе." }
           }
         },
         {
@@ -1562,7 +1573,7 @@
           number: 8,
           dates: "24–29 августа",
           endDate: "2026-08-29",
-          updated: "26 августа 2026",
+          updated: "28 августа 2026",
           status: "active",
           marks: {
             "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
@@ -1570,7 +1581,8 @@
             "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
             "Аня · болид №22": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
             "Таня · болид №11": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
-            "Лена · болид №3": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." }
+            "Лена · болид №3": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Ира · болид №8": { entered: false, finished: false, pit: true, late: false, lastMark: "Пит-стоп отмечен. Вернуться на трек можно в своём темпе." }
           }
         }
       ],
@@ -1581,10 +1593,10 @@
         { name: "Женя · болид №9", joinedRound: 1, firstReport: "2026-07-06" },
         { name: "Женя", profileUrl: "https://t.me/c/4389010152/2/197", joinedRound: 2, firstReport: "2026-07-13" },
         { name: "Ира", joinedRound: 2, firstReport: "2026-07-14", trackPauses: [{ pausedAt: "2026-07-27", resumedAt: null }] },
-        { name: "Нина", joinedRound: 2, firstReport: "2026-07-17" },
+        { name: "Нина", joinedRound: 2, firstReport: "2026-07-17", trackPauses: [{ pausedAt: "2026-08-11", resumedAt: null }] },
         { name: "Болид №7", joinedRound: 3, firstReport: "2026-07-20" },
         { name: "Света", profileUrl: "https://t.me/c/4389010152/2/75", joinedRound: 3, firstReport: "2026-07-22" },
-        { name: "Ира · болид №8", joinedRound: 3, firstReport: "2026-07-26" },
+        { name: "Ира · болид №8", joinedRound: 3, firstReport: "2026-07-26", trackPauses: [{ pausedAt: "2026-08-27", resumedAt: null }] },
         { name: "Аня · болид №22", profileUrl: "https://t.me/c/4389010152/2/331", joinedRound: 4, firstReport: "2026-07-28" },
         { name: "Даша", joinedRound: 4, firstReport: "2026-07-29" },
         { name: "Юля · болид №17", joinedRound: 5, firstReport: "2026-08-11" },
@@ -3148,6 +3160,15 @@
         const activePitStopRound = isOnPitStop
           ? BOARD_DATA.rounds.find(item => Boolean(item.marks[person.name]?.pit))?.number
           : null;
+        const lastCheckpointRoundBeforePit = activePitStopRound != null
+          ? BOARD_DATA.rounds
+              .filter(item => item.number < activePitStopRound)
+              .filter(item => {
+                const itemMark = item.marks[person.name] || {};
+                return Boolean(itemMark.entered || itemMark.finished);
+              })
+              .reduce((lastRound, item) => Math.max(lastRound, item.number), 0)
+          : null;
         if (isOnPitStop && !pitStopSectionAdded) {
           const divider = document.createElement("div");
           divider.className = "pit-stop-divider history-pit-stop-divider";
@@ -3202,14 +3223,24 @@
           const isPit = Boolean(mark.pit) && !hasStart && !hasFinish;
           const notJoined = (person.joinedRound || 1) > round.number;
           const pitStopContinues = activePitStopRound != null && round.number > activePitStopRound;
+          const emptyBeforePit = activePitStopRound != null
+            && lastCheckpointRoundBeforePit > 0
+            && round.number > lastCheckpointRoundBeforePit
+            && round.number < activePitStopRound
+            && !hasStart
+            && !hasFinish
+            && !isPit;
           const value = notJoined ? "not-joined" : pitStopContinues ? "paused" : isPit ? "pit" : hasStart && hasFinish ? "both" : hasStart ? "start-only" : hasFinish ? "finish-only" : "future";
           const canOpenStory = !notJoined && !pitStopContinues && !isPit && (hasStart || hasFinish);
           const cell = document.createElement(canOpenStory ? "button" : "div");
           if (canOpenStory) cell.type = "button";
-          cell.className = "lap " + (value === "paused" ? "not-joined" : value) + (canOpenStory ? " is-story" : "");
+          cell.className = "lap "
+            + (value === "paused" || emptyBeforePit ? "not-joined" : value)
+            + (emptyBeforePit ? " pit-bridge" : "")
+            + (canOpenStory ? " is-story" : "");
           cell.setAttribute("role", "cell");
-          if (notJoined || pitStopContinues) {
-            // Пустой фон: участник ещё не был на этом круге.
+          if (notJoined || pitStopContinues || emptyBeforePit) {
+            // Пустой фон: до вступления, перед началом пит-стопа или во время продолжающейся паузы.
           } else if (isPit) {
             cell.textContent = "🔧";
           } else {
@@ -3226,7 +3257,7 @@
             marks.append(start, finish);
             cell.appendChild(marks);
           }
-          const readable = notJoined ? "ещё не участвовала" : pitStopContinues ? "пит-стоп продолжается" : { both: "заезд и финиш отмечены", "start-only": "отмечен только заезд", "finish-only": "отмечен только финиш", pit: "пит-стоп", future: "отметок ещё нет" }[value];
+          const readable = notJoined ? "ещё не участвовала" : pitStopContinues ? "пит-стоп продолжается" : emptyBeforePit ? "до начала пит-стопа чек-поинтов нет" : { both: "заезд и финиш отмечены", "start-only": "отмечен только заезд", "finish-only": "отмечен только финиш", pit: "пит-стоп", future: "отметок ещё нет" }[value];
           if (canOpenStory) {
             cell.title = "Открыть и скачать карточку: " + person.name + ", " + lapName;
             cell.setAttribute("aria-label", "Открыть и скачать личную карточку: " + person.name + ", " + lapName + ", " + readable);
