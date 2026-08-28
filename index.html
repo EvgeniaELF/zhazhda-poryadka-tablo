@@ -630,7 +630,7 @@
       display: grid;
       grid-template-columns: var(--history-name-column) var(--history-total-column) repeat(var(--round-count, 2), minmax(88px, .75fr));
       gap: var(--history-column-gap);
-      min-width: 720px;
+      min-width: calc(var(--history-name-column) + var(--history-total-column) + var(--history-scroll-columns-width, 203px));
       align-items: center;
     }
     .history-head { padding: 9px 6px; color: var(--muted); font-size: .72rem; font-weight: 900; text-align: center; text-transform: uppercase; }
@@ -3162,6 +3162,10 @@
       const grid = document.getElementById("history-grid");
       grid.replaceChildren();
       grid.style.setProperty("--round-count", BOARD_DATA.rounds.length);
+      grid.style.setProperty(
+        "--history-scroll-columns-width",
+        BOARD_DATA.rounds.length * 88 + (BOARD_DATA.rounds.length + 1) * 9 + "px"
+      );
       ["Участник", "Отмечено", ...BOARD_DATA.rounds.map(round => "Круг " + round.number)].forEach(label => {
         const head = document.createElement("div");
         head.className = "history-head";
