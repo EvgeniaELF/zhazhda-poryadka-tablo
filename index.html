@@ -2097,6 +2097,26 @@
       ctx.textBaseline = "alphabetic";
     }
 
+    function canvasSymbolBrandStrip(ctx, markImage, x, centerY, markSize, segments, maxWidth, fontSize) {
+      if (markImage) ctx.drawImage(markImage, x, centerY - markSize / 2, markSize, markSize);
+      canvasFont(ctx, 900, fontSize);
+      const textX = x + markSize + 18;
+      const textWidth = segments.reduce((width, [label]) => width + ctx.measureText(label).width, 0);
+      const scale = Math.min(1, (maxWidth - textX) / textWidth);
+      let cursorX = 0;
+      ctx.save();
+      ctx.translate(textX, centerY);
+      ctx.scale(scale, 1);
+      ctx.textBaseline = "middle";
+      segments.forEach(([label, color]) => {
+        ctx.fillStyle = color;
+        ctx.fillText(label, cursorX, 0);
+        cursorX += ctx.measureText(label).width;
+      });
+      ctx.restore();
+      ctx.textBaseline = "alphabetic";
+    }
+
     async function createRoundSummaryCanvas(round) {
         if (document.fonts && document.fonts.ready) await document.fonts.ready;
         const summary = roundSummaryData(round);
@@ -2254,9 +2274,9 @@
       const orangeSoft = "#fff0d8";
       const paper = "#fffdf7";
       const muted = "#6f7d72";
-      const [trackImage, brandLogoImage] = await Promise.all([
+      const [trackImage, brandMarkImage] = await Promise.all([
         canvasLoadImage("track.webp"),
-        canvasLoadImage("logo-compact-color.svg")
+        canvasLoadImage("logo-mark-micro-color.svg")
       ]);
 
       const background = ctx.createLinearGradient(0, 0, 1080, 1920);
@@ -2281,10 +2301,11 @@
       ctx.save();
       ctx.translate(0, 50);
 
-      canvasBrandStrip(ctx, brandLogoImage, 70, 88, 340, [
+      canvasSymbolBrandStrip(ctx, brandMarkImage, 70, 88, 88, [
+        ["ЖАЖДА ПОРЯДКА", green],
         [" • КОМАНДНАЯ СВОДКА", orange],
         [" • МЯГКО, НО ЕДЕМ", green]
-      ], 1010, 35);
+      ], 1010, 32);
 
       ctx.fillStyle = green;
       const roundTitle = "КРУГ " + round.number;
@@ -2581,10 +2602,10 @@
       const paper = "#fffdf7";
       const cream = "#fff9ec";
       const muted = "#6f7d72";
-      const [trackImage, helmetImage, brandLogoImage] = await Promise.all([
+      const [trackImage, helmetImage, brandMarkImage] = await Promise.all([
         canvasLoadImage("track.webp"),
         canvasLoadImage("helmet.webp"),
-        canvasLoadImage("logo-compact-color.svg")
+        canvasLoadImage("logo-mark-micro-color.svg")
       ]);
 
       const background = ctx.createLinearGradient(0, 0, 1080, 1920);
@@ -2598,10 +2619,11 @@
       ctx.fillStyle = glow;
       ctx.fillRect(590, 0, 490, 520);
 
-      canvasBrandStrip(ctx, brandLogoImage, 70, 120, 340, [
+      canvasSymbolBrandStrip(ctx, brandMarkImage, 70, 120, 88, [
+        ["ЖАЖДА ПОРЯДКА", green],
         [" • ЛИЧНЫЙ ТРЕК", orange],
         [" • МЯГКО, НО ЕДУ", green]
-      ], 1010, 40);
+      ], 1010, 34);
 
       canvasCard(ctx, 70, 230, 940, 260, 42, "rgba(255,255,255,.76)", "rgba(45,79,54,.13)", 3);
       ctx.fillStyle = orange;
@@ -2738,10 +2760,10 @@
       const beige = "#ffefcd";
       const paper = "#fffdf7";
       const muted = "#6f7d72";
-      const [trackImage, helmetImage, brandLogoImage] = await Promise.all([
+      const [trackImage, helmetImage, brandMarkImage] = await Promise.all([
         canvasLoadImage("track.webp"),
         canvasLoadImage("helmet.webp"),
-        canvasLoadImage("logo-compact-color.svg")
+        canvasLoadImage("logo-mark-micro-color.svg")
       ]);
 
       const background = ctx.createLinearGradient(0, 0, 1080, 1920);
@@ -2767,10 +2789,11 @@
         ctx.restore();
       }
 
-      canvasBrandStrip(ctx, brandLogoImage, 70, 88, 340, [
+      canvasSymbolBrandStrip(ctx, brandMarkImage, 70, 88, 88, [
+        ["ЖАЖДА ПОРЯДКА", green],
         [" • ЛИЧНЫЙ ТРЕК", orange],
         [" • ПИТ-СТОП", green]
-      ], 1010, 40);
+      ], 1010, 34);
 
       canvasCard(ctx, 70, 156, 940, 250, 42, "rgba(255,255,255,.78)", "rgba(45,79,54,.13)", 3);
       ctx.fillStyle = orange;
