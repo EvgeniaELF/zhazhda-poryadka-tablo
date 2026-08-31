@@ -106,10 +106,15 @@
       text-transform: uppercase;
     }
 
-    .hero h1 { margin: 0; }
-    .hero-logo {
-      width: min(500px, 92%);
-      height: auto;
+    .hero h1 {
+      max-width: 680px;
+      margin: 0;
+      color: var(--orange-2);
+      font-size: clamp(2.65rem, 7vw, 5.5rem);
+      font-weight: 900;
+      line-height: .92;
+      letter-spacing: -.05em;
+      text-shadow: 0 4px 0 rgba(0,0,0,.09);
     }
 
     .hero-lead {
@@ -826,7 +831,7 @@
       box-shadow: var(--shadow-small);
     }
     .about-logo {
-      width: min(330px, 100%);
+      width: min(430px, 100%);
       margin-bottom: 17px;
     }
     .about-kicker {
@@ -1256,7 +1261,6 @@
       .history-grid { --history-name-column: 145px; --history-total-column: 96px; }
       .hero { grid-template-columns: 1fr; min-height: 690px; border-radius: 28px; }
       .hero-copy { padding: 30px 23px 0; }
-      .hero-logo { width: min(430px, 96%); }
       .hero-visual { min-height: 380px; }
       .hero-visual::before { width: 380px; height: 380px; right: 50%; bottom: -72px; transform: translateX(50%); }
       .hero-elf { width: min(455px, 112%); right: 50%; bottom: -74px; transform: translateX(50%); }
@@ -1330,7 +1334,7 @@
     <header class="hero">
       <div class="hero-copy">
         <p class="brand-kicker"><span aria-hidden="true">🏎️</span> Онлайн-табло</p>
-        <h1><img class="hero-logo" src="logo-horizontal-reverse.svg" alt="Жажда порядка"></h1>
+        <h1>«Жажда порядка»</h1>
         <p class="hero-lead">Мы едем с разной скоростью, но отмечаем круги вместе. Здесь видно, кто заехал на трек, кто финишировал и сколько пути уже пройдено.</p>
         <p class="hero-note"><span aria-hidden="true">✓</span> Эльфийка-штурман бережно ведёт табло команды.</p>
       </div>
@@ -1417,7 +1421,7 @@
 
     <section class="about-project" aria-labelledby="about-title">
       <div>
-        <img class="about-logo" src="logo-horizontal-color.svg" alt="Жажда порядка">
+        <img class="about-logo" src="logo-compact-color.svg" alt="Жажда порядка">
         <p class="about-kicker">О проекте</p>
         <h2 id="about-title">«Жажда порядка» — это про скорость достижения целей.</h2>
         <p class="about-lead">Чем лучше организована информация, тем меньше времени теряется на хаос и тем быстрее ты приходишь туда, куда хочешь.</p>
@@ -2072,6 +2076,27 @@
       });
     }
 
+    function canvasBrandStrip(ctx, logoImage, x, centerY, logoWidth, segments, maxWidth, fontSize) {
+      const logoHeight = logoImage ? logoWidth * logoImage.height / logoImage.width : 0;
+      if (logoImage) ctx.drawImage(logoImage, x, centerY - logoHeight / 2, logoWidth, logoHeight);
+      canvasFont(ctx, 900, fontSize);
+      const textX = x + logoWidth + 16;
+      const textWidth = segments.reduce((width, [label]) => width + ctx.measureText(label).width, 0);
+      const scale = Math.min(1, (maxWidth - textX) / textWidth);
+      let cursorX = 0;
+      ctx.save();
+      ctx.translate(textX, centerY);
+      ctx.scale(scale, 1);
+      ctx.textBaseline = "middle";
+      segments.forEach(([label, color]) => {
+        ctx.fillStyle = color;
+        ctx.fillText(label, cursorX, 0);
+        cursorX += ctx.measureText(label).width;
+      });
+      ctx.restore();
+      ctx.textBaseline = "alphabetic";
+    }
+
     async function createRoundSummaryCanvas(round) {
         if (document.fonts && document.fonts.ready) await document.fonts.ready;
         const summary = roundSummaryData(round);
@@ -2088,7 +2113,7 @@
         const [trackImage, elfImage, brandLogoImage] = await Promise.all([
           canvasLoadImage("track.webp"),
           canvasLoadImage("elf-checklist-finish.png"),
-          canvasLoadImage("logo-horizontal-color.svg")
+          canvasLoadImage("logo-compact-color.svg")
         ]);
 
         const background = ctx.createLinearGradient(0, 0, 1600, 1050);
@@ -2102,13 +2127,10 @@
         ctx.fillStyle = glow;
         ctx.fillRect(1100, 0, 500, 440);
 
-        if (brandLogoImage) ctx.drawImage(brandLogoImage, 80, 30, 300, 100);
-        ctx.fillStyle = orange;
-        canvasFont(ctx, 900, 25);
-        ctx.fillText("КОМАНДНАЯ СВОДКА", 420, 72);
-        ctx.fillStyle = green;
-        canvasFont(ctx, 900, 20);
-        ctx.fillText("МЯГКО, НО ЕДЕМ", 420, 105);
+        canvasBrandStrip(ctx, brandLogoImage, 80, 84, 300, [
+          [" • КОМАНДНАЯ СВОДКА", orange],
+          [" • МЯГКО, НО ЕДЕМ", green]
+        ], 1520, 25);
         ctx.fillStyle = green;
         canvasFont(ctx, 900, 60);
         const title = round.status === "active" ? "Круг " + round.number + " · сейчас едем" : "Итоги круга " + round.number;
@@ -2234,7 +2256,7 @@
       const muted = "#6f7d72";
       const [trackImage, brandLogoImage] = await Promise.all([
         canvasLoadImage("track.webp"),
-        canvasLoadImage("logo-horizontal-color.svg")
+        canvasLoadImage("logo-compact-color.svg")
       ]);
 
       const background = ctx.createLinearGradient(0, 0, 1080, 1920);
@@ -2259,15 +2281,10 @@
       ctx.save();
       ctx.translate(0, 50);
 
-      if (brandLogoImage) ctx.drawImage(brandLogoImage, 70, 25, 285, 95);
-      canvasCard(ctx, 704, 45, 306, 58, 29, orange);
-      ctx.fillStyle = "#ffffff";
-      canvasFont(ctx, 900, 19);
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText("КОМАНДНАЯ СВОДКА", 857, 74);
-      ctx.textAlign = "left";
-      ctx.textBaseline = "alphabetic";
+      canvasBrandStrip(ctx, brandLogoImage, 70, 82, 285, [
+        [" • КОМАНДНАЯ СВОДКА", orange],
+        [" • МЯГКО, НО ЕДЕМ", green]
+      ], 1010, 20);
 
       ctx.fillStyle = green;
       const roundTitle = "КРУГ " + round.number;
@@ -2568,7 +2585,7 @@
       const [trackImage, helmetImage, brandLogoImage] = await Promise.all([
         canvasLoadImage("track.webp"),
         canvasLoadImage("helmet.webp"),
-        canvasLoadImage("logo-horizontal-color.svg")
+        canvasLoadImage("logo-compact-color.svg")
       ]);
 
       const background = ctx.createLinearGradient(0, 0, 1080, 1920);
@@ -2582,13 +2599,10 @@
       ctx.fillStyle = glow;
       ctx.fillRect(590, 0, 490, 520);
 
-      if (brandLogoImage) ctx.drawImage(brandLogoImage, 70, 65, 300, 100);
-      ctx.fillStyle = orange;
-      canvasFont(ctx, 900, 27);
-      ctx.fillText("ЛИЧНЫЙ ТРЕК", 420, 112);
-      ctx.fillStyle = green;
-      canvasFont(ctx, 900, 22);
-      ctx.fillText("МЯГКО, НО ЕДУ", 420, 151);
+      canvasBrandStrip(ctx, brandLogoImage, 70, 120, 300, [
+        [" • ЛИЧНЫЙ ТРЕК", orange],
+        [" • МЯГКО, НО ЕДУ", green]
+      ], 1010, 25);
 
       canvasCard(ctx, 70, 230, 940, 260, 42, "rgba(255,255,255,.76)", "rgba(45,79,54,.13)", 3);
       ctx.fillStyle = orange;
@@ -2728,7 +2742,7 @@
       const [trackImage, helmetImage, brandLogoImage] = await Promise.all([
         canvasLoadImage("track.webp"),
         canvasLoadImage("helmet.webp"),
-        canvasLoadImage("logo-horizontal-color.svg")
+        canvasLoadImage("logo-compact-color.svg")
       ]);
 
       const background = ctx.createLinearGradient(0, 0, 1080, 1920);
@@ -2754,13 +2768,10 @@
         ctx.restore();
       }
 
-      if (brandLogoImage) ctx.drawImage(brandLogoImage, 70, 25, 300, 100);
-      ctx.fillStyle = orange;
-      canvasFont(ctx, 900, 27);
-      ctx.fillText("ЛИЧНЫЙ ТРЕК", 420, 72);
-      ctx.fillStyle = green;
-      canvasFont(ctx, 900, 22);
-      ctx.fillText("ПИТ-СТОП", 420, 111);
+      canvasBrandStrip(ctx, brandLogoImage, 70, 82, 300, [
+        [" • ЛИЧНЫЙ ТРЕК", orange],
+        [" • ПИТ-СТОП", green]
+      ], 1010, 25);
 
       canvasCard(ctx, 70, 156, 940, 250, 42, "rgba(255,255,255,.78)", "rgba(45,79,54,.13)", 3);
       ctx.fillStyle = orange;
