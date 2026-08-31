@@ -634,7 +634,27 @@
       text-align: center;
     }
 
-    .history-wrap { position: relative; z-index: 1; overflow-x: auto; padding: 12px 27px 27px; }
+    .history-wrap { position: relative; z-index: 1; padding: 12px 27px 27px; }
+    .history-scroll-top {
+      height: 17px;
+      margin: 0 0 10px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      overscroll-behavior-x: contain;
+      scrollbar-color: rgba(45,79,54,.48) rgba(45,79,54,.08);
+      scrollbar-width: thin;
+    }
+    .history-scroll-top[hidden] { display: none; }
+    .history-scroll-top::-webkit-scrollbar { height: 11px; }
+    .history-scroll-top::-webkit-scrollbar-track { background: rgba(45,79,54,.08); border-radius: 999px; }
+    .history-scroll-top::-webkit-scrollbar-thumb { background: rgba(45,79,54,.48); border-radius: 999px; }
+    .history-scroll-top-inner { height: 1px; }
+    .history-scroll-content {
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+    .history-scroll-content::-webkit-scrollbar { display: none; }
     .history-grid {
       --history-name-column: 190px;
       --history-total-column: 112px;
@@ -1388,9 +1408,14 @@
         </div>
         <div class="history-wrap">
           <p class="personal-story-hint"><b aria-hidden="true">↓</b> Нажмите на отметки нужного круга, чтобы открыть и скачать личную карточку</p>
-          <div class="history-grid" id="history-grid" role="table" aria-label="История кругов команды"></div>
-          <div class="history-legend" aria-label="Обозначения истории">
-            <span>● заезд на трек</span><span>⚑ финиш круга</span><span>● + ⚑ оба чек-поинта</span><span>🔧 пит-стоп</span>
+          <div class="history-scroll-top" id="history-scroll-top" aria-label="Прокрутка кругов истории" tabindex="0">
+            <div class="history-scroll-top-inner" id="history-scroll-top-inner"></div>
+          </div>
+          <div class="history-scroll-content" id="history-scroll-content" tabindex="0" aria-label="История кругов команды с горизонтальной прокруткой">
+            <div class="history-grid" id="history-grid" role="table" aria-label="История кругов команды"></div>
+            <div class="history-legend" aria-label="Обозначения истории">
+              <span>● заезд на трек</span><span>⚑ финиш круга</span><span>● + ⚑ оба чек-поинта</span><span>🔧 пит-стоп</span>
+            </div>
           </div>
         </div>
       </div>
@@ -3324,7 +3349,35 @@
         });
 
       });
+      requestAnimationFrame(syncHistoryScrollbars);
     }
+
+    const historyScrollTop = document.getElementById("history-scroll-top");
+    const historyScrollTopInner = document.getElementById("history-scroll-top-inner");
+    const historyScrollContent = document.getElementById("history-scroll-content");
+    let historyScrollSyncing = false;
+
+    function syncHistoryScrollbars() {
+      const grid = document.getElementById("history-grid");
+      if (!grid || !historyScrollTop || !historyScrollTopInner || !historyScrollContent) return;
+      historyScrollTopInner.style.width = grid.scrollWidth + "px";
+      historyScrollTop.hidden = grid.scrollWidth <= historyScrollContent.clientWidth + 1;
+      historyScrollTop.scrollLeft = historyScrollContent.scrollLeft;
+    }
+
+    historyScrollTop.addEventListener("scroll", () => {
+      if (historyScrollSyncing) return;
+      historyScrollSyncing = true;
+      historyScrollContent.scrollLeft = historyScrollTop.scrollLeft;
+      requestAnimationFrame(() => { historyScrollSyncing = false; });
+    }, { passive: true });
+
+    historyScrollContent.addEventListener("scroll", () => {
+      if (historyScrollSyncing) return;
+      historyScrollSyncing = true;
+      historyScrollTop.scrollLeft = historyScrollContent.scrollLeft;
+      requestAnimationFrame(() => { historyScrollSyncing = false; });
+    }, { passive: true });
 
     const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
     tabs.forEach(tab => {
@@ -3334,7 +3387,10 @@
           item.setAttribute("aria-selected", active ? "true" : "false");
           document.getElementById(item.getAttribute("aria-controls")).hidden = !active;
         });
-        if (tab.getAttribute("aria-controls") === "view-history") scheduleSeasonRouteDraw();
+        if (tab.getAttribute("aria-controls") === "view-history") {
+          scheduleSeasonRouteDraw();
+          requestAnimationFrame(syncHistoryScrollbars);
+        }
       });
       tab.addEventListener("keydown", event => {
         if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
@@ -3351,7 +3407,10 @@
     renderParticipants();
     renderHistory();
     renderSeasonPath();
-    window.addEventListener("resize", scheduleSeasonRouteDraw, { passive: true });
+    window.addEventListener("resize", () => {
+      scheduleSeasonRouteDraw();
+      syncHistoryScrollbars();
+    }, { passive: true });
     document.fonts?.ready.then(scheduleSeasonRouteDraw);
     showCelebration();
   </script>
