@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 400 400">
+  <title>Жажда порядка — знак для малых размеров</title>
+  <g transform="translate(25 -32)">
+    <path d="M72 332 C161 373 296 338 326 241 C351 158 286 93 204 108 C137 120 99 173 107 239"
+          fill="none" stroke="#2d4f36" stroke-width="62" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M96 321 C173 345 272 313 289 237 C302 181 261 143 209 149 C164 154 142 190 147 226"
+          fill="none" stroke="#ec8502" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="330" cy="225" r="20" fill="#ffefcd"/>
+  </g>
+</svg>

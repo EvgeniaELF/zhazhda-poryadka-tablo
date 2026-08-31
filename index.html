@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#2d4f36">
   <meta name="description" content="Онлайн-табло кругов проекта «Жажда порядка»">
   <title>Табло кругов · Жажда порядка</title>
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="logo-mark-micro-color.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -61,9 +61,9 @@
     .hero {
       position: relative;
       display: grid;
-      grid-template-columns: minmax(0, 1.15fr) minmax(270px, .65fr);
+      grid-template-columns: minmax(0, 1.08fr) minmax(350px, .92fr);
       align-items: center;
-      min-height: 355px;
+      min-height: 430px;
       overflow: hidden;
       color: var(--white);
       background:
@@ -87,7 +87,7 @@
     .hero-copy {
       position: relative;
       z-index: 2;
-      padding: 40px 12px 40px 46px;
+      padding: 42px 12px 42px 46px;
     }
 
     .brand-kicker {
@@ -106,20 +106,15 @@
       text-transform: uppercase;
     }
 
-    .hero h1 {
-      max-width: 680px;
-      margin: 0;
-      color: var(--orange-2);
-      font-size: clamp(2.65rem, 7vw, 5.5rem);
-      font-weight: 900;
-      line-height: .92;
-      letter-spacing: -.05em;
-      text-shadow: 0 4px 0 rgba(0,0,0,.09);
+    .hero h1 { margin: 0; }
+    .hero-logo {
+      width: min(500px, 92%);
+      height: auto;
     }
 
     .hero-lead {
       max-width: 610px;
-      margin: 22px 0 0;
+      margin: 18px 0 0;
       color: rgba(255,255,255,.9);
       font-size: clamp(1rem, 2vw, 1.2rem);
       line-height: 1.55;
@@ -138,15 +133,27 @@
     .hero-visual {
       position: relative;
       align-self: stretch;
-      min-height: 355px;
+      min-height: 430px;
+    }
+
+    .hero-visual::before {
+      content: "";
+      position: absolute;
+      width: 410px;
+      height: 410px;
+      right: -5px;
+      bottom: -58px;
+      background: rgba(255,239,205,.95);
+      border: 10px solid rgba(255,255,255,.38);
+      border-radius: 50%;
     }
 
     .hero-elf {
       position: absolute;
       z-index: 2;
-      width: min(385px, 106%);
-      right: -8px;
-      bottom: -35px;
+      width: min(500px, 118%);
+      right: -20px;
+      bottom: -72px;
       filter: drop-shadow(0 18px 18px rgba(0,0,0,.23));
     }
 
@@ -818,6 +825,10 @@
       border-radius: var(--radius-xl);
       box-shadow: var(--shadow-small);
     }
+    .about-logo {
+      width: min(330px, 100%);
+      margin-bottom: 17px;
+    }
     .about-kicker {
       margin: 0 0 8px;
       color: var(--orange);
@@ -885,6 +896,7 @@
       font-size: .76rem;
     }
     footer strong { color: var(--green); font-weight: 900; }
+    .footer-logo { width: 240px; height: auto; }
 
     body.summary-open { overflow: hidden; }
     .round-summary[hidden] { display: none; }
@@ -1227,9 +1239,10 @@
     @keyframes confetti-fall { 0% { transform: translateY(-10px) rotate(0); } 100% { transform: translateY(430px) rotate(540deg); } }
 
     @media (max-width: 900px) {
-      .hero { grid-template-columns: 1fr 300px; }
+      .hero { grid-template-columns: 1fr 340px; }
       .hero-copy { padding-left: 36px; }
-      .hero-elf { width: 390px; right: -42px; }
+      .hero-visual::before { right: -55px; }
+      .hero-elf { width: 455px; right: -60px; }
       .metrics { grid-template-columns: repeat(2, 1fr); }
       .participants { grid-template-columns: 1fr; }
       .season-path { gap: clamp(28px, 6vw, 70px); }
@@ -1241,10 +1254,12 @@
     @media (max-width: 680px) {
       .page { width: min(100% - 18px, 1180px); padding-top: 9px; }
       .history-grid { --history-name-column: 145px; --history-total-column: 96px; }
-      .hero { grid-template-columns: 1fr; min-height: 555px; border-radius: 28px; }
+      .hero { grid-template-columns: 1fr; min-height: 690px; border-radius: 28px; }
       .hero-copy { padding: 30px 23px 0; }
-      .hero-visual { min-height: 290px; }
-      .hero-elf { width: min(350px, 94%); right: 50%; bottom: -28px; transform: translateX(50%); }
+      .hero-logo { width: min(430px, 96%); }
+      .hero-visual { min-height: 380px; }
+      .hero-visual::before { width: 380px; height: 380px; right: 50%; bottom: -72px; transform: translateX(50%); }
+      .hero-elf { width: min(455px, 112%); right: 50%; bottom: -74px; transform: translateX(50%); }
       .week-bar { grid-template-columns: 1fr; }
       .week-meta { justify-items: start; }
       .demo-badge { justify-self: start; }
@@ -1275,6 +1290,7 @@
       .principles { grid-template-columns: 1fr; }
       .about-project { grid-template-columns: 1fr; padding: 22px; }
       footer { align-items: flex-start; flex-direction: column; }
+      .footer-logo { width: 240px; }
       .celebration-card { grid-template-columns: 1fr; justify-items: center; text-align: center; }
       .celebration-card img { width: 145px; }
     }
@@ -1314,12 +1330,12 @@
     <header class="hero">
       <div class="hero-copy">
         <p class="brand-kicker"><span aria-hidden="true">🏎️</span> Онлайн-табло</p>
-        <h1>«Жажда порядка»</h1>
+        <h1><img class="hero-logo" src="logo-horizontal-reverse.svg" alt="Жажда порядка"></h1>
         <p class="hero-lead">Мы едем с разной скоростью, но отмечаем круги вместе. Здесь видно, кто заехал на трек, кто финишировал и сколько пути уже пройдено.</p>
         <p class="hero-note"><span aria-hidden="true">✓</span> Эльфийка-штурман бережно ведёт табло команды.</p>
       </div>
       <div class="hero-visual" aria-hidden="true">
-        <img class="hero-elf" src="elf.webp" alt="">
+        <img class="hero-elf" src="elf-checklist-finish.png" alt="">
       </div>
     </header>
 
@@ -1401,6 +1417,7 @@
 
     <section class="about-project" aria-labelledby="about-title">
       <div>
+        <img class="about-logo" src="logo-horizontal-color.svg" alt="Жажда порядка">
         <p class="about-kicker">О проекте</p>
         <h2 id="about-title">«Жажда порядка» — это про скорость достижения целей.</h2>
         <p class="about-lead">Чем лучше организована информация, тем меньше времени теряется на хаос и тем быстрее ты приходишь туда, куда хочешь.</p>
@@ -1413,7 +1430,7 @@
       </aside>
     </section>
 
-    <footer><strong>Мягко, но едем.</strong><span>«Жажда порядка»</span></footer>
+    <footer><strong>Мягко, но едем.</strong><img class="footer-logo" src="logo-horizontal-color.svg" alt="Жажда порядка"></footer>
   </main>
 
   <div class="round-summary" id="round-summary" hidden>
@@ -2068,9 +2085,10 @@
         const cream = "#fff9ec";
         const paper = "#fffdf7";
         const muted = "#6f7d72";
-        const [trackImage, elfImage] = await Promise.all([
+        const [trackImage, elfImage, brandLogoImage] = await Promise.all([
           canvasLoadImage("track.webp"),
-          canvasLoadImage("elf.webp")
+          canvasLoadImage("elf-checklist-finish.png"),
+          canvasLoadImage("logo-horizontal-color.svg")
         ]);
 
         const background = ctx.createLinearGradient(0, 0, 1600, 1050);
@@ -2084,33 +2102,28 @@
         ctx.fillStyle = glow;
         ctx.fillRect(1100, 0, 500, 440);
 
-        const summaryHeaderParts = [
-          ["ЖАЖДА ПОРЯДКА", green],
-          [" • КОМАНДНАЯ СВОДКА", orange],
-          [" • МЯГКО, НО ЕДЕМ", green]
-        ];
-        canvasFont(ctx, 900, 30);
-        let summaryHeaderX = 80;
-        summaryHeaderParts.forEach(([label, color]) => {
-          ctx.fillStyle = color;
-          ctx.fillText(label, summaryHeaderX, 84);
-          summaryHeaderX += ctx.measureText(label).width;
-        });
+        if (brandLogoImage) ctx.drawImage(brandLogoImage, 80, 30, 300, 100);
+        ctx.fillStyle = orange;
+        canvasFont(ctx, 900, 25);
+        ctx.fillText("КОМАНДНАЯ СВОДКА", 420, 72);
         ctx.fillStyle = green;
-        canvasFont(ctx, 900, 64);
+        canvasFont(ctx, 900, 20);
+        ctx.fillText("МЯГКО, НО ЕДЕМ", 420, 105);
+        ctx.fillStyle = green;
+        canvasFont(ctx, 900, 60);
         const title = round.status === "active" ? "Круг " + round.number + " · сейчас едем" : "Итоги круга " + round.number;
-        ctx.fillText(title, 80, 166);
+        ctx.fillText(title, 80, 190);
         ctx.fillStyle = muted;
         canvasFont(ctx, 800, 30);
-        ctx.fillText(round.dates, 80, 216);
+        ctx.fillText(round.dates, 80, 232);
 
         if (round.status === "active") {
-          canvasCard(ctx, 1180, 160, 340, 58, 29, orange);
+          canvasCard(ctx, 1180, 177, 340, 58, 29, orange);
           ctx.fillStyle = "#ffffff";
           canvasFont(ctx, 900, 23);
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.fillText("Данные на " + currentDataDate(), 1350, 190);
+          ctx.fillText("Данные на " + currentDataDate(), 1350, 207);
           ctx.textAlign = "left";
           ctx.textBaseline = "alphabetic";
         }
@@ -2219,7 +2232,10 @@
       const orangeSoft = "#fff0d8";
       const paper = "#fffdf7";
       const muted = "#6f7d72";
-      const trackImage = await canvasLoadImage("track.webp");
+      const [trackImage, brandLogoImage] = await Promise.all([
+        canvasLoadImage("track.webp"),
+        canvasLoadImage("logo-horizontal-color.svg")
+      ]);
 
       const background = ctx.createLinearGradient(0, 0, 1080, 1920);
       background.addColorStop(0, paper);
@@ -2243,12 +2259,7 @@
       ctx.save();
       ctx.translate(0, 50);
 
-      ctx.fillStyle = green;
-      canvasFont(ctx, 900, 28);
-      ctx.fillText("ЖАЖДА ПОРЯДКА", 70, 84);
-      ctx.fillStyle = orange;
-      canvasFont(ctx, 900, 20);
-      ctx.fillText("ТРЕК ЗДОРОВОЙ ПРОДУКТИВНОСТИ", 70, 121);
+      if (brandLogoImage) ctx.drawImage(brandLogoImage, 70, 25, 285, 95);
       canvasCard(ctx, 704, 45, 306, 58, 29, orange);
       ctx.fillStyle = "#ffffff";
       canvasFont(ctx, 900, 19);
@@ -2379,12 +2390,10 @@
       ctx.lineTo(1010, 1510);
       ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle = green;
-      canvasFont(ctx, 900, 34);
-      ctx.fillText("«Жажда порядка»", 70, 1575);
+      if (brandLogoImage) ctx.drawImage(brandLogoImage, 70, 1518, 300, 100);
       ctx.fillStyle = orange;
       canvasFont(ctx, 900, 29);
-      ctx.fillText("ХОЧЕШЬ НА ТРЕК? → @ZhenyaHabatulina", 70, 1630);
+      ctx.fillText("ХОЧЕШЬ НА ТРЕК? → @ZhenyaHabatulina", 70, 1668);
       ctx.textAlign = "left";
       ctx.restore();
 
@@ -2556,9 +2565,10 @@
       const paper = "#fffdf7";
       const cream = "#fff9ec";
       const muted = "#6f7d72";
-      const [trackImage, helmetImage] = await Promise.all([
+      const [trackImage, helmetImage, brandLogoImage] = await Promise.all([
         canvasLoadImage("track.webp"),
-        canvasLoadImage("helmet.webp")
+        canvasLoadImage("helmet.webp"),
+        canvasLoadImage("logo-horizontal-color.svg")
       ]);
 
       const background = ctx.createLinearGradient(0, 0, 1080, 1920);
@@ -2572,25 +2582,13 @@
       ctx.fillStyle = glow;
       ctx.fillRect(590, 0, 490, 520);
 
-      const storyHeaderParts = [
-        ["ЖАЖДА ПОРЯДКА", green],
-        [" • ЛИЧНЫЙ ТРЕК", orange],
-        [" • МЯГКО, НО ЕДУ", green]
-      ];
-      canvasFont(ctx, 900, 34);
-      ctx.textAlign = "left";
-      const storyHeaderWidth = storyHeaderParts.reduce((width, [label]) => width + ctx.measureText(label).width, 0);
-      const storyHeaderScale = 940 / storyHeaderWidth;
-      let storyHeaderX = 0;
-      ctx.save();
-      ctx.translate(70, 0);
-      ctx.scale(storyHeaderScale, 1);
-      storyHeaderParts.forEach(([label, color]) => {
-        ctx.fillStyle = color;
-        ctx.fillText(label, storyHeaderX, 176);
-        storyHeaderX += ctx.measureText(label).width;
-      });
-      ctx.restore();
+      if (brandLogoImage) ctx.drawImage(brandLogoImage, 70, 65, 300, 100);
+      ctx.fillStyle = orange;
+      canvasFont(ctx, 900, 27);
+      ctx.fillText("ЛИЧНЫЙ ТРЕК", 420, 112);
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 22);
+      ctx.fillText("МЯГКО, НО ЕДУ", 420, 151);
 
       canvasCard(ctx, 70, 230, 940, 260, 42, "rgba(255,255,255,.76)", "rgba(45,79,54,.13)", 3);
       ctx.fillStyle = orange;
@@ -2727,9 +2725,10 @@
       const beige = "#ffefcd";
       const paper = "#fffdf7";
       const muted = "#6f7d72";
-      const [trackImage, helmetImage] = await Promise.all([
+      const [trackImage, helmetImage, brandLogoImage] = await Promise.all([
         canvasLoadImage("track.webp"),
-        canvasLoadImage("helmet.webp")
+        canvasLoadImage("helmet.webp"),
+        canvasLoadImage("logo-horizontal-color.svg")
       ]);
 
       const background = ctx.createLinearGradient(0, 0, 1080, 1920);
@@ -2755,25 +2754,13 @@
         ctx.restore();
       }
 
-      const headerParts = [
-        ["ЖАЖДА ПОРЯДКА", green],
-        [" • ЛИЧНЫЙ ТРЕК", orange],
-        [" • ПИТ-СТОП", green]
-      ];
-      canvasFont(ctx, 900, 34);
-      ctx.textAlign = "left";
-      const headerWidth = headerParts.reduce((width, [label]) => width + ctx.measureText(label).width, 0);
-      const headerScale = Math.min(1, 940 / headerWidth);
-      let headerX = 0;
-      ctx.save();
-      ctx.translate(70, 0);
-      ctx.scale(headerScale, 1);
-      headerParts.forEach(([label, color]) => {
-        ctx.fillStyle = color;
-        ctx.fillText(label, headerX, 116);
-        headerX += ctx.measureText(label).width;
-      });
-      ctx.restore();
+      if (brandLogoImage) ctx.drawImage(brandLogoImage, 70, 25, 300, 100);
+      ctx.fillStyle = orange;
+      canvasFont(ctx, 900, 27);
+      ctx.fillText("ЛИЧНЫЙ ТРЕК", 420, 72);
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 22);
+      ctx.fillText("ПИТ-СТОП", 420, 111);
 
       canvasCard(ctx, 70, 156, 940, 250, 42, "rgba(255,255,255,.78)", "rgba(45,79,54,.13)", 3);
       ctx.fillStyle = orange;
