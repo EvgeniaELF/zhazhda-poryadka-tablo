@@ -2127,10 +2127,10 @@
         ctx.fillStyle = glow;
         ctx.fillRect(1100, 0, 500, 440);
 
-        canvasBrandStrip(ctx, brandLogoImage, 80, 84, 300, [
+        canvasBrandStrip(ctx, brandLogoImage, 80, 84, 390, [
           [" • КОМАНДНАЯ СВОДКА", orange],
           [" • МЯГКО, НО ЕДЕМ", green]
-        ], 1520, 25);
+        ], 1520, 42);
         ctx.fillStyle = green;
         canvasFont(ctx, 900, 60);
         const title = round.status === "active" ? "Круг " + round.number + " · сейчас едем" : "Итоги круга " + round.number;
@@ -2284,7 +2284,7 @@
       canvasBrandStrip(ctx, brandLogoImage, 70, 82, 285, [
         [" • КОМАНДНАЯ СВОДКА", orange],
         [" • МЯГКО, НО ЕДЕМ", green]
-      ], 1010, 20);
+      ], 1010, 26);
 
       ctx.fillStyle = green;
       const roundTitle = "КРУГ " + round.number;
@@ -2407,10 +2407,9 @@
       ctx.lineTo(1010, 1510);
       ctx.stroke();
       ctx.setLineDash([]);
-      if (brandLogoImage) ctx.drawImage(brandLogoImage, 70, 1518, 300, 100);
       ctx.fillStyle = orange;
-      canvasFont(ctx, 900, 29);
-      ctx.fillText("ХОЧЕШЬ НА ТРЕК? → @ZhenyaHabatulina", 70, 1668);
+      canvasFont(ctx, 900, 32);
+      ctx.fillText("ХОЧЕШЬ НА ТРЕК? → @ZhenyaHabatulina", 70, 1590);
       ctx.textAlign = "left";
       ctx.restore();
 
@@ -2602,7 +2601,7 @@
       canvasBrandStrip(ctx, brandLogoImage, 70, 120, 300, [
         [" • ЛИЧНЫЙ ТРЕК", orange],
         [" • МЯГКО, НО ЕДУ", green]
-      ], 1010, 25);
+      ], 1010, 33);
 
       canvasCard(ctx, 70, 230, 940, 260, 42, "rgba(255,255,255,.76)", "rgba(45,79,54,.13)", 3);
       ctx.fillStyle = orange;
@@ -2771,7 +2770,7 @@
       canvasBrandStrip(ctx, brandLogoImage, 70, 82, 300, [
         [" • ЛИЧНЫЙ ТРЕК", orange],
         [" • ПИТ-СТОП", green]
-      ], 1010, 25);
+      ], 1010, 34);
 
       canvasCard(ctx, 70, 156, 940, 250, 42, "rgba(255,255,255,.78)", "rgba(45,79,54,.13)", 3);
       ctx.fillStyle = orange;
