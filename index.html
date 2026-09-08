@@ -554,13 +554,14 @@
 
     .season-path {
       position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: clamp(32px, 5vw, 96px);
-      min-height: 198px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      align-items: start;
+      column-gap: clamp(24px, 4vw, 68px);
+      row-gap: 42px;
+      min-height: 0;
       margin-bottom: 16px;
-      padding: 24px;
+      padding: 30px 48px 58px;
       overflow: hidden;
       background:
         linear-gradient(rgba(255,253,247,.9), rgba(255,253,247,.9)),
@@ -1283,7 +1284,7 @@
       .hero-elf { width: 455px; right: -60px; }
       .metrics { grid-template-columns: repeat(2, 1fr); }
       .participants { grid-template-columns: 1fr; }
-      .season-path { gap: clamp(28px, 6vw, 70px); }
+      .season-path { column-gap: clamp(22px, 4vw, 40px); }
       .logic-grid { grid-template-columns: 1fr; }
       .logic-card { display: grid; grid-template-columns: 210px 1fr; }
       .logic-visual { height: 100%; min-height: 200px; }
@@ -1930,6 +1931,19 @@
       seasonRouteFrame = requestAnimationFrame(drawSeasonRoute);
     }
 
+    function layoutSeasonStops() {
+      const path = document.getElementById("season-path");
+      const stops = Array.from(path.querySelectorAll(".path-stop"));
+      const columns = window.matchMedia("(max-width: 680px)").matches ? 2 : 5;
+      stops.forEach((stop, index) => {
+        const row = Math.floor(index / columns) + 1;
+        const position = index % columns;
+        const column = row % 2 ? position + 1 : columns - position;
+        stop.style.gridColumn = String(column);
+        stop.style.gridRow = String(row);
+      });
+    }
+
     function renderSeasonPath() {
       const path = document.getElementById("season-path");
       path.replaceChildren();
@@ -1944,10 +1958,6 @@
         stop.type = "button";
         stop.className = "path-stop " + round.status;
         stop.dataset.round = String(round.number);
-        const row = Math.floor(index / 2) + 1;
-        const column = row % 2 ? index % 2 + 1 : 2 - (index % 2);
-        stop.style.gridColumn = String(column);
-        stop.style.gridRow = String(row);
         if (round.number === BOARD_DATA.selectedRound) stop.setAttribute("aria-current", "step");
         stop.setAttribute("aria-label", "Открыть сводку круга " + round.number + ", " + round.dates);
         stop.title = "Открыть итоги круга " + round.number;
@@ -1966,6 +1976,7 @@
       hint.className = "season-path-hint";
       hint.textContent = "Нажмите на круг, чтобы открыть командную сводку";
       path.appendChild(hint);
+      layoutSeasonStops();
       scheduleSeasonRouteDraw();
     }
 
@@ -3503,6 +3514,7 @@
     renderHistory();
     renderSeasonPath();
     window.addEventListener("resize", () => {
+      layoutSeasonStops();
       scheduleSeasonRouteDraw();
       syncHistoryScrollbars();
     }, { passive: true });
