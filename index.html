@@ -636,20 +636,27 @@
     }
 
     .history-wrap { position: relative; z-index: 1; padding: 12px 27px 27px; }
-    .history-scroll-top {
+    .history-scroll-top,
+    .history-scroll-bottom {
       height: 17px;
-      margin: 0 0 10px;
       overflow-x: auto;
       overflow-y: hidden;
       overscroll-behavior-x: contain;
       scrollbar-color: rgba(45,79,54,.48) rgba(45,79,54,.08);
       scrollbar-width: thin;
     }
-    .history-scroll-top[hidden] { display: none; }
-    .history-scroll-top::-webkit-scrollbar { height: 11px; }
-    .history-scroll-top::-webkit-scrollbar-track { background: rgba(45,79,54,.08); border-radius: 999px; }
-    .history-scroll-top::-webkit-scrollbar-thumb { background: rgba(45,79,54,.48); border-radius: 999px; }
-    .history-scroll-top-inner { height: 1px; }
+    .history-scroll-top { margin: 0 0 10px; }
+    .history-scroll-bottom { margin: 10px 0 0; }
+    .history-scroll-top[hidden],
+    .history-scroll-bottom[hidden] { display: none; }
+    .history-scroll-top::-webkit-scrollbar,
+    .history-scroll-bottom::-webkit-scrollbar { height: 11px; }
+    .history-scroll-top::-webkit-scrollbar-track,
+    .history-scroll-bottom::-webkit-scrollbar-track { background: rgba(45,79,54,.08); border-radius: 999px; }
+    .history-scroll-top::-webkit-scrollbar-thumb,
+    .history-scroll-bottom::-webkit-scrollbar-thumb { background: rgba(45,79,54,.48); border-radius: 999px; }
+    .history-scroll-top-inner,
+    .history-scroll-bottom-inner { height: 1px; }
     .history-scroll-content {
       overflow-x: auto;
       overscroll-behavior-x: contain;
@@ -1430,6 +1437,9 @@
             <div class="history-legend" aria-label="Обозначения истории">
               <span>● заезд на трек</span><span>⚑ финиш круга</span><span>● + ⚑ оба чек-поинта</span><span>●⏸ осознанная пауза · 1 чек-поинт</span><span>🔧 пит-стоп</span>
             </div>
+          </div>
+          <div class="history-scroll-bottom" id="history-scroll-bottom" aria-label="Прокрутка кругов истории внизу" tabindex="0">
+            <div class="history-scroll-bottom-inner" id="history-scroll-bottom-inner"></div>
           </div>
         </div>
       </div>
@@ -3461,21 +3471,36 @@
 
     const historyScrollTop = document.getElementById("history-scroll-top");
     const historyScrollTopInner = document.getElementById("history-scroll-top-inner");
+    const historyScrollBottom = document.getElementById("history-scroll-bottom");
+    const historyScrollBottomInner = document.getElementById("history-scroll-bottom-inner");
     const historyScrollContent = document.getElementById("history-scroll-content");
     let historyScrollSyncing = false;
 
     function syncHistoryScrollbars() {
       const grid = document.getElementById("history-grid");
-      if (!grid || !historyScrollTop || !historyScrollTopInner || !historyScrollContent) return;
+      if (!grid || !historyScrollTop || !historyScrollTopInner || !historyScrollBottom || !historyScrollBottomInner || !historyScrollContent) return;
       historyScrollTopInner.style.width = grid.scrollWidth + "px";
-      historyScrollTop.hidden = grid.scrollWidth <= historyScrollContent.clientWidth + 1;
+      historyScrollBottomInner.style.width = grid.scrollWidth + "px";
+      const noOverflow = grid.scrollWidth <= historyScrollContent.clientWidth + 1;
+      historyScrollTop.hidden = noOverflow;
+      historyScrollBottom.hidden = noOverflow;
       historyScrollTop.scrollLeft = historyScrollContent.scrollLeft;
+      historyScrollBottom.scrollLeft = historyScrollContent.scrollLeft;
     }
 
     historyScrollTop.addEventListener("scroll", () => {
       if (historyScrollSyncing) return;
       historyScrollSyncing = true;
       historyScrollContent.scrollLeft = historyScrollTop.scrollLeft;
+      historyScrollBottom.scrollLeft = historyScrollTop.scrollLeft;
+      requestAnimationFrame(() => { historyScrollSyncing = false; });
+    }, { passive: true });
+
+    historyScrollBottom.addEventListener("scroll", () => {
+      if (historyScrollSyncing) return;
+      historyScrollSyncing = true;
+      historyScrollContent.scrollLeft = historyScrollBottom.scrollLeft;
+      historyScrollTop.scrollLeft = historyScrollBottom.scrollLeft;
       requestAnimationFrame(() => { historyScrollSyncing = false; });
     }, { passive: true });
 
@@ -3483,6 +3508,7 @@
       if (historyScrollSyncing) return;
       historyScrollSyncing = true;
       historyScrollTop.scrollLeft = historyScrollContent.scrollLeft;
+      historyScrollBottom.scrollLeft = historyScrollContent.scrollLeft;
       requestAnimationFrame(() => { historyScrollSyncing = false; });
     }, { passive: true });
 
