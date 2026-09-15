@@ -2610,7 +2610,7 @@
     }
 
     function personalStoryState(mark, roundNumber) {
-      if (roundNumber >= 11) {
+      if (roundNumber >= 10) {
         if (mark.skip) {
           return {
             phrase: "Пауза — тоже часть маршрута. Еду в своём темпе",
@@ -2652,34 +2652,6 @@
         return {
           phrase: "Я не сошла с дистанции. Я выбрала паузу",
           lines: ["Я не сошла", "с дистанции.", "Я выбрала паузу"],
-          fontSize: 66,
-          lineHeight: 82
-        };
-      }
-      if (roundNumber >= 10) {
-        if (mark.entered && mark.finished) {
-          return {
-            phrase: "Мой темп. Мой маршрут. Мой финиш",
-            lines: ["Мой темп.", "Мой маршрут.", "Мой финиш"]
-          };
-        }
-        if (mark.entered) {
-          return {
-            phrase: "Маршрут выбран. Я на треке",
-            lines: ["Маршрут выбран.", "Я на треке"]
-          };
-        }
-        if (mark.finished) {
-          return {
-            phrase: "Отмечаю не идеальность, а реальное движение",
-            lines: ["Отмечаю", "не идеальность,", "а реальное движение"],
-            fontSize: 62,
-            lineHeight: 78
-          };
-        }
-        return {
-          phrase: "Пристегнись. Наводим порядок в делах",
-          lines: ["Пристегнись.", "Наводим порядок", "в делах"],
           fontSize: 66,
           lineHeight: 82
         };
