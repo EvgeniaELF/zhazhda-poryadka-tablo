@@ -1542,7 +1542,7 @@
       season: "Старт сезона 26 июня",
       seasonStarted: "2026-06-26",
       timeZone: "Europe/Moscow",
-      selectedRound: 10,
+      selectedRound: 11,
       rounds: [
         {
           number: 1,
@@ -1702,16 +1702,32 @@
           number: 10,
           dates: "7–12 сентября",
           endDate: "2026-09-12",
-          updated: "8 сентября 2026",
+          updated: "15 сентября 2026",
+          status: "closed",
+          marks: {
+            "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 10-го круга отмечен. Оба чек-поинта круга приняты." },
+            "Даша · болид №5": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 10-го круга отмечен. Оба чек-поинта круга приняты." },
+            "Аня · болид №22": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 10-го круга отмечен. Оба чек-поинта круга приняты." },
+            "Женя": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш после возвращения на трек отмечен. Оба чек-поинта круга приняты." },
+            "Лена · болид №10": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 10-го круга отмечен. Оба чек-поинта круга приняты." },
+            "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 10-го круга отмечен. Оба чек-поинта круга приняты." },
+            "Даша": { entered: false, finished: false, pit: true, late: false, lastMark: "Пит-стоп с 6 сентября 2026. Вернуться на трек можно в своём темпе." }
+          }
+        },
+        {
+          number: 11,
+          dates: "14–19 сентября",
+          endDate: "2026-09-19",
+          updated: "15 сентября 2026",
           status: "active",
           marks: {
-            "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на новый круг отмечен. Финишной отметки пока нет." },
-            "Даша · болид №5": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на новый круг отмечен. Финишной отметки пока нет." },
-            "Аня · болид №22": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на новый круг отмечен. Финишной отметки пока нет." },
-            "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "После осознанной паузы заезд на новый круг отмечен." },
-            "Лена · болид №10": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на новый круг отмечен. Финишной отметки пока нет." },
-            "Женя · болид №9": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 10-й круг отмечен. Финишной отметки пока нет." },
-            "Даша": { entered: false, finished: false, pit: true, late: false, lastMark: "Пит-стоп с 6 сентября 2026. Вернуться на трек можно в своём темпе." }
+            "Аня · болид №22": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
+            "Женя · болид №9": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
+            "Лена · болид №10": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
+            "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
+            "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
+            "Даша · болид №5": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
+            "Болид №7": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." }
           }
         }
       ],
@@ -1734,8 +1750,8 @@
         { name: "Даша · болид №5", joinedRound: 8, firstReport: "2026-08-29" }
       ],
       celebration: {
-        id: "round-10-start-v1",
-        round: 10
+        id: "round-11-start-v1",
+        round: 11
       }
     };
 
@@ -2594,6 +2610,44 @@
     }
 
     function personalStoryState(mark, roundNumber) {
+      if (roundNumber >= 11) {
+        if (mark.skip) {
+          return {
+            phrase: "Пауза — тоже часть маршрута. Еду в своём темпе",
+            lines: ["Пауза — тоже", "часть маршрута.", "Еду в своём темпе"],
+            fontSize: 64,
+            lineHeight: 80
+          };
+        }
+        if (mark.entered && mark.finished) {
+          return {
+            phrase: "От старта до финиша — еду шикарно",
+            lines: ["От старта", "до финиша —", "еду шикарно"]
+          };
+        }
+        if (mark.entered) {
+          return {
+            phrase: "Финиш ещё впереди. Движение уже началось",
+            lines: ["Финиш ещё впереди.", "Движение уже", "началось"],
+            fontSize: 64,
+            lineHeight: 80
+          };
+        }
+        if (mark.finished) {
+          return {
+            phrase: "Старт остался за кадром. Результат говорит за себя",
+            lines: ["Старт остался", "за кадром.", "Результат говорит", "за себя"],
+            fontSize: 64,
+            lineHeight: 76
+          };
+        }
+        return {
+          phrase: "Пристегнись. Наводим порядок в делах",
+          lines: ["Пристегнись.", "Наводим порядок", "в делах"],
+          fontSize: 66,
+          lineHeight: 82
+        };
+      }
       if (mark.skip) {
         return {
           phrase: "Я не сошла с дистанции. Я выбрала паузу",
