@@ -567,7 +567,7 @@
     .season-path {
       position: relative;
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(6, minmax(0, 1fr));
       align-items: start;
       column-gap: clamp(24px, 4vw, 68px);
       row-gap: 42px;
@@ -757,16 +757,18 @@
     .history-initial:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
     .history-initial.is-loading { cursor: wait; animation: pulse-soft 1s ease-in-out infinite; }
     .personal-story-hint {
-      display: inline-flex;
+      display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      gap: 7px;
+      gap: 5px 16px;
       margin: 0 0 12px;
       padding: 7px 10px;
       color: var(--green);
       background: var(--beige);
-      border-radius: 999px;
+      border-radius: 18px;
       font-size: .7rem;
       font-weight: 900;
+      line-height: 1.4;
     }
     .personal-story-hint b { color: var(--orange); }
     .lap {
@@ -1348,7 +1350,7 @@
       .hero-elf { width: 455px; right: -60px; }
       .metrics { grid-template-columns: repeat(2, 1fr); }
       .participants { grid-template-columns: 1fr; }
-      .season-path { column-gap: clamp(22px, 4vw, 40px); }
+      .season-path { grid-template-columns: repeat(5, minmax(0, 1fr)); column-gap: clamp(22px, 4vw, 40px); }
       .logic-grid { grid-template-columns: 1fr; }
       .logic-card { display: grid; grid-template-columns: 210px 1fr; }
       .logic-visual { height: 100%; min-height: 200px; }
@@ -1378,6 +1380,7 @@
       .participant-top { align-items: flex-start; flex-wrap: wrap; }
       .season-toolbar { align-items: flex-start; flex-direction: column; }
       .season-toolbar-meta { text-align: left; }
+      .personal-story-hint { display: grid; width: 100%; gap: 6px; border-radius: 16px; }
       .season-path {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1411,18 +1414,21 @@
     }
 
     @media (max-width: 640px) {
-      .round-summary { padding-top: 112px; }
-      .round-summary-shell { max-height: calc(100vh - 132px); }
-      .round-summary-preview { max-height: calc(100vh - 140px); }
+      .round-summary { padding-top: 122px; }
+      .round-summary-shell { max-height: calc(100vh - 140px); }
+      .round-summary-preview { max-height: calc(100vh - 146px); }
       .summary-group-label { font-size: .64rem; }
       .summary-personal-name { padding: 4px 7px; font-size: .62rem; }
       .round-summary-downloads {
-        top: -94px;
-        right: 0;
+        top: -104px;
+        right: 52px;
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: 1fr;
       }
-      .round-summary-download { min-height: 38px; padding: 7px 8px; font-size: .62rem; }
+      .round-summary-download { min-height: 44px; padding: 9px 12px; font-size: .76rem; }
+      .round-summary-close { top: -104px; width: 44px; height: 44px; }
+      .personal-story-download { min-height: 44px; font-size: .76rem; }
+      .personal-story-close { width: 44px; height: 44px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1490,11 +1496,14 @@
       <div class="season-path" id="season-path" aria-label="Трасса сезона"></div>
       <div class="board">
         <div class="board-head">
-          <div><h2 id="season-title">Маршрут Сезона 1</h2><p id="season-subtitle">26 июня–26 сентября · круг за кругом — личная история устойчивого движения</p></div>
+          <div><h2 id="season-title">Маршрут</h2><p id="season-subtitle">старт 26 июня · круг за кругом — личная история устойчивого движения</p></div>
           <span class="board-rule">Порядок участников не меняется: это не рейтинг</span>
         </div>
         <div class="history-wrap">
-          <p class="personal-story-hint"><b aria-hidden="true">↓</b> Нажмите на отметки нужного круга, чтобы открыть и скачать личную карточку</p>
+          <p class="personal-story-hint">
+            <span><b>Буква участника</b> — актуальная карточка или пит‑стоп</span>
+            <span><b>Отметка круга</b> — карточка именно за этот круг</span>
+          </p>
           <div class="history-scroll-top" id="history-scroll-top" aria-label="Прокрутка кругов истории" tabindex="0">
             <div class="history-scroll-top-inner" id="history-scroll-top-inner"></div>
           </div>
@@ -1597,25 +1606,26 @@
       entered — участник прислал понедельничный план;
       finished — участник прислал субботний итог;
       pit — подписка пока не продлена, участник находится на пит-стопе;
-      skip — участник осознанно берёт паузу только на этот круг; это 1 стартовый чек-поинт;
+      skip — участник осознанно берёт паузу только на этот круг; это 1 самостоятельный чек-поинт, который не входит в заезды и финиши;
       late — поздний старт (он всё равно считается входом на круг).
-      startIcon — особый символ вместо стандартной отметки старта;
+      startIcon — самостоятельный чек-поинт поездки: входит в общий итог, но не в заезды и финиши;
       joinedRound — круг, с которого участник присоединился к сезону.
       trackPauses — паузы в счётчике дней на треке:
         pausedAt — последний день, который входит в счётчик перед паузой;
         resumedAt — первый день после возвращения на трек (null, пока пауза продолжается).
 
-      История строится автоматически из двух независимых отметок: entered и finished.
+      История строится автоматически из независимых отметок: заезд, поездка, финиш и осознанная пауза.
 
       ПРИ СТАРТЕ СЕЗОНА 2:
       1. Сохранить 12 кругов Сезона 1 как архив и добавить переключатель сезонов.
-      2. Открыть Сезон 2 с круга 1 и новой датой старта.
-      3. Считать «За сезон» только внутри выбранного сезона, а историю гонщика не обнулять.
-      4. Добавить спокойный показатель «За всё время» и итоговый блок «Маршрут Сезона 1».
+      2. Открыть Сезон 2 с круга 13 и продолжить сквозную нумерацию кругов.
+      3. Использовать сезоны только как удобную группировку трассы по 12 кругов.
+      4. Продолжать накапливать круги, чек-поинты и дни на треке за всё время без обнуления.
       5. Перенести действующие пит-стопы в новый сезон без потери прежних отметок.
     */
     const BOARD_DATA = {
       demo: false,
+      projectStartedLabel: "26 июня",
       season: {
         number: 1,
         title: "Сезон 1",
@@ -2030,15 +2040,15 @@
       document.getElementById("season-option-title").textContent = season.title;
       document.getElementById("season-option-status").textContent = seasonFinished ? "завершён" : "текущий";
       document.getElementById("season-toolbar-meta").textContent = season.totalRounds + " кругов · " + season.dates;
-      document.getElementById("season-title").textContent = "Маршрут " + season.title.replace("Сезон", "Сезона");
-      document.getElementById("season-subtitle").textContent = season.dates.replace(/ \d{4}$/, "") + " · круг за кругом — личная история устойчивого движения";
+      document.getElementById("season-title").textContent = "Маршрут";
+      document.getElementById("season-subtitle").textContent = "старт " + BOARD_DATA.projectStartedLabel + " · круг за кругом — личная история устойчивого движения";
       document.getElementById("season-path").setAttribute("aria-label", "Трасса: " + season.title);
       document.getElementById("demo-badge").hidden = !BOARD_DATA.demo;
     }
 
     function renderMetrics() {
       const participants = selectedParticipants();
-      const entered = participants.filter(person => person.entered).length;
+      const entered = participants.filter(person => person.entered && !person.startIcon).length;
       const done = participants.filter(person => person.finished).length;
       const awaiting = participants.filter(person => !person.entered && !person.finished && !person.pit && !person.skip).length;
       document.getElementById("metric-entered").textContent = entered;
@@ -2072,7 +2082,9 @@
     function layoutSeasonStops() {
       const path = document.getElementById("season-path");
       const stops = Array.from(path.querySelectorAll(".path-stop"));
-      const columns = window.matchMedia("(max-width: 680px)").matches ? 2 : 5;
+      const columns = window.matchMedia("(max-width: 680px)").matches
+        ? 2
+        : window.matchMedia("(max-width: 900px)").matches ? 5 : 6;
       stops.forEach((stop, index) => {
         const row = Math.floor(index / columns) + 1;
         const position = index % columns;
@@ -2124,25 +2136,36 @@
         const mark = round.marks[member.name] || {};
         return Boolean(mark.entered || mark.finished || mark.skip);
       });
-      const entered = eligible.filter(member => Boolean((round.marks[member.name] || {}).entered)).length;
+      const entered = eligible.filter(member => {
+        const mark = round.marks[member.name] || {};
+        return Boolean(mark.entered && !mark.startIcon);
+      }).length;
+      const trips = eligible.filter(member => {
+        const mark = round.marks[member.name] || {};
+        return Boolean(mark.entered && mark.startIcon);
+      }).length;
       const finished = eligible.filter(member => Boolean((round.marks[member.name] || {}).finished)).length;
       const skipped = eligible.filter(member => Boolean((round.marks[member.name] || {}).skip)).length;
       const full = eligible.filter(member => {
         const mark = round.marks[member.name] || {};
         return Boolean(mark.entered && mark.finished);
       }).length;
-      const groups = [
-        { icon: "● + ⚑", label: "Оба чек-поинта", members: [] },
-        { icon: "●", label: "Заехали на трек", members: [] },
-        { icon: "⚑", label: "Финишировали", members: [] },
-        { icon: "●⏸", label: "Осознанная пауза", members: [] }
-      ];
+      const groups = {
+        full: { icon: "● + ⚑", label: "Оба чек-поинта", members: [] },
+        tripFull: { icon: "☀ + ⚑", label: "Поездка и финиш", members: [] },
+        entered: { icon: "●", label: "Заехали на трек", members: [] },
+        trip: { icon: "☀", label: "Поездка", members: [] },
+        finished: { icon: "⚑", label: "Финишировали", members: [] },
+        skipped: { icon: "⏸", label: "Осознанная пауза", members: [] }
+      };
       participants.forEach(member => {
         const mark = round.marks[member.name] || {};
-        if (mark.skip) groups[3].members.push(member);
-        else if (mark.entered && mark.finished) groups[0].members.push(member);
-        else if (mark.entered) groups[1].members.push(member);
-        else if (mark.finished) groups[2].members.push(member);
+        if (mark.skip) groups.skipped.members.push(member);
+        else if (mark.startIcon && mark.finished) groups.tripFull.members.push(member);
+        else if (mark.startIcon) groups.trip.members.push(member);
+        else if (mark.entered && mark.finished) groups.full.members.push(member);
+        else if (mark.entered) groups.entered.members.push(member);
+        else if (mark.finished) groups.finished.members.push(member);
       });
       const seasonTotals = BOARD_DATA.rounds
         .filter(item => item.number <= round.number)
@@ -2150,26 +2173,29 @@
           const itemEligible = BOARD_DATA.members.filter(member => (member.joinedRound || 1) <= item.number);
           return itemEligible.reduce((result, member) => {
             const mark = item.marks[member.name] || {};
-            result.entered += Number(Boolean(mark.entered));
+            result.entered += Number(Boolean(mark.entered && !mark.startIcon));
+            result.trips += Number(Boolean(mark.entered && mark.startIcon));
             result.finished += Number(Boolean(mark.finished));
             result.skipped += Number(Boolean(mark.skip));
             return result;
           }, totals);
-        }, { entered: 0, finished: 0, skipped: 0 });
-      const roundCheckpoints = entered + finished + skipped;
-      const seasonCheckpoints = seasonTotals.entered + seasonTotals.finished + seasonTotals.skipped;
+        }, { entered: 0, trips: 0, finished: 0, skipped: 0 });
+      const roundCheckpoints = entered + trips + finished + skipped;
+      const seasonCheckpoints = seasonTotals.entered + seasonTotals.trips + seasonTotals.finished + seasonTotals.skipped;
       return {
         participants,
         entered,
+        trips,
         finished,
         skipped,
         roundCheckpoints,
         full,
         seasonCheckpoints,
         seasonEntered: seasonTotals.entered,
+        seasonTrips: seasonTotals.trips,
         seasonFinished: seasonTotals.finished,
         seasonSkipped: seasonTotals.skipped,
-        groups: groups.filter(group => group.members.length)
+        groups: Object.values(groups).filter(group => group.members.length)
       };
     }
 
@@ -2388,8 +2414,8 @@
         ctx.fillStyle = green;
         canvasFont(ctx, 900, 60);
         const title = round.status === "active"
-          ? BOARD_DATA.season.title + " · круг " + round.number + " · сейчас едем"
-          : BOARD_DATA.season.title + " · итоги круга " + round.number;
+          ? "круг " + round.number + " · сейчас едем"
+          : "итоги круга " + round.number;
         ctx.fillText(title, 80, 190);
         ctx.fillStyle = muted;
         canvasFont(ctx, 800, 30);
@@ -2436,7 +2462,7 @@
         canvasCard(ctx, 80, 760, 470, 230, 32, "rgba(255,255,255,.78)", "rgba(45,79,54,.2)", 3);
         ctx.fillStyle = green;
         canvasFont(ctx, 900, 25);
-        ctx.fillText("Чек-поинтов · " + BOARD_DATA.season.title, 115, 810);
+        ctx.fillText("Чек-поинтов · за всё время", 115, 810);
         ctx.fillStyle = green;
         canvasFont(ctx, 900, 88);
         ctx.fillText(String(summary.seasonCheckpoints), 112, 910);
@@ -2541,7 +2567,7 @@
       ], 1010, 32);
 
       ctx.fillStyle = green;
-      const roundTitle = BOARD_DATA.season.title.toUpperCase() + " · КРУГ " + round.number;
+      const roundTitle = "КРУГ " + round.number;
       canvasFont(ctx, 900, 70);
       ctx.fillText(roundTitle, 70, 205);
       const roundTitleWidth = ctx.measureText(roundTitle).width;
@@ -2608,7 +2634,7 @@
       canvasElevatedCard(ctx, 70, 700, 940, 375, 32, green);
       ctx.fillStyle = "#ffffff";
       canvasFont(ctx, 900, 34);
-      ctx.fillText("ЧЕК-ПОИНТОВ · " + BOARD_DATA.season.title.toUpperCase(), 115, 775);
+      ctx.fillText("ЧЕК-ПОИНТОВ · ЗА ВСЁ ВРЕМЯ", 115, 775);
       canvasFont(ctx, 900, 150);
       ctx.textAlign = "center";
       ctx.fillText(String(summary.seasonCheckpoints), 285, 1005);
@@ -2663,7 +2689,7 @@
       ctx.setLineDash([]);
       ctx.fillStyle = orange;
       canvasFont(ctx, 900, 32);
-      ctx.fillText("ХОЧЕШЬ НА ТРЕК? → @ZhenyaHabatulina", 70, 1590);
+      ctx.fillText("ХОЧЕШЬ НА ТРЕК? → @Zhenya_Habatulina", 70, 1590);
       ctx.textAlign = "left";
       ctx.restore();
 
