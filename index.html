@@ -176,7 +176,7 @@
       box-shadow: var(--shadow-small);
     }
 
-    .current-round { display: flex; flex-wrap: wrap; align-items: baseline; gap: 7px 11px; }
+    .current-round { display: flex; flex-wrap: wrap; align-items: center; gap: 7px 11px; }
     .current-round-label {
       color: var(--orange);
       font-size: .7rem;
@@ -184,7 +184,19 @@
       letter-spacing: .06em;
       text-transform: uppercase;
     }
-    .current-round strong { color: var(--green); font-size: 1rem; font-weight: 900; }
+    .current-round strong,
+    .current-round-dates { color: var(--green); font-size: 1rem; font-weight: 900; }
+    .season-round-note {
+      padding: 5px 9px;
+      color: var(--white);
+      background: var(--orange);
+      border-radius: 999px;
+      font-size: .63rem;
+      font-weight: 900;
+      letter-spacing: .035em;
+      text-transform: uppercase;
+    }
+    .season-round-note[hidden] { display: none; }
     .week-meta { display: grid; justify-items: end; gap: 7px; }
     .week-updated { color: var(--muted); font-size: .78rem; }
 
@@ -570,6 +582,37 @@
       border-radius: var(--radius-xl);
       box-shadow: var(--shadow-small);
     }
+    .season-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 12px;
+      padding: 13px 16px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-small);
+    }
+    .season-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 12px;
+      color: var(--white);
+      background: var(--green);
+      border-radius: 999px;
+      font-size: .76rem;
+      font-weight: 900;
+    }
+    .season-option small {
+      color: rgba(255,255,255,.72);
+      font-size: .6rem;
+      font-weight: 900;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .season-toolbar-meta { color: var(--muted); font-size: .73rem; font-weight: 800; text-align: right; }
     .season-route {
       position: absolute;
       inset: 0;
@@ -815,6 +858,7 @@
       font-size: .72rem;
     }
     .lap-mark.start.on { color: var(--white); background: var(--green); border-color: var(--green); }
+    .lap-mark.start.special-icon { font-size: .92rem; }
     .lap-mark.finish.on { color: var(--white); background: var(--orange); border-color: var(--orange); }
     .lap.future .lap-mark { opacity: .45; }
     .lap-total { display: grid; align-content: center; justify-items: center; gap: 1px; min-height: 50px; color: var(--green); text-align: center; }
@@ -845,7 +889,7 @@
 
     .principles {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
       margin-top: 16px;
       padding: 20px;
@@ -857,7 +901,20 @@
     .principle { display: flex; align-items: flex-start; gap: 10px; }
     .principle b { color: var(--orange-2); font-size: 1.2rem; }
     .principle strong { display: block; font-size: .88rem; font-weight: 900; }
-    .principle span { color: rgba(255,255,255,.72); font-size: .75rem; }
+    .principle span { color: rgba(255,255,255,.72); font-size: .75rem; line-height: 1.5; }
+    .principle-rule {
+      grid-column: 1 / -1;
+      margin: 2px 0 0;
+      padding: 10px 13px;
+      color: rgba(255,255,255,.78);
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      font-size: .78rem;
+      font-weight: 800;
+      text-align: center;
+    }
+    .principle-rule strong { color: var(--orange-2); font-weight: 900; }
 
     .about-project {
       display: grid;
@@ -1300,11 +1357,12 @@
     @media (max-width: 680px) {
       .page { width: min(100% - 18px, 1180px); padding-top: 9px; }
       .history-grid { --history-name-column: 145px; --history-total-column: 96px; }
-      .hero { grid-template-columns: 1fr; min-height: 690px; border-radius: 28px; }
-      .hero-copy { padding: 30px 23px 0; }
-      .hero-visual { min-height: 380px; }
-      .hero-visual::before { width: 380px; height: 380px; right: 50%; bottom: -72px; transform: translateX(50%); }
-      .hero-elf { width: min(455px, 112%); right: 50%; bottom: -74px; transform: translateX(50%); }
+      .hero { grid-template-columns: 1fr; min-height: 610px; border-radius: 28px; }
+      .hero-copy { padding: 25px 23px 0; }
+      .brand-kicker { font-size: .68rem; letter-spacing: .08em; }
+      .hero-visual { min-height: 310px; }
+      .hero-visual::before { width: 320px; height: 320px; right: 50%; bottom: -58px; transform: translateX(50%); }
+      .hero-elf { width: min(400px, 108%); right: 50%; bottom: -62px; transform: translateX(50%); }
       .week-bar { grid-template-columns: 1fr; }
       .week-meta { justify-items: start; }
       .demo-badge { justify-self: start; }
@@ -1318,6 +1376,8 @@
       .board-rule { max-width: none; text-align: left; }
       .participants { padding: 14px 17px 20px; }
       .participant-top { align-items: flex-start; flex-wrap: wrap; }
+      .season-toolbar { align-items: flex-start; flex-direction: column; }
+      .season-toolbar-meta { text-align: left; }
       .season-path {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1348,21 +1408,21 @@
       .round-summary-card h2 { font-size: 1.35rem; }
       .summary-kicker { margin-bottom: 5px; font-size: .61rem; }
       .summary-personal-group { grid-template-columns: 128px 1fr; gap: 5px; }
-      .summary-group-label { font-size: .55rem; }
-      .summary-personal-name { padding: 3px 6px; font-size: .54rem; }
     }
 
     @media (max-width: 640px) {
       .round-summary { padding-top: 112px; }
       .round-summary-shell { max-height: calc(100vh - 132px); }
       .round-summary-preview { max-height: calc(100vh - 140px); }
+      .summary-group-label { font-size: .64rem; }
+      .summary-personal-name { padding: 4px 7px; font-size: .62rem; }
       .round-summary-downloads {
         top: -94px;
         right: 0;
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
-      .round-summary-download { min-height: 38px; padding: 7px 8px; font-size: .56rem; }
+      .round-summary-download { min-height: 38px; padding: 7px 8px; font-size: .62rem; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1374,7 +1434,7 @@
   <main class="page">
     <header class="hero">
       <div class="hero-copy">
-        <p class="brand-kicker"><span aria-hidden="true">🏎️</span> Онлайн-табло</p>
+        <p class="brand-kicker"><span aria-hidden="true">🏎️</span> Табло информационных гонщиков</p>
         <h1>«Жажда порядка»</h1>
         <p class="hero-lead">Мы едем с разной скоростью, но отмечаем круги вместе. Здесь видно, кто заехал на трек, кто финишировал и сколько пути уже пройдено.</p>
         <p class="hero-note"><span aria-hidden="true">✓</span> Эльфийка-штурман бережно ведёт табло команды.</p>
@@ -1387,14 +1447,16 @@
     <div class="week-bar">
       <div class="current-round">
         <span class="current-round-label">Сейчас едем</span>
-        <strong id="current-round-title">Круг 2 · 13–18 июля</strong>
+        <strong id="current-round-title">круг 12</strong>
+        <span class="current-round-dates" id="current-round-dates">· 21–26 сентября</span>
+        <span class="season-round-note" id="season-round-note">Финальный круг сезона</span>
       </div>
-      <div class="week-meta"><span class="demo-badge" id="demo-badge">Демонстрационные данные</span><span class="week-updated" id="week-updated">Последняя отметка: 12 июля</span></div>
+      <div class="week-meta"><span class="demo-badge" id="demo-badge">Демонстрационные данные</span><span class="week-updated" id="week-updated">Последняя отметка: 21 сентября 2026</span></div>
     </div>
 
     <nav class="tabs" role="tablist" aria-label="Разделы табло">
       <button class="tab" id="tab-current" type="button" role="tab" aria-selected="true" aria-controls="view-current">Текущий круг</button>
-      <button class="tab" id="tab-history" type="button" role="tab" aria-selected="false" aria-controls="view-history">История сезона</button>
+      <button class="tab" id="tab-history" type="button" role="tab" aria-selected="false" aria-controls="view-history">История сезонов</button>
       <button class="tab" id="tab-logic" type="button" role="tab" aria-selected="false" aria-controls="view-logic">Как считается круг</button>
     </nav>
 
@@ -1421,10 +1483,14 @@
     </section>
 
     <section class="view" id="view-history" role="tabpanel" aria-labelledby="tab-history" hidden>
+      <div class="season-toolbar" aria-label="Выбранный сезон">
+        <span class="season-option" aria-current="true"><span id="season-option-title">Сезон 1</span><small id="season-option-status">текущий</small></span>
+        <span class="season-toolbar-meta" id="season-toolbar-meta">12 кругов · 26 июня–26 сентября 2026</span>
+      </div>
       <div class="season-path" id="season-path" aria-label="Трасса сезона"></div>
       <div class="board">
         <div class="board-head">
-          <div><h2 id="season-title">Старт сезона 26 июня</h2><p>Круг за кругом — личная история устойчивого движения</p></div>
+          <div><h2 id="season-title">Маршрут Сезона 1</h2><p id="season-subtitle">26 июня–26 сентября · круг за кругом — личная история устойчивого движения</p></div>
           <span class="board-rule">Порядок участников не меняется: это не рейтинг</span>
         </div>
         <div class="history-wrap">
@@ -1435,7 +1501,7 @@
           <div class="history-scroll-content" id="history-scroll-content" tabindex="0" aria-label="История кругов команды с горизонтальной прокруткой">
             <div class="history-grid" id="history-grid" role="table" aria-label="История кругов команды"></div>
             <div class="history-legend" aria-label="Обозначения истории">
-              <span>● заезд на трек</span><span>⚑ финиш круга</span><span>● + ⚑ оба чек-поинта</span><span>●⏸ осознанная пауза · 1 чек-поинт</span><span>🔧 пит-стоп</span>
+              <span>● заезд на трек</span><span>☀ поездка</span><span>⚑ финиш круга</span><span>● + ⚑ оба чек-поинта</span><span>⏸ осознанная пауза</span><span>🔧 пит-стоп</span>
             </div>
           </div>
           <div class="history-scroll-bottom" id="history-scroll-bottom" aria-label="Прокрутка кругов истории внизу" tabindex="0">
@@ -1464,7 +1530,9 @@
       <div class="principles">
         <div class="principle"><b>↗</b><div><strong>Можно начать с любого круга</strong><span>Не нужно проходить предыдущие круги, чтобы присоединиться сейчас.</span></div></div>
         <div class="principle"><b>✓</b><div><strong>Считаем возвращения</strong><span>Ценность — регулярно замечать свой прогресс.</span></div></div>
-        <div class="principle"><b>♡</b><div><strong>Пит-стоп — часть пути</strong><span>Пауза не обнуляет уже пройденные круги.</span></div></div>
+        <div class="principle"><b>⏸</b><div><strong>Осознанная пауза — выбор на текущий круг</strong><span>Подписка действует, и информационный гонщик остаётся в активной команде, но на этом круге выбирает паузу. На следующем можно снова выйти на трек.</span></div></div>
+        <div class="principle"><b>🔧</b><div><strong>Пит-стоп — подписка пока не продлена</strong><span>Информационный гонщик временно не участвует в новых кругах. Его история и пройденный путь остаются на табло, а при возвращении движение продолжается без обнуления.</span></div></div>
+        <p class="principle-rule"><strong>Пауза — статус одного круга.</strong> Пит-стоп — статус участия в проекте.</p>
       </div>
     </section>
 
@@ -1472,9 +1540,10 @@
       <div>
         <img class="about-logo" src="logo-compact-color.svg" alt="Жажда порядка">
         <p class="about-kicker">О проекте</p>
-        <h2 id="about-title">«Жажда порядка» — это про скорость достижения целей.</h2>
-        <p class="about-lead">Чем лучше организована информация, тем меньше времени теряется на хаос и тем быстрее ты приходишь туда, куда хочешь.</p>
-        <p class="about-text">Практический чат по подписке, где мы вместе внедряем инструменты планирования, структурирования и бережной дисциплины. Превращаем сферы, проекты и задачи в понятный маршрут, отмечаем чек-поинты и учимся видеть собственное движение.</p>
+        <h2 id="about-title">«Жажда порядка» — трек информационных гонщиков.</h2>
+        <p class="about-lead">Информационные гонщики — не те, кто старается ехать быстрее всех. Мы учимся управлять потоком задач, идей и знаний: собирать его в понятную систему, видеть свой маршрут и двигаться в собственном темпе.</p>
+        <p class="about-text">В практическом чате по подписке мы настраиваем болид порядка с помощью PARA, бумажных и цифровых пит-стопов, выходим на недельные круги и отмечаем чек-поинты. У каждого свой темп, но движемся мы вместе.</p>
+        <p class="about-text">Каждые 12 недельных кругов складываются в сезон. Новый сезон начинается с первого круга, а пройденный путь остаётся на табло.</p>
       </div>
       <aside class="author-card" aria-label="Автор проекта">
         <img class="author-photo" src="author.webp" alt="Евгения Хабатулина">
@@ -1510,11 +1579,11 @@
       <div class="confetti" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <img src="elf.webp" alt="Эльфийка-штурман отмечает чек-поинты">
       <div class="celebration-copy">
-        <h2 id="celebration-title">Круг 2 — мы уже едем!</h2>
+        <h2 id="celebration-title">Сезон 1 · круг 12 — финальный круг!</h2>
         <p id="celebration-text"></p>
         <div class="celebration-results" id="celebration-results"></div>
-        <p class="celebration-prompt" id="celebration-prompt">Ещё не на треке? Даже если первый круг прошёл без тебя, ничего не упущено — присоединяйся сейчас и отправляй понедельничный отчёт.</p>
-        <div class="celebration-actions"><a class="celebration-action" id="celebration-action" href="https://t.me/c/4389010152/15" target="_blank" rel="noopener noreferrer">Присоединиться к кругу 2</a><button class="celebration-close" id="celebration-close" type="button">Перейти к табло</button></div>
+        <p class="celebration-prompt" id="celebration-prompt">Ещё не на треке? Ничего не упущено — к финальному кругу сезона тоже можно присоединиться.</p>
+        <div class="celebration-actions"><a class="celebration-action" id="celebration-action" href="https://t.me/c/4389010152/15" target="_blank" rel="noopener noreferrer">Присоединиться к кругу 12</a><button class="celebration-close" id="celebration-close" type="button">Перейти к табло</button></div>
       </div>
     </div>
   </div>
@@ -1527,22 +1596,36 @@
       Для каждого круга:
       entered — участник прислал понедельничный план;
       finished — участник прислал субботний итог;
-      pit — участник обозначил паузу;
+      pit — подписка пока не продлена, участник находится на пит-стопе;
       skip — участник осознанно берёт паузу только на этот круг; это 1 стартовый чек-поинт;
       late — поздний старт (он всё равно считается входом на круг).
+      startIcon — особый символ вместо стандартной отметки старта;
       joinedRound — круг, с которого участник присоединился к сезону.
       trackPauses — паузы в счётчике дней на треке:
         pausedAt — последний день, который входит в счётчик перед паузой;
         resumedAt — первый день после возвращения на трек (null, пока пауза продолжается).
 
       История строится автоматически из двух независимых отметок: entered и finished.
+
+      ПРИ СТАРТЕ СЕЗОНА 2:
+      1. Сохранить 12 кругов Сезона 1 как архив и добавить переключатель сезонов.
+      2. Открыть Сезон 2 с круга 1 и новой датой старта.
+      3. Считать «За сезон» только внутри выбранного сезона, а историю гонщика не обнулять.
+      4. Добавить спокойный показатель «За всё время» и итоговый блок «Маршрут Сезона 1».
+      5. Перенести действующие пит-стопы в новый сезон без потери прежних отметок.
     */
     const BOARD_DATA = {
       demo: false,
-      season: "Старт сезона 26 июня",
-      seasonStarted: "2026-06-26",
+      season: {
+        number: 1,
+        title: "Сезон 1",
+        started: "2026-06-26",
+        dates: "26 июня–26 сентября 2026",
+        totalRounds: 12,
+        status: "active"
+      },
       timeZone: "Europe/Moscow",
-      selectedRound: 11,
+      selectedRound: 12,
       rounds: [
         {
           number: 1,
@@ -1642,7 +1725,7 @@
             "Женя": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Лена · болид №10": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Юля · болид №17": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
-            "Аня · болид №22": { entered: false, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
+            "Аня · болид №22": { entered: true, finished: true, pit: false, late: false, startIcon: "☀", lastMark: "Поездка и финиш 6-го круга отмечены. Оба чек-поинта круга приняты." },
             "Нина": { entered: false, finished: false, pit: true, late: false, lastMark: "Пит-стоп отмечен. Вернуться на трек можно в своём темпе." }
           }
         },
@@ -1675,7 +1758,7 @@
             "Женя": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Аня · болид №22": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Таня · болид №11": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
-            "Лена · болид №3": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на трек отмечен. Финишной отметки пока нет." },
+            "Лена · болид №3": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 8-го круга отмечен. Оба чек-поинта круга приняты." },
             "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш круга отмечен." },
             "Даша · болид №5": { entered: true, finished: true, pit: false, late: true, lastMark: "Поздний старт и финиш отмечены. Оба чек-поинта круга приняты." },
             "Юля · болид №17": { entered: true, finished: true, pit: false, late: false, lastMark: "Старт и финиш отмечены. Оба чек-поинта круга приняты." },
@@ -1702,7 +1785,7 @@
           number: 10,
           dates: "7–12 сентября",
           endDate: "2026-09-12",
-          updated: "15 сентября 2026",
+          updated: "20 сентября 2026",
           status: "closed",
           marks: {
             "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 10-го круга отмечен. Оба чек-поинта круга приняты." },
@@ -1710,7 +1793,9 @@
             "Аня · болид №22": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 10-го круга отмечен. Оба чек-поинта круга приняты." },
             "Женя": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш после возвращения на трек отмечен. Оба чек-поинта круга приняты." },
             "Лена · болид №10": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 10-го круга отмечен. Оба чек-поинта круга приняты." },
+            "Лена · болид №3": { entered: true, finished: true, pit: false, late: false, lastMark: "Старт и финиш 10-го круга отмечены. Оба чек-поинта круга приняты." },
             "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 10-го круга отмечен. Оба чек-поинта круга приняты." },
+            "Юля · болид №17": { entered: true, finished: true, pit: false, late: false, lastMark: "Старт и финиш 10-го круга отмечены. Оба чек-поинта круга приняты." },
             "Даша": { entered: false, finished: false, pit: true, late: false, lastMark: "Пит-стоп с 6 сентября 2026. Вернуться на трек можно в своём темпе." }
           }
         },
@@ -1718,16 +1803,28 @@
           number: 11,
           dates: "14–19 сентября",
           endDate: "2026-09-19",
-          updated: "15 сентября 2026",
-          status: "active",
+          updated: "21 сентября 2026",
+          status: "closed",
           marks: {
-            "Аня · болид №22": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
+            "Аня · болид №22": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 11-го круга отмечен. Оба чек-поинта круга приняты." },
             "Женя · болид №9": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
             "Лена · болид №10": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
             "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
             "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
             "Даша · болид №5": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
-            "Болид №7": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." }
+            "Болид №7": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
+            "Юля · болид №17": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
+            "Лена · болид №3": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." }
+          }
+        },
+        {
+          number: 12,
+          dates: "21–26 сентября",
+          endDate: "2026-09-26",
+          updated: "21 сентября 2026",
+          status: "active",
+          marks: {
+            "Аня · болид №22": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." }
           }
         }
       ],
@@ -1750,8 +1847,8 @@
         { name: "Даша · болид №5", joinedRound: 8, firstReport: "2026-08-29" }
       ],
       celebration: {
-        id: "round-11-start-v1",
-        round: 11
+        id: "round-12-start-v1",
+        round: 12
       }
     };
 
@@ -1802,7 +1899,7 @@
     function trackNextStep(person) {
       if (person.entered && person.finished) return "Круг завершён — обе отметки собраны 🎉";
       if (person.finished) return "Финиш отмечен — заезд можно добавить.";
-      if (person.pit) return "Пит-стоп — часть пути. Вернуться можно в своём темпе.";
+      if (person.pit) return "Пит-стоп: подписка пока не продлена. Пройденный путь сохранён.";
       if (person.skip) return "Этот круг пропущен осознанно — вернуться можно на следующем.";
       if (person.entered) return "До полного круга остался субботний финиш.";
       return "Следующий шаг — отметить заезд на текущий круг.";
@@ -1871,9 +1968,9 @@
     }
 
     function seasonDaysForRound(round, now = new Date()) {
-      if (!round || !BOARD_DATA.seasonStarted) return 0;
+      if (!round || !BOARD_DATA.season.started) return 0;
       const dayMs = 86400000;
-      const startUtc = dateStringToUtc(BOARD_DATA.seasonStarted);
+      const startUtc = dateStringToUtc(BOARD_DATA.season.started);
       const roundEndUtc = round.endDate ? dateStringToUtc(round.endDate) : todayUtcInBoardTimeZone(now);
       const referenceUtc = round.status === "active"
         ? Math.min(todayUtcInBoardTimeZone(now), roundEndUtc)
@@ -1918,10 +2015,24 @@
 
     function renderHeader() {
       const round = selectedRound();
+      const season = BOARD_DATA.season;
+      const isFinalRound = round.number === season.totalRounds;
+      const seasonFinished = isFinalRound && round.status === "closed";
       document.getElementById("week-updated").textContent = "Последняя отметка: " + round.updated;
-      document.getElementById("current-round-title").textContent = "Круг " + round.number + " · " + round.dates;
-      document.querySelector(".current-round-label").textContent = round.status === "active" ? "Сейчас едем" : "Круг завершён";
-      document.getElementById("season-title").textContent = BOARD_DATA.season;
+      document.getElementById("current-round-title").textContent = "круг " + round.number;
+      document.getElementById("current-round-dates").textContent = "· " + round.dates;
+      document.querySelector(".current-round-label").textContent = seasonFinished
+        ? "Сезон завершён"
+        : round.status === "active" ? "Сейчас едем" : "Круг завершён";
+      const seasonRoundNote = document.getElementById("season-round-note");
+      seasonRoundNote.hidden = !isFinalRound;
+      seasonRoundNote.textContent = seasonFinished ? "Сезон завершён" : "Финальный круг сезона";
+      document.getElementById("season-option-title").textContent = season.title;
+      document.getElementById("season-option-status").textContent = seasonFinished ? "завершён" : "текущий";
+      document.getElementById("season-toolbar-meta").textContent = season.totalRounds + " кругов · " + season.dates;
+      document.getElementById("season-title").textContent = "Маршрут " + season.title.replace("Сезон", "Сезона");
+      document.getElementById("season-subtitle").textContent = season.dates.replace(/ \d{4}$/, "") + " · круг за кругом — личная история устойчивого движения";
+      document.getElementById("season-path").setAttribute("aria-label", "Трасса: " + season.title);
       document.getElementById("demo-badge").hidden = !BOARD_DATA.demo;
     }
 
@@ -2076,7 +2187,7 @@
         download.textContent = "Готовлю превью…";
         const canvas = await createRoundSummaryCanvas(round);
         preview.src = canvas.toDataURL("image/png");
-        preview.alt = "Командная сводка: круг " + round.number + ", " + round.dates;
+        preview.alt = "Командная сводка: " + BOARD_DATA.season.title + ", круг " + round.number + ", " + round.dates;
         layer.hidden = false;
         document.body.classList.add("summary-open");
         download.disabled = false;
@@ -2276,7 +2387,9 @@
         ], 1520, 42);
         ctx.fillStyle = green;
         canvasFont(ctx, 900, 60);
-        const title = round.status === "active" ? "Круг " + round.number + " · сейчас едем" : "Итоги круга " + round.number;
+        const title = round.status === "active"
+          ? BOARD_DATA.season.title + " · круг " + round.number + " · сейчас едем"
+          : BOARD_DATA.season.title + " · итоги круга " + round.number;
         ctx.fillText(title, 80, 190);
         ctx.fillStyle = muted;
         canvasFont(ctx, 800, 30);
@@ -2323,7 +2436,7 @@
         canvasCard(ctx, 80, 760, 470, 230, 32, "rgba(255,255,255,.78)", "rgba(45,79,54,.2)", 3);
         ctx.fillStyle = green;
         canvasFont(ctx, 900, 25);
-        ctx.fillText("Чек-поинтов за сезон", 115, 810);
+        ctx.fillText("Чек-поинтов · " + BOARD_DATA.season.title, 115, 810);
         ctx.fillStyle = green;
         canvasFont(ctx, 900, 88);
         ctx.fillText(String(summary.seasonCheckpoints), 112, 910);
@@ -2393,8 +2506,6 @@
       const green = "#2d4f36";
       const orange = "#ec8502";
       const beige = "#ffefcd";
-      const greenSoft = "#e8f0e8";
-      const orangeSoft = "#fff0d8";
       const paper = "#fffdf7";
       const muted = "#6f7d72";
       const [trackImage, brandMarkImage] = await Promise.all([
@@ -2430,7 +2541,7 @@
       ], 1010, 32);
 
       ctx.fillStyle = green;
-      const roundTitle = "КРУГ " + round.number;
+      const roundTitle = BOARD_DATA.season.title.toUpperCase() + " · КРУГ " + round.number;
       canvasFont(ctx, 900, 70);
       ctx.fillText(roundTitle, 70, 205);
       const roundTitleWidth = ctx.measureText(roundTitle).width;
@@ -2454,22 +2565,22 @@
       ctx.stroke();
       ctx.setLineDash([]);
 
-      canvasElevatedCard(ctx, 70, 285, 940, 375, 32, "rgba(255,255,255,.92)");
-      ctx.fillStyle = orange;
+      canvasElevatedCard(ctx, 70, 285, 940, 375, 32, orange);
+      ctx.fillStyle = "#ffffff";
       canvasFont(ctx, 900, 34);
       ctx.fillText("ЧЕК-ПОИНТОВ ЗА КРУГ", 115, 360);
       canvasFont(ctx, 900, 150);
       ctx.textAlign = "center";
       ctx.fillText(String(summary.roundCheckpoints), 285, 590);
       ctx.textAlign = "left";
-      ctx.strokeStyle = "rgba(45,79,54,.12)";
+      ctx.strokeStyle = "rgba(255,255,255,.32)";
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.moveTo(500, 400);
       ctx.lineTo(500, 605);
       ctx.stroke();
-      canvasCard(ctx, 550, 390, 390, 105, 28, greenSoft);
-      canvasCard(ctx, 550, 520, 390, 105, 28, orangeSoft);
+      canvasCard(ctx, 550, 390, 390, 105, 28, "rgba(255,255,255,.94)");
+      canvasCard(ctx, 550, 520, 390, 105, 28, "rgba(255,255,255,.94)");
       ctx.fillStyle = green;
       canvasFont(ctx, 900, 28);
       ctx.fillText("ЗАЕЗДЫ", 590, 430);
@@ -2494,22 +2605,22 @@
       ctx.textAlign = "left";
       ctx.textBaseline = "alphabetic";
 
-      canvasElevatedCard(ctx, 70, 700, 940, 375, 32, "rgba(255,255,255,.92)");
-      ctx.fillStyle = green;
+      canvasElevatedCard(ctx, 70, 700, 940, 375, 32, green);
+      ctx.fillStyle = "#ffffff";
       canvasFont(ctx, 900, 34);
-      ctx.fillText("ЧЕК-ПОИНТОВ ЗА СЕЗОН", 115, 775);
+      ctx.fillText("ЧЕК-ПОИНТОВ · " + BOARD_DATA.season.title.toUpperCase(), 115, 775);
       canvasFont(ctx, 900, 150);
       ctx.textAlign = "center";
       ctx.fillText(String(summary.seasonCheckpoints), 285, 1005);
       ctx.textAlign = "left";
-      ctx.strokeStyle = "rgba(45,79,54,.12)";
+      ctx.strokeStyle = "rgba(255,255,255,.28)";
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.moveTo(500, 815);
       ctx.lineTo(500, 1020);
       ctx.stroke();
-      canvasCard(ctx, 550, 805, 390, 105, 28, greenSoft);
-      canvasCard(ctx, 550, 935, 390, 105, 28, orangeSoft);
+      canvasCard(ctx, 550, 805, 390, 105, 28, "rgba(255,255,255,.94)");
+      canvasCard(ctx, 550, 935, 390, 105, 28, "rgba(255,255,255,.94)");
       ctx.fillStyle = green;
       canvasFont(ctx, 900, 28);
       ctx.fillText("ЗАЕЗДЫ", 590, 845);
@@ -2566,7 +2677,7 @@
       try {
         const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
         const link = document.createElement("a");
-        link.download = "zhazhda-poryadka-krug-" + round.number + ".png";
+        link.download = "zhazhda-poryadka-sezon-" + BOARD_DATA.season.number + "-krug-" + round.number + ".png";
         if (blob) {
           const url = URL.createObjectURL(blob);
           link.href = url;
@@ -2591,7 +2702,7 @@
       try {
         const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
         const link = document.createElement("a");
-        link.download = "zhazhda-poryadka-krug-" + round.number + "-stories.png";
+        link.download = "zhazhda-poryadka-sezon-" + BOARD_DATA.season.number + "-krug-" + round.number + "-stories.png";
         if (blob) {
           const url = URL.createObjectURL(blob);
           link.href = url;
@@ -2861,7 +2972,7 @@
       ctx.lineTo(870, 750);
       ctx.stroke();
       ctx.setLineDash([]);
-      canvasStoryNode(ctx, 210, 750, mark.entered || mark.skip, green, mark.skip ? "⏸" : mark.entered ? "✓" : "●", mark.skip ? "ПАУЗА" : "ЗАЕЗД");
+      canvasStoryNode(ctx, 210, 750, mark.entered || mark.skip, green, mark.startIcon || (mark.skip ? "⏸" : mark.entered ? "✓" : "●"), mark.skip ? "ПАУЗА" : mark.startIcon ? "ПОЕЗДКА" : "ЗАЕЗД");
       canvasStoryNode(ctx, 870, 750, mark.finished, orange, "⚑", "ФИНИШ");
       if (mark.entered && !mark.finished && !mark.pit) {
         ctx.fillStyle = green;
@@ -2873,9 +2984,9 @@
 
       ctx.fillStyle = green;
       canvasFont(ctx, 900, 34);
-      ctx.fillText("МОЙ ПУТЬ В СЕЗОНЕ", 70, 1005);
+      ctx.fillText("МОЙ ПУТЬ · " + BOARD_DATA.season.title.toUpperCase(), 70, 1005);
       const statCards = [
-        { value: stats.series, label: "КРУГОВ В СЕРИИ" },
+        { value: stats.series, label: "КРУГОВ ЗА СЕЗОН" },
         { value: stats.checkpoints, label: "ЧЕК-ПОИНТОВ" },
         { value: stats.days, label: "ДНЕЙ НА ТРЕКЕ" }
       ];
@@ -3108,7 +3219,7 @@
       try {
         const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
         const link = document.createElement("a");
-        link.download = "zhazhda-poryadka-" + (isPitStop ? "pit-stop-" : "lichnyy-trek-") + personalStorySlug(person.name) + "-krug-" + round.number + ".png";
+        link.download = "zhazhda-poryadka-sezon-" + BOARD_DATA.season.number + "-" + (isPitStop ? "pit-stop-" : "lichnyy-trek-") + personalStorySlug(person.name) + "-krug-" + round.number + ".png";
         if (blob) {
           const url = URL.createObjectURL(blob);
           link.href = url;
@@ -3145,7 +3256,7 @@
         preview.src = canvas.toDataURL("image/png");
         preview.alt = isPitStop
           ? "Карточка пит-стопа участника " + person.name
-          : "Личный трек участника " + person.name + ", круг " + round.number;
+          : "Личный трек участника " + person.name + ", " + BOARD_DATA.season.title + ", круг " + round.number;
         shell.setAttribute("aria-label", isPitStop ? "Карточка пит-стопа для Stories" : "Личный трек для Stories");
         layer.hidden = false;
         document.body.classList.add("summary-open");
@@ -3223,12 +3334,18 @@
 
       results.replaceChildren();
       if (round.status === "active") {
-        title.textContent = "Круг " + data.round + " — мы уже едем!";
+        title.textContent = round.number === BOARD_DATA.season.totalRounds
+          ? BOARD_DATA.season.title + " · круг " + data.round + " — финальный круг!"
+          : BOARD_DATA.season.title + " · круг " + data.round + " — мы уже едем!";
         text.textContent = "Привет, информационные гонщики! Отмечаю чек-поинты команды:";
-        prompt.textContent = "Ещё не на треке? Даже если первый круг прошёл без тебя, ничего не упущено — присоединяйся сейчас и отправляй понедельничный отчёт.";
+        prompt.textContent = round.number === BOARD_DATA.season.totalRounds
+          ? "Ещё не на треке? Ничего не упущено — к финальному кругу сезона тоже можно присоединиться."
+          : "Ещё не на треке? Ничего не упущено — присоединяйся сейчас и отправляй понедельничный отчёт.";
         action.textContent = "Присоединиться к кругу " + data.round;
       } else {
-        title.textContent = "Круг " + data.round + " завершён!";
+        title.textContent = round.number === BOARD_DATA.season.totalRounds
+          ? BOARD_DATA.season.title + " завершён!"
+          : BOARD_DATA.season.title + " · круг " + data.round + " завершён!";
         text.textContent = "Отмечаю движение всей команды:";
         prompt.textContent = "Если твой чек-поинт ещё не отмечен — отправь отчёт, и Эльфийка добавит его на табло.";
         action.textContent = "Заехать / Финишировать";
@@ -3324,7 +3441,7 @@
         trackStats.className = "participant-track-stats";
         trackStats.setAttribute("aria-label", "Статистика личного трека");
         [
-          "🔥 Серия: " + formatLaps(stats.series),
+          "🔥 За сезон: " + formatLaps(stats.series),
           "✓ " + formatCheckpoints(stats.checkpoints),
           "🏎️ " + formatDays(stats.days) + " на треке"
         ].forEach(value => {
@@ -3412,11 +3529,11 @@
 
         const participationCount = BOARD_DATA.rounds.filter(round => {
           const mark = round.marks[person.name] || {};
-          return Boolean(mark.entered || mark.finished);
+          return Boolean(mark.entered || mark.finished || mark.skip);
         }).length;
         const checkpointCount = BOARD_DATA.rounds.reduce((sum, round) => {
           const mark = round.marks[person.name] || {};
-          return sum + Number(Boolean(mark.entered)) + Number(Boolean(mark.finished));
+          return sum + Number(Boolean(mark.entered)) + Number(Boolean(mark.finished)) + Number(Boolean(mark.skip));
         }, 0);
         const total = document.createElement("div");
         total.className = "lap-total" + (isOnPitStop ? " is-pit" : "");
@@ -3470,8 +3587,8 @@
             const marks = document.createElement("span");
             marks.className = "lap-marks";
             const start = document.createElement("span");
-            start.className = "lap-mark start" + (hasStart ? " on" : "");
-            start.textContent = "●";
+            start.className = "lap-mark start" + (hasStart ? " on" : "") + (mark.startIcon ? " special-icon" : "");
+            start.textContent = mark.startIcon || "●";
             start.setAttribute("aria-hidden", "true");
             const finish = document.createElement("span");
             finish.className = "lap-mark finish" + (hasFinish ? " on" : "");
@@ -3480,7 +3597,15 @@
             marks.append(start, finish);
             cell.appendChild(marks);
           }
-          const readable = notJoined ? "ещё не участвовала" : pitStopContinues ? "пит-стоп продолжается" : emptyBeforePit ? "до начала пит-стопа чек-поинтов нет" : { both: "заезд и финиш отмечены", "start-only": "отмечен только заезд", "finish-only": "отмечен только финиш", pit: "пит-стоп", skip: "осознанная пауза", future: "отметок ещё нет" }[value];
+          const readable = notJoined
+            ? "ещё не участвовала"
+            : pitStopContinues
+              ? "пит-стоп продолжается"
+              : emptyBeforePit
+                ? "до начала пит-стопа чек-поинтов нет"
+                : mark.startIcon
+                  ? (hasFinish ? "поездка и финиш отмечены" : "отмечена поездка")
+                  : { both: "заезд и финиш отмечены", "start-only": "отмечен только заезд", "finish-only": "отмечен только финиш", pit: "пит-стоп", skip: "осознанная пауза", future: "отметок ещё нет" }[value];
           if (canOpenStory) {
             cell.title = "Открыть и скачать карточку: " + person.name + ", " + lapName;
             cell.setAttribute("aria-label", "Открыть и скачать личную карточку: " + person.name + ", " + lapName + ", " + readable);
