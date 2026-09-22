@@ -186,17 +186,6 @@
     }
     .current-round strong,
     .current-round-dates { color: var(--green); font-size: 1rem; font-weight: 900; }
-    .season-round-note {
-      padding: 5px 9px;
-      color: var(--white);
-      background: var(--orange);
-      border-radius: 999px;
-      font-size: .63rem;
-      font-weight: 900;
-      letter-spacing: .035em;
-      text-transform: uppercase;
-    }
-    .season-round-note[hidden] { display: none; }
     .week-meta { display: grid; justify-items: end; gap: 7px; }
     .week-updated { color: var(--muted); font-size: .78rem; }
 
@@ -1455,7 +1444,6 @@
         <span class="current-round-label">Сейчас едем</span>
         <strong id="current-round-title">круг 12</strong>
         <span class="current-round-dates" id="current-round-dates">· 21–26 сентября</span>
-        <span class="season-round-note" id="season-round-note">Финальный круг сезона</span>
       </div>
       <div class="week-meta"><span class="demo-badge" id="demo-badge">Демонстрационные данные</span><span class="week-updated" id="week-updated">Последняя отметка: 21 сентября 2026</span></div>
     </div>
@@ -1552,7 +1540,7 @@
         <h2 id="about-title">«Жажда порядка» — трек информационных гонщиков.</h2>
         <p class="about-lead">Информационные гонщики — не те, кто старается ехать быстрее всех. Мы учимся управлять потоком задач, идей и знаний: собирать его в понятную систему, видеть свой маршрут и двигаться в собственном темпе.</p>
         <p class="about-text">В практическом чате по подписке мы настраиваем болид порядка с помощью PARA, бумажных и цифровых пит-стопов, выходим на недельные круги и отмечаем чек-поинты. У каждого свой темп, но движемся мы вместе.</p>
-        <p class="about-text">Каждые 12 недельных кругов складываются в сезон. Новый сезон начинается с первого круга, а пройденный путь остаётся на табло.</p>
+        <p class="about-text">Каждые 12 недельных кругов складываются в сезон. Новый сезон продолжает общую нумерацию кругов, а пройденный путь остаётся на табло.</p>
       </div>
       <aside class="author-card" aria-label="Автор проекта">
         <img class="author-photo" src="author.webp" alt="Евгения Хабатулина">
@@ -1588,10 +1576,10 @@
       <div class="confetti" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <img src="elf.webp" alt="Эльфийка-штурман отмечает чек-поинты">
       <div class="celebration-copy">
-        <h2 id="celebration-title">Сезон 1 · круг 12 — финальный круг!</h2>
+        <h2 id="celebration-title">Круг 12 — мы уже едем!</h2>
         <p id="celebration-text"></p>
         <div class="celebration-results" id="celebration-results"></div>
-        <p class="celebration-prompt" id="celebration-prompt">Ещё не на треке? Ничего не упущено — к финальному кругу сезона тоже можно присоединиться.</p>
+        <p class="celebration-prompt" id="celebration-prompt">Ещё не на треке? Можно присоединиться и сейчас — поздний старт тоже считается.</p>
         <div class="celebration-actions"><a class="celebration-action" id="celebration-action" href="https://t.me/c/4389010152/15" target="_blank" rel="noopener noreferrer">Присоединиться к кругу 12</a><button class="celebration-close" id="celebration-close" type="button">Перейти к табло</button></div>
       </div>
     </div>
@@ -1813,28 +1801,33 @@
           number: 11,
           dates: "14–19 сентября",
           endDate: "2026-09-19",
-          updated: "21 сентября 2026",
+          updated: "22 сентября 2026",
           status: "closed",
           marks: {
             "Аня · болид №22": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 11-го круга отмечен. Оба чек-поинта круга приняты." },
-            "Женя · болид №9": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
-            "Лена · болид №10": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
-            "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
-            "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
-            "Даша · болид №5": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
-            "Болид №7": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
+            "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 11-го круга отмечен. Оба чек-поинта круга приняты." },
+            "Лена · болид №10": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 11-го круга отмечен. Оба чек-поинта круга приняты." },
+            "Женя": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 11-го круга отмечен. Оба чек-поинта круга приняты." },
+            "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 11-го круга отмечен. Оба чек-поинта круга приняты." },
+            "Даша · болид №5": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 11-го круга отмечен. Оба чек-поинта круга приняты." },
+            "Болид №7": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 11-го круга отмечен. Оба чек-поинта круга приняты." },
             "Юля · болид №17": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
-            "Лена · болид №3": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." }
+            "Лена · болид №3": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 11-го круга отмечен. Оба чек-поинта круга приняты." }
           }
         },
         {
           number: 12,
           dates: "21–26 сентября",
           endDate: "2026-09-26",
-          updated: "21 сентября 2026",
+          updated: "22 сентября 2026",
           status: "active",
           marks: {
-            "Аня · болид №22": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." }
+            "Аня · болид №22": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." },
+            "Даша · болид №5": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." },
+            "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." },
+            "Лена · болид №10": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." },
+            "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." },
+            "Болид №7": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." }
           }
         }
       ],
@@ -2031,12 +2024,7 @@
       document.getElementById("week-updated").textContent = "Последняя отметка: " + round.updated;
       document.getElementById("current-round-title").textContent = "круг " + round.number;
       document.getElementById("current-round-dates").textContent = "· " + round.dates;
-      document.querySelector(".current-round-label").textContent = seasonFinished
-        ? "Сезон завершён"
-        : round.status === "active" ? "Сейчас едем" : "Круг завершён";
-      const seasonRoundNote = document.getElementById("season-round-note");
-      seasonRoundNote.hidden = !isFinalRound;
-      seasonRoundNote.textContent = seasonFinished ? "Сезон завершён" : "Финальный круг сезона";
+      document.querySelector(".current-round-label").textContent = round.status === "active" ? "Сейчас едем" : "Круг завершён";
       document.getElementById("season-option-title").textContent = season.title;
       document.getElementById("season-option-status").textContent = seasonFinished ? "завершён" : "текущий";
       document.getElementById("season-toolbar-meta").textContent = season.totalRounds + " кругов · " + season.dates;
@@ -3360,18 +3348,12 @@
 
       results.replaceChildren();
       if (round.status === "active") {
-        title.textContent = round.number === BOARD_DATA.season.totalRounds
-          ? BOARD_DATA.season.title + " · круг " + data.round + " — финальный круг!"
-          : BOARD_DATA.season.title + " · круг " + data.round + " — мы уже едем!";
+        title.textContent = "Круг " + data.round + " — мы уже едем!";
         text.textContent = "Привет, информационные гонщики! Отмечаю чек-поинты команды:";
-        prompt.textContent = round.number === BOARD_DATA.season.totalRounds
-          ? "Ещё не на треке? Ничего не упущено — к финальному кругу сезона тоже можно присоединиться."
-          : "Ещё не на треке? Ничего не упущено — присоединяйся сейчас и отправляй понедельничный отчёт.";
+        prompt.textContent = "Ещё не на треке? Можно присоединиться и сейчас — поздний старт тоже считается.";
         action.textContent = "Присоединиться к кругу " + data.round;
       } else {
-        title.textContent = round.number === BOARD_DATA.season.totalRounds
-          ? BOARD_DATA.season.title + " завершён!"
-          : BOARD_DATA.season.title + " · круг " + data.round + " завершён!";
+        title.textContent = "Круг " + data.round + " завершён!";
         text.textContent = "Отмечаю движение всей команды:";
         prompt.textContent = "Если твой чек-поинт ещё не отмечен — отправь отчёт, и Эльфийка добавит его на табло.";
         action.textContent = "Заехать / Финишировать";
