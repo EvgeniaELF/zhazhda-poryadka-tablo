@@ -1202,12 +1202,12 @@
       position: relative;
       display: grid;
       justify-items: center;
-      width: min(400px, 100%);
+      width: min(560px, 100%);
       max-height: calc(100vh - 86px);
     }
     .personal-story-preview {
       display: block;
-      width: 100%;
+      width: min(400px, 100%);
       max-height: calc(100vh - 92px);
       object-fit: contain;
       background: var(--beige);
@@ -1215,10 +1215,15 @@
       border-radius: 28px;
       box-shadow: 0 28px 80px rgba(0,0,0,.36);
     }
-    .personal-story-download,
-    .personal-story-close {
+    .personal-story-downloads {
       position: absolute;
       top: -48px;
+      left: 80px;
+      display: flex;
+      gap: 8px;
+    }
+    .personal-story-download,
+    .personal-story-close {
       min-height: 40px;
       border: 0;
       box-shadow: 0 8px 22px rgba(0,0,0,.22);
@@ -1227,7 +1232,6 @@
       cursor: pointer;
     }
     .personal-story-download {
-      left: 0;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -1237,7 +1241,10 @@
       border-radius: 999px;
       font-size: .72rem;
     }
+    .personal-story-download--badge { background: var(--green); }
     .personal-story-close {
+      position: absolute;
+      top: -48px;
       right: 0;
       display: grid;
       place-items: center;
@@ -1250,6 +1257,7 @@
       line-height: 1;
     }
     .personal-story-download:hover { background: var(--orange-2); }
+    .personal-story-download--badge:hover { background: var(--green-2); }
     .personal-story-close:hover { color: var(--white); background: var(--orange); }
     .personal-story-download:focus-visible,
     .personal-story-close:focus-visible { outline: 4px solid var(--white); outline-offset: 3px; }
@@ -1416,8 +1424,18 @@
       }
       .round-summary-download { min-height: 44px; padding: 9px 12px; font-size: .76rem; }
       .round-summary-close { top: -104px; width: 44px; height: 44px; }
+      .personal-story { padding-top: 122px; }
+      .personal-story-shell { max-height: calc(100vh - 140px); }
+      .personal-story-preview { max-height: calc(100vh - 146px); }
+      .personal-story-downloads {
+        top: -104px;
+        left: 0;
+        right: 52px;
+        display: grid;
+        grid-template-columns: 1fr;
+      }
       .personal-story-download { min-height: 44px; font-size: .76rem; }
-      .personal-story-close { width: 44px; height: 44px; }
+      .personal-story-close { top: -104px; width: 44px; height: 44px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1489,7 +1507,7 @@
         </div>
         <div class="history-wrap">
           <p class="personal-story-hint">
-            <span><b>Буква участника</b> — актуальная карточка или пит‑стоп</span>
+            <span><b>Буква участника</b> — актуальная карточка и PNG-плашка</span>
             <span><b>Отметка круга</b> — карточка именно за этот круг</span>
           </p>
           <div class="history-scroll-top" id="history-scroll-top" aria-label="Прокрутка кругов истории" tabindex="0">
@@ -1564,9 +1582,12 @@
   </div>
 
   <div class="personal-story" id="personal-story" hidden>
-    <div class="personal-story-shell" role="dialog" aria-modal="true" aria-label="Личный трек для Stories">
-      <button class="personal-story-download" id="personal-story-download" type="button">Скачать PNG · 1080 × 1920</button>
-      <button class="personal-story-close" id="personal-story-close" type="button" aria-label="Закрыть личный трек">×</button>
+    <div class="personal-story-shell" role="dialog" aria-modal="true" aria-label="Личные карточки для Stories">
+      <div class="personal-story-downloads">
+        <button class="personal-story-download" id="personal-story-download" type="button">Скачать PNG · 1080 × 1920</button>
+        <button class="personal-story-download personal-story-download--badge" id="personal-badge-download" type="button">Скачать PNG-плашку</button>
+      </div>
+      <button class="personal-story-close" id="personal-story-close" type="button" aria-label="Закрыть личные карточки">×</button>
       <img class="personal-story-preview" id="personal-story-preview" alt="">
     </div>
   </div>
@@ -1801,7 +1822,7 @@
           number: 11,
           dates: "14–19 сентября",
           endDate: "2026-09-19",
-          updated: "22 сентября 2026",
+          updated: "27 сентября 2026",
           status: "closed",
           marks: {
             "Аня · болид №22": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 11-го круга отмечен. Оба чек-поинта круга приняты." },
@@ -1811,7 +1832,7 @@
             "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 11-го круга отмечен. Оба чек-поинта круга приняты." },
             "Даша · болид №5": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 11-го круга отмечен. Оба чек-поинта круга приняты." },
             "Болид №7": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 11-го круга отмечен. Оба чек-поинта круга приняты." },
-            "Юля · болид №17": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 11-й круг отмечен. Финишной отметки пока нет." },
+            "Юля · болид №17": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 11-го круга отмечен. Оба чек-поинта круга приняты." },
             "Лена · болид №3": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 11-го круга отмечен. Оба чек-поинта круга приняты." }
           }
         },
@@ -1819,7 +1840,7 @@
           number: 12,
           dates: "21–26 сентября",
           endDate: "2026-09-26",
-          updated: "22 сентября 2026",
+          updated: "27 сентября 2026",
           status: "active",
           marks: {
             "Аня · болид №22": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." },
@@ -1827,7 +1848,8 @@
             "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." },
             "Лена · болид №10": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." },
             "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." },
-            "Болид №7": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." }
+            "Болид №7": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." },
+            "Женя · болид №9": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." }
           }
         }
       ],
@@ -3041,6 +3063,60 @@
       return canvas;
     }
 
+    async function createPersonalBadgeCanvas(person) {
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      const stats = pilotStats(person.name);
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 720;
+      const ctx = canvas.getContext("2d");
+      const green = "#2d4f36";
+      const orange = "#ec8502";
+      const paper = "#fffdf7";
+      const brandMarkImage = await canvasLoadImage("logo-mark-micro-color.svg");
+      const bolidMatch = person.name.match(/^(.+?)\s*·\s*болид\s*(№\d+)$/i);
+      const pilotName = (bolidMatch ? bolidMatch[1] : person.name).trim();
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      canvasElevatedCard(ctx, 60, 40, 960, 640, 54, paper, "rgba(45,79,54,.18)", 4);
+
+      canvasSymbolBrandStrip(ctx, brandMarkImage, 105, 112, 70, [
+        ["ЖАЖДА ПОРЯДКА", green],
+        [" • ЛИЧНЫЙ РУБЕЖ", orange]
+      ], 975, 36);
+
+      ctx.fillStyle = green;
+      ctx.textAlign = "center";
+      const mainLines = [
+        pilotName + ", ты уже",
+        formatDays(stats.days) + " на треке",
+        formatLaps(stats.series) + " · " + formatCheckpoints(stats.checkpoints)
+      ];
+      canvasFont(ctx, 900, 54);
+      mainLines.forEach((line, index) => {
+        const scale = Math.min(1, 830 / ctx.measureText(line).width);
+        ctx.save();
+        ctx.translate(540, 205 + index * 72);
+        ctx.scale(scale, 1);
+        ctx.fillText(line, 0, 0);
+        ctx.restore();
+      });
+
+      ctx.fillStyle = orange;
+      canvasFont(ctx, 900, 38);
+      ctx.fillText("круг за кругом ты возвращаешься", 540, 450);
+      ctx.fillText("к своему маршруту", 540, 498);
+
+      canvasCard(ctx, 255, 555, 570, 80, 40, orange);
+      ctx.fillStyle = "#ffffff";
+      canvasFont(ctx, 900, 34);
+      ctx.textBaseline = "middle";
+      ctx.fillText("ДА, Я ЕДУ!", 540, 597);
+      ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
+      return canvas;
+    }
+
     async function createPitStopStoryCanvas(person) {
       if (document.fonts && document.fonts.ready) await document.fonts.ready;
       const stats = pilotStats(person.name);
@@ -3251,10 +3327,36 @@
       }
     }
 
+    async function downloadPersonalBadge(person, canvas, button) {
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "Готовлю плашку…";
+      try {
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+        const link = document.createElement("a");
+        link.download = "zhazhda-poryadka-lichnyy-rubezh-" + personalStorySlug(person.name) + ".png";
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          link.href = url;
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } else {
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        }
+        button.textContent = "PNG-плашка скачана ✓";
+        setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 1800);
+      } catch (error) {
+        button.textContent = "Не удалось скачать";
+        setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 2200);
+      }
+    }
+
     async function openPersonalStory(person, opener, round = selectedRound()) {
       const layer = document.getElementById("personal-story");
       const close = document.getElementById("personal-story-close");
       const download = document.getElementById("personal-story-download");
+      const badgeDownload = document.getElementById("personal-badge-download");
       const preview = document.getElementById("personal-story-preview");
       const shell = layer.querySelector(".personal-story-shell");
       opener.classList.add("is-loading");
@@ -3264,14 +3366,17 @@
         const isPitStop = round.number === BOARD_DATA.selectedRound
           ? isOnActivePitStop(person)
           : Boolean(roundMark.pit && !roundMark.entered && !roundMark.finished);
-        const canvas = isPitStop
-          ? await createPitStopStoryCanvas(person)
-          : await createPersonalStoryCanvas(person, round);
+        const [canvas, badgeCanvas] = await Promise.all([
+          isPitStop
+            ? createPitStopStoryCanvas(person)
+            : createPersonalStoryCanvas(person, round),
+          createPersonalBadgeCanvas(person)
+        ]);
         preview.src = canvas.toDataURL("image/png");
         preview.alt = isPitStop
           ? "Карточка пит-стопа участника " + person.name
           : "Личный трек участника " + person.name + ", " + BOARD_DATA.season.title + ", круг " + round.number;
-        shell.setAttribute("aria-label", isPitStop ? "Карточка пит-стопа для Stories" : "Личный трек для Stories");
+        shell.setAttribute("aria-label", "Личные карточки участника " + person.name + " для Stories");
         layer.hidden = false;
         document.body.classList.add("summary-open");
         download.disabled = false;
@@ -3279,6 +3384,9 @@
           ? "Получить карточку пит-стопа 🔧"
           : "Скачать PNG · 1080 × 1920";
         download.onclick = () => downloadPersonalStory(person, canvas, download, round, isPitStop);
+        badgeDownload.disabled = false;
+        badgeDownload.textContent = "Скачать PNG-плашку";
+        badgeDownload.onclick = () => downloadPersonalBadge(person, badgeCanvas, badgeDownload);
         close.focus();
 
         const dismiss = () => {
@@ -3522,13 +3630,8 @@
         avatar.className = "history-initial";
         avatar.type = "button";
         avatar.textContent = initial(person.name);
-        avatar.setAttribute(
-          "aria-label",
-          isOnPitStop
-            ? "Открыть карточку пит-стопа участника " + person.name + " для Stories"
-            : "Открыть личный трек участника " + person.name + " для Stories"
-        );
-        avatar.title = isOnPitStop ? "Получить карточку пит-стопа" : "Открыть личный трек для Stories";
+        avatar.setAttribute("aria-label", "Открыть личные карточки участника " + person.name + " для Stories");
+        avatar.title = "Открыть личные карточки для Stories";
         avatar.addEventListener("click", () => openPersonalStory(person, avatar));
         const nameText = document.createElement("span");
         nameText.textContent = person.name;
