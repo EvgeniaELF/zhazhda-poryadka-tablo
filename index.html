@@ -588,20 +588,49 @@
       align-items: center;
       gap: 7px;
       padding: 8px 12px;
-      color: var(--white);
-      background: var(--green);
+      color: var(--green);
+      background: rgba(45,79,54,.08);
+      border: 1px solid rgba(45,79,54,.12);
       border-radius: 999px;
+      cursor: pointer;
+      font: inherit;
       font-size: .76rem;
       font-weight: 900;
+      transition: background .18s ease, color .18s ease, transform .18s ease;
     }
+    .season-option:hover { transform: translateY(-1px); background: rgba(45,79,54,.13); }
+    .season-option[aria-current="true"] { color: var(--white); background: var(--green); border-color: var(--green); }
+    .season-option:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
     .season-option small {
-      color: rgba(255,255,255,.72);
+      color: rgba(45,79,54,.56);
       font-size: .6rem;
       font-weight: 900;
       letter-spacing: .04em;
       text-transform: uppercase;
     }
+    .season-option[aria-current="true"] small { color: rgba(255,255,255,.72); }
+    .season-options { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
     .season-toolbar-meta { color: var(--muted); font-size: .73rem; font-weight: 800; text-align: right; }
+    .season-toolbar-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+    .season-summary-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      padding: 8px 14px;
+      color: var(--white);
+      background: var(--orange);
+      border: 0;
+      border-radius: 999px;
+      box-shadow: 0 8px 18px rgba(236,133,2,.18);
+      cursor: pointer;
+      font: 900 .7rem/1 Nunito, sans-serif;
+      white-space: nowrap;
+      transition: background .18s ease, transform .18s ease;
+    }
+    .season-summary-button:hover { transform: translateY(-1px); background: var(--orange-2); }
+    .season-summary-button:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+    .season-summary-button.is-loading { cursor: wait; opacity: .72; }
     .season-route {
       position: absolute;
       inset: 0;
@@ -700,7 +729,7 @@
       --history-total-column: 112px;
       --history-column-gap: 9px;
       display: grid;
-      grid-template-columns: var(--history-name-column) var(--history-total-column) repeat(var(--round-count, 2), minmax(88px, .75fr));
+      grid-template-columns: var(--history-name-column) var(--history-total-column) repeat(var(--round-count, 2), 88px);
       gap: var(--history-column-gap);
       min-width: calc(var(--history-name-column) + var(--history-total-column) + var(--history-scroll-columns-width, 203px));
       align-items: center;
@@ -1377,6 +1406,7 @@
       .participant-top { align-items: flex-start; flex-wrap: wrap; }
       .season-toolbar { align-items: flex-start; flex-direction: column; }
       .season-toolbar-meta { text-align: left; }
+      .season-toolbar-actions { width: 100%; justify-content: space-between; }
       .personal-story-hint { display: grid; width: 100%; gap: 6px; border-radius: 16px; }
       .season-path {
         display: grid;
@@ -1411,6 +1441,8 @@
     }
 
     @media (max-width: 640px) {
+      .season-toolbar-actions { align-items: flex-start; flex-direction: column; }
+      .season-summary-button { width: 100%; min-height: 44px; }
       .round-summary { padding-top: 122px; }
       .round-summary-shell { max-height: calc(100vh - 140px); }
       .round-summary-preview { max-height: calc(100vh - 146px); }
@@ -1496,8 +1528,11 @@
 
     <section class="view" id="view-history" role="tabpanel" aria-labelledby="tab-history" hidden>
       <div class="season-toolbar" aria-label="Выбранный сезон">
-        <span class="season-option" aria-current="true"><span id="season-option-title">Сезон 1</span><small id="season-option-status">текущий</small></span>
-        <span class="season-toolbar-meta" id="season-toolbar-meta">12 кругов · 26 июня–26 сентября 2026</span>
+        <div class="season-options" id="season-options" role="tablist" aria-label="Сезоны"></div>
+        <div class="season-toolbar-actions">
+          <span class="season-toolbar-meta" id="season-toolbar-meta">12 кругов · 26 июня–26 сентября 2026</span>
+          <button class="season-summary-button" id="season-summary-button" type="button">Сводка сезона ↓</button>
+        </div>
       </div>
       <div class="season-path" id="season-path" aria-label="Трасса сезона"></div>
       <div class="board">
@@ -1571,7 +1606,7 @@
   </main>
 
   <div class="round-summary" id="round-summary" hidden>
-    <div class="round-summary-shell" role="dialog" aria-modal="true" aria-label="Командная сводка круга">
+    <div class="round-summary-shell" id="round-summary-shell" role="dialog" aria-modal="true" aria-label="Командная сводка">
       <div class="round-summary-downloads">
         <button class="round-summary-download" id="round-summary-download" type="button">Скачать PNG · 1600 × 1050</button>
         <button class="round-summary-download" id="round-summary-story-download" type="button">Скачать PNG · 1080 × 1920</button>
@@ -1635,16 +1670,33 @@
     const BOARD_DATA = {
       demo: false,
       projectStartedLabel: "26 июня",
-      season: {
-        number: 1,
-        title: "Сезон 1",
-        started: "2026-06-26",
-        dates: "26 июня–26 сентября 2026",
-        totalRounds: 12,
-        status: "active"
-      },
+      seasons: [
+        {
+          number: 1,
+          title: "Сезон 1",
+          started: "2026-06-26",
+          startedLabel: "26 июня",
+          dates: "26 июня–26 сентября 2026",
+          firstRound: 1,
+          lastRound: 12,
+          totalRounds: 12,
+          status: "closed"
+        },
+        {
+          number: 2,
+          title: "Сезон 2",
+          started: "2026-09-28",
+          startedLabel: "28 сентября",
+          dates: "с 28 сентября 2026",
+          firstRound: 13,
+          lastRound: 24,
+          totalRounds: 12,
+          status: "active"
+        }
+      ],
       timeZone: "Europe/Moscow",
-      selectedRound: 12,
+      selectedSeason: 2,
+      selectedRound: 13,
       rounds: [
         {
           number: 1,
@@ -1840,16 +1892,30 @@
           number: 12,
           dates: "21–26 сентября",
           endDate: "2026-09-26",
-          updated: "27 сентября 2026",
-          status: "active",
+          updated: "29 сентября 2026",
+          status: "closed",
           marks: {
             "Аня · болид №22": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." },
             "Даша · болид №5": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." },
-            "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." },
-            "Лена · болид №10": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." },
+            "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш 12-го круга отмечен." },
+            "Лена · болид №10": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш 12-го круга отмечен." },
             "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." },
-            "Болид №7": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." },
-            "Женя · болид №9": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 12-й круг отмечен. Финишной отметки пока нет." }
+            "Болид №7": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш 12-го круга отмечен." },
+            "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Субботний чек-поинт принят. Финиш 12-го круга отмечен." },
+            "Юля · болид №17": { entered: true, finished: true, pit: false, late: false, lastMark: "Старт и финиш 12-го круга отмечены. Оба чек-поинта круга приняты." }
+          }
+        },
+        {
+          number: 13,
+          dates: "28 сентября–3 октября",
+          endDate: "2026-10-03",
+          updated: "29 сентября 2026",
+          status: "active",
+          marks: {
+            "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 13-й круг отмечен. Второй сезон открыт." },
+            "Лена · болид №10": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 13-й круг отмечен. Второй сезон открыт." },
+            "Лена · болид №3": { entered: false, finished: false, pit: true, late: false, lastMark: "Пит-стоп с 28 сентября 2026. Пройденный путь сохранён." },
+            "Даша · болид №5": { entered: false, finished: false, pit: true, late: false, lastMark: "Пит-стоп с 25 сентября 2026. Пройденный путь сохранён." }
           }
         }
       ],
@@ -1868,14 +1934,16 @@
         { name: "Даша", joinedRound: 4, firstReport: "2026-07-29", trackPauses: [{ pausedAt: "2026-09-05", resumedAt: null }] },
         { name: "Юля · болид №17", joinedRound: 5, firstReport: "2026-08-11" },
         { name: "Таня · болид №11", joinedRound: 4, firstReport: "2026-08-02", trackPauses: [{ pausedAt: "2026-08-31", resumedAt: null }] },
-        { name: "Лена · болид №3", joinedRound: 5, firstReport: "2026-08-05" },
-        { name: "Даша · болид №5", joinedRound: 8, firstReport: "2026-08-29" }
+        { name: "Лена · болид №3", joinedRound: 5, firstReport: "2026-08-05", trackPauses: [{ pausedAt: "2026-09-27", resumedAt: null }] },
+        { name: "Даша · болид №5", joinedRound: 8, firstReport: "2026-08-29", trackPauses: [{ pausedAt: "2026-09-24", resumedAt: null }] }
       ],
       celebration: {
-        id: "round-12-start-v1",
-        round: 12
+        id: "season-2-round-13-start-v1",
+        round: 13
       }
     };
+
+    const SEASON_TROPHY_ELF = "season-trophy-elf.png";
 
     const stateMeta = {
       garage: { label: "Заезд не отмечен", icon: "○", color: "#2d4f36", bg: "#ffefcd" },
@@ -1890,6 +1958,19 @@
       return BOARD_DATA.rounds.find(round => round.number === BOARD_DATA.selectedRound) || BOARD_DATA.rounds[0];
     }
 
+    function selectedSeason() {
+      return BOARD_DATA.seasons.find(season => season.number === BOARD_DATA.selectedSeason) || BOARD_DATA.seasons.at(-1);
+    }
+
+    function seasonForRound(roundOrNumber) {
+      const roundNumber = typeof roundOrNumber === "number" ? roundOrNumber : roundOrNumber?.number;
+      return BOARD_DATA.seasons.find(season => roundNumber >= season.firstRound && roundNumber <= season.lastRound) || BOARD_DATA.seasons.at(-1);
+    }
+
+    function roundsForSeason(season = selectedSeason()) {
+      return BOARD_DATA.rounds.filter(round => round.number >= season.firstRound && round.number <= season.lastRound);
+    }
+
     function isOnActivePitStop(member) {
       return Boolean((member.trackPauses || []).some(pause => pause.pausedAt && !pause.resumedAt));
     }
@@ -1898,18 +1979,21 @@
       const round = selectedRound();
       return BOARD_DATA.members
         .filter(member => (member.joinedRound || 1) <= round.number)
-        .filter(member => !isOnActivePitStop(member))
-        .map(member => ({
-          ...member,
-          entered: false,
-          finished: false,
-          pit: false,
-          skip: false,
-          late: false,
-          lastMark: "Заезд на этот круг ещё не отмечен.",
-          ...(round.marks[member.name] || {})
-        }))
-        .filter(person => !person.pit);
+        .filter(member => !isOnActivePitStop(member) && !round.marks[member.name]?.pit)
+        .map(member => {
+          const mark = round.marks[member.name] || {};
+          return {
+            ...member,
+            entered: false,
+            finished: false,
+            pit: false,
+            skip: false,
+            late: false,
+            lastMark: "Заезд на этот круг ещё не отмечен.",
+            ...mark,
+            pit: false
+          };
+        });
     }
 
     function currentState(person) {
@@ -1993,9 +2077,10 @@
     }
 
     function seasonDaysForRound(round, now = new Date()) {
-      if (!round || !BOARD_DATA.season.started) return 0;
+      const season = seasonForRound(round);
+      if (!round || !season?.started) return 0;
       const dayMs = 86400000;
-      const startUtc = dateStringToUtc(BOARD_DATA.season.started);
+      const startUtc = dateStringToUtc(season.started);
       const roundEndUtc = round.endDate ? dateStringToUtc(round.endDate) : todayUtcInBoardTimeZone(now);
       const referenceUtc = round.status === "active"
         ? Math.min(todayUtcInBoardTimeZone(now), roundEndUtc)
@@ -2038,28 +2123,53 @@
       return { series, checkpoints, days: daysOnTrack(member) };
     }
 
+    function renderSeasonToolbar() {
+      const season = selectedSeason();
+      const options = document.getElementById("season-options");
+      options.replaceChildren();
+      BOARD_DATA.seasons.forEach(item => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "season-option";
+        button.setAttribute("role", "tab");
+        button.setAttribute("aria-selected", item.number === season.number ? "true" : "false");
+        button.setAttribute("aria-current", item.number === season.number ? "true" : "false");
+        const title = document.createElement("span");
+        title.textContent = item.title;
+        const status = document.createElement("small");
+        status.textContent = item.status === "closed" ? "завершён" : "текущий";
+        button.append(title, status);
+        button.addEventListener("click", () => {
+          BOARD_DATA.selectedSeason = item.number;
+          renderSeasonToolbar();
+          renderSeasonPath();
+          renderHistory();
+        });
+        options.appendChild(button);
+      });
+      document.getElementById("season-toolbar-meta").textContent = season.totalRounds + " кругов · " + season.dates;
+      const summaryButton = document.getElementById("season-summary-button");
+      summaryButton.setAttribute("aria-label", "Открыть сводку: " + season.title);
+      summaryButton.onclick = () => openSeasonSummary(season, summaryButton);
+      document.getElementById("season-title").textContent = "Маршрут · " + season.title;
+      document.getElementById("season-subtitle").textContent = "старт " + season.startedLabel + " · круг за кругом — личная история устойчивого движения";
+      document.getElementById("season-path").setAttribute("aria-label", "Трасса: " + season.title);
+    }
+
     function renderHeader() {
       const round = selectedRound();
-      const season = BOARD_DATA.season;
-      const isFinalRound = round.number === season.totalRounds;
-      const seasonFinished = isFinalRound && round.status === "closed";
       document.getElementById("week-updated").textContent = "Последняя отметка: " + round.updated;
       document.getElementById("current-round-title").textContent = "круг " + round.number;
       document.getElementById("current-round-dates").textContent = "· " + round.dates;
       document.querySelector(".current-round-label").textContent = round.status === "active" ? "Сейчас едем" : "Круг завершён";
-      document.getElementById("season-option-title").textContent = season.title;
-      document.getElementById("season-option-status").textContent = seasonFinished ? "завершён" : "текущий";
-      document.getElementById("season-toolbar-meta").textContent = season.totalRounds + " кругов · " + season.dates;
-      document.getElementById("season-title").textContent = "Маршрут";
-      document.getElementById("season-subtitle").textContent = "старт " + BOARD_DATA.projectStartedLabel + " · круг за кругом — личная история устойчивого движения";
-      document.getElementById("season-path").setAttribute("aria-label", "Трасса: " + season.title);
+      renderSeasonToolbar();
       document.getElementById("demo-badge").hidden = !BOARD_DATA.demo;
     }
 
     function renderMetrics() {
       const participants = selectedParticipants();
-      const entered = participants.filter(person => person.entered && !person.startIcon).length;
-      const done = participants.filter(person => person.finished).length;
+      const entered = participants.filter(person => !person.pit && person.entered && !person.startIcon).length;
+      const done = participants.filter(person => !person.pit && person.finished).length;
       const awaiting = participants.filter(person => !person.entered && !person.finished && !person.pit && !person.skip).length;
       document.getElementById("metric-entered").textContent = entered;
       document.getElementById("metric-done").textContent = done;
@@ -2113,7 +2223,7 @@
       const route = document.createElementNS("http://www.w3.org/2000/svg", "path");
       svg.appendChild(route);
       path.appendChild(svg);
-      BOARD_DATA.rounds.forEach((round, index) => {
+      roundsForSeason().forEach(round => {
         const stop = document.createElement("button");
         stop.type = "button";
         stop.className = "path-stop " + round.status;
@@ -2209,8 +2319,48 @@
       };
     }
 
+    function seasonSummaryData(season) {
+      const rounds = roundsForSeason(season);
+      const participants = BOARD_DATA.members
+        .map(member => {
+          const totals = rounds.reduce((result, round) => {
+            const mark = round.marks[member.name] || {};
+            const entered = Boolean(mark.entered);
+            const finished = Boolean(mark.finished);
+            const skipped = Boolean(mark.skip);
+            result.starts += Number(entered);
+            result.finishes += Number(finished);
+            result.skips += Number(skipped);
+            result.rounds += Number(entered || finished || skipped);
+            return result;
+          }, { starts: 0, finishes: 0, skips: 0, rounds: 0 });
+          return {
+            ...member,
+            ...totals,
+            checkpoints: totals.starts + totals.finishes + totals.skips
+          };
+        })
+        .filter(member => member.checkpoints > 0);
+      const totals = participants.reduce((result, member) => {
+        result.starts += member.starts;
+        result.finishes += member.finishes;
+        result.skips += member.skips;
+        result.checkpoints += member.checkpoints;
+        return result;
+      }, { starts: 0, finishes: 0, skips: 0, checkpoints: 0 });
+      return {
+        season,
+        rounds,
+        participants,
+        closedRounds: rounds.filter(round => round.status === "closed").length,
+        days: rounds.length ? seasonDaysForRound(rounds.at(-1)) : 0,
+        ...totals
+      };
+    }
+
     async function openRoundSummary(round, opener) {
       const layer = document.getElementById("round-summary");
+      const shell = document.getElementById("round-summary-shell");
       const close = document.getElementById("round-summary-close");
       const download = document.getElementById("round-summary-download");
       const storyDownload = document.getElementById("round-summary-story-download");
@@ -2223,7 +2373,8 @@
         download.textContent = "Готовлю превью…";
         const canvas = await createRoundSummaryCanvas(round);
         preview.src = canvas.toDataURL("image/png");
-        preview.alt = "Командная сводка: " + BOARD_DATA.season.title + ", круг " + round.number + ", " + round.dates;
+        preview.alt = "Командная сводка: " + seasonForRound(round).title + ", круг " + round.number + ", " + round.dates;
+        shell.setAttribute("aria-label", "Командная сводка круга " + round.number);
         layer.hidden = false;
         document.body.classList.add("summary-open");
         download.disabled = false;
@@ -2235,6 +2386,57 @@
         storyDownload.onclick = async () => {
           if (!storyCanvas) storyCanvas = await createRoundStoryCanvas(round);
           downloadRoundStory(round, storyCanvas, storyDownload);
+        };
+        close.focus();
+
+        const dismiss = () => {
+          if (layer.hidden) return;
+          layer.hidden = true;
+          document.body.classList.remove("summary-open");
+          document.removeEventListener("keydown", onEscape);
+          opener.focus();
+        };
+        close.onclick = dismiss;
+        layer.onclick = event => { if (event.target === layer) dismiss(); };
+        const onEscape = event => {
+          if (event.key !== "Escape" || layer.hidden) return;
+          dismiss();
+        };
+        document.addEventListener("keydown", onEscape);
+      } finally {
+        opener.classList.remove("is-loading");
+        opener.removeAttribute("aria-busy");
+      }
+    }
+
+    async function openSeasonSummary(season, opener) {
+      const layer = document.getElementById("round-summary");
+      const shell = document.getElementById("round-summary-shell");
+      const close = document.getElementById("round-summary-close");
+      const download = document.getElementById("round-summary-download");
+      const storyDownload = document.getElementById("round-summary-story-download");
+      const preview = document.getElementById("round-summary-preview");
+      opener.classList.add("is-loading");
+      opener.setAttribute("aria-busy", "true");
+      try {
+        download.disabled = true;
+        storyDownload.disabled = true;
+        download.textContent = "Готовлю сводку…";
+        const canvas = await createSeasonSummaryCanvas(season);
+        preview.src = canvas.toDataURL("image/png");
+        preview.alt = "Командная сводка: " + season.title;
+        shell.setAttribute("aria-label", "Командная сводка: " + season.title);
+        layer.hidden = false;
+        document.body.classList.add("summary-open");
+        download.disabled = false;
+        storyDownload.disabled = false;
+        download.textContent = "Скачать PNG · 1600 × 1050";
+        storyDownload.textContent = "Скачать PNG · 1080 × 1920";
+        download.onclick = () => downloadSeasonSummary(season, canvas, download, false);
+        let storyCanvas = null;
+        storyDownload.onclick = async () => {
+          if (!storyCanvas) storyCanvas = await createSeasonStoryCanvas(season);
+          downloadSeasonSummary(season, storyCanvas, storyDownload, true);
         };
         close.focus();
 
@@ -2385,6 +2587,249 @@
       });
       ctx.restore();
       ctx.textBaseline = "alphabetic";
+    }
+
+    function canvasSeasonParticipantRow(ctx, participant, x, y, width, height, compact = false) {
+      canvasCard(ctx, x, y, width, height, Math.min(24, height / 2), "rgba(255,253,247,.94)", "rgba(45,79,54,.14)", 2);
+      const nameSize = participant.name.length > 22 ? 19 : compact ? 22 : 23;
+      ctx.fillStyle = "#2d4f36";
+      canvasFont(ctx, 900, nameSize);
+      ctx.textBaseline = "middle";
+      if (compact) {
+        const stats = formatLaps(participant.rounds) + " · " + formatCheckpoints(participant.checkpoints);
+        canvasFont(ctx, 800, 17);
+        const statsWidth = ctx.measureText(stats).width;
+        const maxNameWidth = Math.max(170, width - statsWidth - 72);
+        canvasFont(ctx, 900, nameSize);
+        const nameWidth = ctx.measureText(participant.name).width;
+        ctx.save();
+        ctx.translate(x + 22, y + height / 2);
+        ctx.scale(Math.min(1, maxNameWidth / nameWidth), 1);
+        ctx.fillText(participant.name, 0, 0);
+        ctx.restore();
+        ctx.fillStyle = "#6f7d72";
+        canvasFont(ctx, 800, 17);
+        ctx.textAlign = "right";
+        ctx.fillText(stats, x + width - 22, y + height / 2);
+        ctx.textAlign = "left";
+      } else {
+        const maxNameWidth = width - 44;
+        const nameWidth = ctx.measureText(participant.name).width;
+        ctx.save();
+        ctx.translate(x + 22, y + height * .36);
+        ctx.scale(Math.min(1, maxNameWidth / nameWidth), 1);
+        ctx.fillText(participant.name, 0, 0);
+        ctx.restore();
+        ctx.fillStyle = "#6f7d72";
+        canvasFont(ctx, 800, 15);
+        ctx.fillText(formatLaps(participant.rounds) + " · " + formatCheckpoints(participant.checkpoints), x + 22, y + height * .73);
+      }
+      ctx.textBaseline = "alphabetic";
+    }
+
+    async function createSeasonSummaryCanvas(season) {
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      const summary = seasonSummaryData(season);
+      const canvas = document.createElement("canvas");
+      canvas.width = 1600;
+      canvas.height = 1050;
+      const ctx = canvas.getContext("2d");
+      const green = "#2d4f36";
+      const orange = "#ec8502";
+      const beige = "#ffefcd";
+      const paper = "#fffdf7";
+      const muted = "#6f7d72";
+      const [trackImage, brandLogoImage] = await Promise.all([
+        canvasLoadImage("track.webp"),
+        canvasLoadImage("logo-compact-color.svg")
+      ]);
+
+      const background = ctx.createLinearGradient(0, 0, 1600, 1050);
+      background.addColorStop(0, paper);
+      background.addColorStop(1, beige);
+      ctx.fillStyle = background;
+      ctx.fillRect(0, 0, 1600, 1050);
+      const glow = ctx.createRadialGradient(1510, 30, 10, 1510, 30, 360);
+      glow.addColorStop(0, "rgba(236,133,2,.22)");
+      glow.addColorStop(1, "rgba(236,133,2,0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(1100, 0, 500, 440);
+
+      canvasBrandStrip(ctx, brandLogoImage, 80, 84, 390, [
+        [" • СВОДКА СЕЗОНА", orange],
+        [" • МЯГКО, НО ЕДЕМ", green]
+      ], 1520, 42);
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 60);
+      ctx.fillText(season.title.toLowerCase() + (season.status === "active" ? " · сейчас едем" : " · итоги"), 80, 190);
+      ctx.fillStyle = muted;
+      canvasFont(ctx, 800, 30);
+      ctx.fillText(season.dates, 80, 232);
+      if (season.status === "active") {
+        canvasCard(ctx, 1180, 177, 340, 58, 29, orange);
+        ctx.fillStyle = "#ffffff";
+        canvasFont(ctx, 900, 23);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("Данные на " + currentDataDate(), 1350, 207);
+        ctx.textAlign = "left";
+        ctx.textBaseline = "alphabetic";
+      }
+
+      canvasCard(ctx, 80, 280, 420, 150, 32, green);
+      ctx.fillStyle = "rgba(255,255,255,.82)";
+      canvasFont(ctx, 800, 24);
+      ctx.fillText("Участниц в сезоне", 115, 325);
+      ctx.fillStyle = "#ffffff";
+      canvasFont(ctx, 900, 78);
+      ctx.fillText(String(summary.participants.length), 112, 408);
+
+      canvasCard(ctx, 80, 455, 420, 235, 32, orange);
+      ctx.fillStyle = "rgba(255,255,255,.86)";
+      canvasFont(ctx, 900, 24);
+      ctx.fillText("Чек-поинтов за сезон", 115, 503);
+      ctx.fillStyle = "#ffffff";
+      canvasFont(ctx, 900, 88);
+      ctx.fillText(String(summary.checkpoints), 112, 607);
+      canvasCard(ctx, 112, 625, 170, 46, 23, "rgba(255,255,255,.94)");
+      canvasCard(ctx, 296, 625, 170, 46, 23, "rgba(255,255,255,.94)");
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 17);
+      ctx.fillText("● СТАРТЫ: " + summary.starts, 197, 649);
+      ctx.fillStyle = orange;
+      ctx.fillText("⚑ ФИНИШИ: " + summary.finishes, 381, 649);
+      ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
+
+      canvasCard(ctx, 80, 715, 420, 275, 32, "rgba(255,255,255,.78)", "rgba(45,79,54,.2)", 3);
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 24);
+      ctx.fillText("Кругов в сезоне", 115, 765);
+      ctx.fillStyle = green;
+      const seasonDuration = String(summary.rounds.length) + " = " + formatDays(summary.days);
+      canvasFont(ctx, 900, 50);
+      const durationWidth = ctx.measureText(seasonDuration).width;
+      ctx.save();
+      ctx.translate(115, 885);
+      ctx.scale(Math.min(1, 350 / durationWidth), 1);
+      ctx.fillText(seasonDuration, 0, 0);
+      ctx.restore();
+
+      canvasCard(ctx, 540, 280, 980, 710, 32, "rgba(255,255,255,.76)", "rgba(45,79,54,.14)", 3);
+      if (trackImage) {
+        ctx.save();
+        canvasRoundedRect(ctx, 540, 280, 980, 710, 32);
+        ctx.clip();
+        ctx.globalAlpha = .045;
+        ctx.drawImage(trackImage, 890, 370, 720, 720);
+        ctx.restore();
+      }
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 40);
+      ctx.fillText("Кто был на треке", 590, 344);
+      ctx.fillStyle = muted;
+      canvasFont(ctx, 700, 22);
+      ctx.fillText("Круги и чек-поинты именно этого сезона", 590, 382);
+      const rows = Math.max(1, Math.ceil(summary.participants.length / 2));
+      const rowGap = 10;
+      const rowHeight = Math.min(62, (520 - (rows - 1) * rowGap) / rows);
+      summary.participants.forEach((participant, index) => {
+        const column = index % 2;
+        const row = Math.floor(index / 2);
+        canvasSeasonParticipantRow(ctx, participant, 590 + column * 452, 410 + row * (rowHeight + rowGap), 430, rowHeight);
+      });
+      ctx.fillStyle = muted;
+      canvasFont(ctx, 700, 19);
+      ctx.fillText("Порядок имён постоянный — это не рейтинг.", 590, 963);
+      return canvas;
+    }
+
+    async function createSeasonStoryCanvas(season) {
+      if (document.fonts && document.fonts.ready) await document.fonts.ready;
+      const summary = seasonSummaryData(season);
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1920;
+      const ctx = canvas.getContext("2d");
+      const green = "#2d4f36";
+      const orange = "#ec8502";
+      const beige = "#ffefcd";
+      const paper = "#fffdf7";
+      const muted = "#6f7d72";
+      const [trackImage, brandMarkImage, trophyElfImage] = await Promise.all([
+        canvasLoadImage("track.webp"),
+        canvasLoadImage("logo-mark-micro-color.svg"),
+        canvasLoadImage(SEASON_TROPHY_ELF)
+      ]);
+
+      const background = ctx.createLinearGradient(0, 0, 1080, 1920);
+      background.addColorStop(0, paper);
+      background.addColorStop(.58, "#fffaf0");
+      background.addColorStop(1, beige);
+      ctx.fillStyle = background;
+      ctx.fillRect(0, 0, 1080, 1920);
+      const topGlow = ctx.createRadialGradient(1010, 30, 10, 1010, 30, 420);
+      topGlow.addColorStop(0, "rgba(236,133,2,.22)");
+      topGlow.addColorStop(1, "rgba(236,133,2,0)");
+      ctx.fillStyle = topGlow;
+      ctx.fillRect(560, 0, 520, 480);
+      if (trackImage) {
+        ctx.save();
+        ctx.globalAlpha = .04;
+        ctx.drawImage(trackImage, 360, 950, 900, 900);
+        ctx.restore();
+      }
+
+      canvasSymbolBrandStrip(ctx, brandMarkImage, 70, 100, 88, [
+        ["ЖАЖДА ПОРЯДКА", green],
+        [" • СВОДКА СЕЗОНА", orange]
+      ], 1010, 31);
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 68);
+      ctx.fillText(season.title.toUpperCase(), 70, 220);
+      ctx.fillStyle = orange;
+      canvasFont(ctx, 900, 34);
+      ctx.fillText(season.status === "active" ? "СЕЙЧАС ЕДЕМ · " + season.dates.toUpperCase() : "ИТОГИ · " + season.dates.toUpperCase(), 70, 270);
+
+      const metrics = [
+        { value: summary.participants.length, label: "УЧАСТНИЦ", fill: green, color: "#ffffff" },
+        { value: summary.checkpoints, label: "ЧЕК-ПОИНТОВ", fill: orange, color: "#ffffff" },
+        { value: summary.rounds.length, label: "КРУГОВ", fill: "rgba(255,255,255,.8)", color: green }
+      ];
+      metrics.forEach((metric, index) => {
+        const x = 70 + index * 310;
+        const y = 380;
+        const outlined = metric.fill === "rgba(255,255,255,.8)";
+        canvasElevatedCard(ctx, x, y, 290, 210, 32, metric.fill, outlined ? "rgba(45,79,54,.16)" : null, 3);
+        ctx.fillStyle = metric.color;
+        canvasFont(ctx, 900, 82);
+        ctx.textAlign = "center";
+        ctx.fillText(String(metric.value), x + 145, y + 110);
+        ctx.fillStyle = outlined ? muted : "rgba(255,255,255,.82)";
+        canvasFont(ctx, 900, 20);
+        ctx.fillText(metric.label, x + 145, y + 165);
+      });
+      ctx.textAlign = "left";
+
+      if (trophyElfImage) {
+        ctx.save();
+        ctx.shadowColor = "rgba(45,79,54,.2)";
+        ctx.shadowBlur = 30;
+        ctx.shadowOffsetY = 18;
+        ctx.drawImage(trophyElfImage, 90, 675, 900, 900);
+        ctx.restore();
+      }
+      ctx.fillStyle = green;
+      canvasFont(ctx, 900, 34);
+      ctx.fillText("МЯГКО, НО ЕДЕМ.", 70, 1795);
+      ctx.fillStyle = orange;
+      canvasFont(ctx, 800, 27);
+      ctx.textAlign = "right";
+      ctx.fillText("@Zhenya_Habatulina", 1010, 1795);
+      ctx.textAlign = "left";
+      return canvas;
     }
 
     async function createRoundSummaryCanvas(round) {
@@ -2607,8 +3052,10 @@
       ctx.fillText("ЧЕК-ПОИНТОВ ЗА КРУГ", 115, 360);
       canvasFont(ctx, 900, 150);
       ctx.textAlign = "center";
-      ctx.fillText(String(summary.roundCheckpoints), 285, 590);
+      ctx.textBaseline = "middle";
+      ctx.fillText(String(summary.roundCheckpoints), 285, 510);
       ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
       ctx.strokeStyle = "rgba(255,255,255,.32)";
       ctx.lineWidth = 3;
       ctx.beginPath();
@@ -2621,7 +3068,7 @@
       canvasFont(ctx, 900, 28);
       ctx.fillText("ЗАЕЗДЫ", 590, 430);
       ctx.fillStyle = muted;
-      canvasFont(ctx, 800, 21);
+      canvasFont(ctx, 800, 25);
       ctx.fillText("планы на неделю", 590, 463);
       ctx.fillStyle = green;
       canvasFont(ctx, 900, 48);
@@ -2632,7 +3079,7 @@
       ctx.textAlign = "left";
       ctx.fillText("ФИНИШИ", 590, 560);
       ctx.fillStyle = muted;
-      canvasFont(ctx, 800, 21);
+      canvasFont(ctx, 800, 25);
       ctx.fillText("итоги недели", 590, 593);
       ctx.fillStyle = orange;
       canvasFont(ctx, 900, 48);
@@ -2647,8 +3094,10 @@
       ctx.fillText("ЧЕК-ПОИНТОВ · ЗА ВСЁ ВРЕМЯ", 115, 775);
       canvasFont(ctx, 900, 150);
       ctx.textAlign = "center";
-      ctx.fillText(String(summary.seasonCheckpoints), 285, 1005);
+      ctx.textBaseline = "middle";
+      ctx.fillText(String(summary.seasonCheckpoints), 285, 925);
       ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
       ctx.strokeStyle = "rgba(255,255,255,.28)";
       ctx.lineWidth = 3;
       ctx.beginPath();
@@ -2661,7 +3110,7 @@
       canvasFont(ctx, 900, 28);
       ctx.fillText("ЗАЕЗДЫ", 590, 845);
       ctx.fillStyle = muted;
-      canvasFont(ctx, 800, 21);
+      canvasFont(ctx, 800, 25);
       ctx.fillText("планы на неделю", 590, 878);
       ctx.fillStyle = green;
       canvasFont(ctx, 900, 48);
@@ -2672,7 +3121,7 @@
       ctx.textAlign = "left";
       ctx.fillText("ФИНИШИ", 590, 975);
       ctx.fillStyle = muted;
-      canvasFont(ctx, 800, 21);
+      canvasFont(ctx, 800, 25);
       ctx.fillText("итоги недели", 590, 1008);
       ctx.fillStyle = orange;
       canvasFont(ctx, 900, 48);
@@ -2706,6 +3155,31 @@
       return canvas;
     }
 
+    async function downloadSeasonSummary(season, canvas, button, isStory) {
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "Готовлю PNG…";
+      try {
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+        const link = document.createElement("a");
+        link.download = "zhazhda-poryadka-sezon-" + season.number + "-svodka" + (isStory ? "-stories" : "") + ".png";
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          link.href = url;
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } else {
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        }
+        button.textContent = "PNG скачан ✓";
+        setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 1800);
+      } catch (error) {
+        button.textContent = "Не удалось скачать";
+        setTimeout(() => { button.textContent = originalText; button.disabled = false; }, 2200);
+      }
+    }
+
     async function downloadRoundSummary(round, canvas, button) {
       const originalText = button.textContent;
       button.disabled = true;
@@ -2713,7 +3187,7 @@
       try {
         const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
         const link = document.createElement("a");
-        link.download = "zhazhda-poryadka-sezon-" + BOARD_DATA.season.number + "-krug-" + round.number + ".png";
+        link.download = "zhazhda-poryadka-sezon-" + seasonForRound(round).number + "-krug-" + round.number + ".png";
         if (blob) {
           const url = URL.createObjectURL(blob);
           link.href = url;
@@ -2738,7 +3212,7 @@
       try {
         const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
         const link = document.createElement("a");
-        link.download = "zhazhda-poryadka-sezon-" + BOARD_DATA.season.number + "-krug-" + round.number + "-stories.png";
+        link.download = "zhazhda-poryadka-sezon-" + seasonForRound(round).number + "-krug-" + round.number + "-stories.png";
         if (blob) {
           const url = URL.createObjectURL(blob);
           link.href = url;
@@ -3020,9 +3494,9 @@
 
       ctx.fillStyle = green;
       canvasFont(ctx, 900, 34);
-      ctx.fillText("МОЙ ПУТЬ · " + BOARD_DATA.season.title.toUpperCase(), 70, 1005);
+      ctx.fillText("МОЙ ПУТЬ · " + seasonForRound(round).title.toUpperCase(), 70, 1005);
       const statCards = [
-        { value: stats.series, label: "КРУГОВ ЗА СЕЗОН" },
+        { value: stats.series, label: "КРУГОВ" },
         { value: stats.checkpoints, label: "ЧЕК-ПОИНТОВ" },
         { value: stats.days, label: "ДНЕЙ НА ТРЕКЕ" }
       ];
@@ -3309,7 +3783,7 @@
       try {
         const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
         const link = document.createElement("a");
-        link.download = "zhazhda-poryadka-sezon-" + BOARD_DATA.season.number + "-" + (isPitStop ? "pit-stop-" : "lichnyy-trek-") + personalStorySlug(person.name) + "-krug-" + round.number + ".png";
+        link.download = "zhazhda-poryadka-sezon-" + seasonForRound(round).number + "-" + (isPitStop ? "pit-stop-" : "lichnyy-trek-") + personalStorySlug(person.name) + "-krug-" + round.number + ".png";
         if (blob) {
           const url = URL.createObjectURL(blob);
           link.href = url;
@@ -3375,7 +3849,7 @@
         preview.src = canvas.toDataURL("image/png");
         preview.alt = isPitStop
           ? "Карточка пит-стопа участника " + person.name
-          : "Личный трек участника " + person.name + ", " + BOARD_DATA.season.title + ", круг " + round.number;
+          : "Личный трек участника " + person.name + ", " + seasonForRound(round).title + ", круг " + round.number;
         shell.setAttribute("aria-label", "Личные карточки участника " + person.name + " для Stories");
         layer.hidden = false;
         document.body.classList.add("summary-open");
@@ -3557,7 +4031,7 @@
         trackStats.className = "participant-track-stats";
         trackStats.setAttribute("aria-label", "Статистика личного трека");
         [
-          "🔥 За сезон: " + formatLaps(stats.series),
+          "🔥 " + formatLaps(stats.series),
           "✓ " + formatCheckpoints(stats.checkpoints),
           "🏎️ " + formatDays(stats.days) + " на треке"
         ].forEach(value => {
@@ -3579,13 +4053,14 @@
 
     function renderHistory() {
       const grid = document.getElementById("history-grid");
+      const historyRounds = roundsForSeason();
       grid.replaceChildren();
-      grid.style.setProperty("--round-count", BOARD_DATA.rounds.length);
+      grid.style.setProperty("--round-count", historyRounds.length);
       grid.style.setProperty(
         "--history-scroll-columns-width",
-        BOARD_DATA.rounds.length * 88 + (BOARD_DATA.rounds.length + 1) * 9 + "px"
+        historyRounds.length * 88 + (historyRounds.length + 1) * 9 + "px"
       );
-      ["Участник", "Отмечено", ...BOARD_DATA.rounds.map(round => "Круг " + round.number)].forEach(label => {
+      ["Участник", "Отмечено", ...historyRounds.map(round => "Круг " + round.number)].forEach(label => {
         const head = document.createElement("div");
         head.className = "history-head";
         head.setAttribute("role", "columnheader");
@@ -3656,7 +4131,7 @@
         total.append(totalRounds, totalMarks);
         grid.appendChild(total);
 
-        BOARD_DATA.rounds.forEach((round, index) => {
+        historyRounds.forEach(round => {
           const lapName = "Круг " + round.number;
           const mark = round.marks[person.name] || {};
           const hasStart = Boolean(mark.entered);
