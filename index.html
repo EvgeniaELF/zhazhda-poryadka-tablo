@@ -1593,7 +1593,7 @@
         <h2 id="about-title">«Жажда порядка» — трек информационных гонщиков.</h2>
         <p class="about-lead">Информационные гонщики — не те, кто старается ехать быстрее всех. Мы учимся управлять потоком задач, идей и знаний: собирать его в понятную систему, видеть свой маршрут и двигаться в собственном темпе.</p>
         <p class="about-text">В практическом чате по подписке мы настраиваем болид порядка с помощью PARA, бумажных и цифровых пит-стопов, выходим на недельные круги и отмечаем чек-поинты. У каждого свой темп, но движемся мы вместе.</p>
-        <p class="about-text">Каждые 12 недельных кругов складываются в сезон. Новый сезон продолжает общую нумерацию кругов, а пройденный путь остаётся на табло.</p>
+        <p class="about-text">Двенадцать кругов складываются в сезон. Новый сезон продолжает общую нумерацию кругов, а пройденный путь остаётся на табло.</p>
       </div>
       <aside class="author-card" aria-label="Автор проекта">
         <img class="author-photo" src="author.webp" alt="Евгения Хабатулина">
@@ -2147,7 +2147,12 @@
         });
         options.appendChild(button);
       });
-      document.getElementById("season-toolbar-meta").textContent = season.totalRounds + " кругов · " + season.dates;
+      const seasonRoundsInProgress = roundsForSeason(season)
+        .filter(round => round.status !== "upcoming")
+        .length;
+      document.getElementById("season-toolbar-meta").textContent = season.status === "active"
+        ? seasonRoundsInProgress + " из " + season.totalRounds + " кругов · " + season.dates
+        : season.totalRounds + " кругов · " + season.dates;
       const summaryButton = document.getElementById("season-summary-button");
       summaryButton.setAttribute("aria-label", "Открыть сводку: " + season.title);
       summaryButton.onclick = () => openSeasonSummary(season, summaryButton);
