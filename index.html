@@ -1229,13 +1229,16 @@
     }
     .personal-story-shell {
       position: relative;
+      --story-preview-width: clamp(180px, calc(56.25vh - 151.875px), 270px);
       width: min(940px, 100%);
       max-height: calc(100vh - 86px);
     }
     .personal-story-formats {
       display: grid;
-      grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr);
+      grid-template-columns: auto minmax(320px, 520px);
       gap: 16px;
+      align-items: start;
+      justify-content: center;
       width: 100%;
       max-height: calc(100vh - 86px);
       padding: 2px 6px 10px;
@@ -1244,7 +1247,7 @@
     }
     .personal-story-format {
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr) auto;
+      grid-template-rows: auto auto auto;
       gap: 14px;
       min-width: 0;
       padding: 18px;
@@ -1252,6 +1255,10 @@
       border: 1px solid rgba(45,79,54,.16);
       border-radius: 28px;
       box-shadow: 0 28px 80px rgba(0,0,0,.28);
+    }
+    .personal-story-format--track {
+      width: calc(var(--story-preview-width) + 56px);
+      justify-self: end;
     }
     .personal-story-format-copy {
       display: grid;
@@ -1273,12 +1280,15 @@
     }
     .personal-story-preview-frame {
       display: grid;
-      min-height: 0;
       place-items: center;
       padding: 10px;
       overflow: hidden;
       background: var(--beige);
       border-radius: 22px;
+    }
+    .personal-story-format--track .personal-story-preview-frame {
+      width: calc(var(--story-preview-width) + 20px);
+      justify-self: center;
     }
     .personal-story-format--badge .personal-story-preview-frame {
       background-color: #f5f1e7;
@@ -1299,13 +1309,18 @@
       box-shadow: 0 16px 38px rgba(45,79,54,.2);
     }
     .personal-story-preview--track {
-      width: min(270px, 100%);
-      max-height: calc(100vh - 270px);
+      width: var(--story-preview-width);
+      height: auto;
+      aspect-ratio: 9 / 16;
     }
     .personal-story-preview--badge {
       width: 100%;
-      max-height: calc(100vh - 310px);
+      height: auto;
+      aspect-ratio: 3 / 2;
       object-fit: contain;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
     }
     .personal-story-download,
     .personal-story-close {
@@ -1517,16 +1532,24 @@
       .round-summary-download { min-height: 44px; padding: 9px 12px; font-size: .76rem; }
       .round-summary-close { top: -104px; width: 44px; height: 44px; }
       .personal-story { padding: 62px 8px 8px; }
-      .personal-story-shell { max-height: calc(100vh - 70px); }
+      .personal-story-shell {
+        --story-preview-width: min(260px, calc(100vw - 72px));
+        max-height: calc(100vh - 70px);
+      }
       .personal-story-formats {
         grid-template-columns: 1fr;
         max-height: calc(100vh - 70px);
         padding: 2px 4px 10px;
       }
       .personal-story-format { gap: 12px; padding: 14px; border-radius: 24px; }
+      .personal-story-format--track {
+        width: min(100%, calc(var(--story-preview-width) + 48px));
+        justify-self: center;
+      }
+      .personal-story-format--track .personal-story-preview-frame {
+        width: calc(var(--story-preview-width) + 16px);
+      }
       .personal-story-preview-frame { padding: 8px; }
-      .personal-story-preview--track { max-height: 58vh; }
-      .personal-story-preview--badge { max-height: 34vh; }
       .personal-story-download { min-height: 48px; font-size: .76rem; }
       .personal-story-close { top: -52px; right: 4px; width: 44px; height: 44px; }
     }
@@ -1680,25 +1703,25 @@
   <div class="personal-story" id="personal-story" hidden>
     <div class="personal-story-shell" role="dialog" aria-modal="true" aria-label="Личные карточки для Stories">
       <div class="personal-story-formats">
-        <section class="personal-story-format" aria-labelledby="personal-story-track-title">
+        <section class="personal-story-format personal-story-format--track" aria-labelledby="personal-story-track-title">
           <div class="personal-story-format-copy">
             <strong id="personal-story-track-title">Личный трек</strong>
-            <span>Готовая карточка для Stories · 1080 × 1920</span>
+            <span>Готовая карточка для Stories</span>
           </div>
+          <button class="personal-story-download" id="personal-story-download" type="button">Скачать карточку «Личный трек»</button>
           <div class="personal-story-preview-frame">
             <img class="personal-story-preview personal-story-preview--track" id="personal-story-preview" alt="">
           </div>
-          <button class="personal-story-download" id="personal-story-download" type="button">Скачать карточку «Личный трек»</button>
         </section>
         <section class="personal-story-format personal-story-format--badge" aria-labelledby="personal-story-badge-title">
           <div class="personal-story-format-copy">
             <strong id="personal-story-badge-title">Личный рубеж</strong>
-            <span>Прозрачная плашка для своей фотографии · 1080 × 720</span>
+            <span>Прозрачная плашка для своей фотографии</span>
           </div>
+          <button class="personal-story-download personal-story-download--badge" id="personal-badge-download" type="button">Скачать плашку «Личный рубеж»</button>
           <div class="personal-story-preview-frame">
             <img class="personal-story-preview personal-story-preview--badge" id="personal-badge-preview" alt="">
           </div>
-          <button class="personal-story-download personal-story-download--badge" id="personal-badge-download" type="button">Скачать плашку «Личный рубеж»</button>
         </section>
       </div>
       <button class="personal-story-close" id="personal-story-close" type="button" aria-label="Закрыть личные карточки">×</button>
