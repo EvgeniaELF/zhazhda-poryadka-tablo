@@ -1229,27 +1229,83 @@
     }
     .personal-story-shell {
       position: relative;
-      display: grid;
-      justify-items: center;
-      width: min(560px, 100%);
+      width: min(940px, 100%);
       max-height: calc(100vh - 86px);
+    }
+    .personal-story-formats {
+      display: grid;
+      grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr);
+      gap: 16px;
+      width: 100%;
+      max-height: calc(100vh - 86px);
+      padding: 2px 6px 10px;
+      overflow: auto;
+      scrollbar-gutter: stable;
+    }
+    .personal-story-format {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 14px;
+      min-width: 0;
+      padding: 18px;
+      background: rgba(255,253,247,.98);
+      border: 1px solid rgba(45,79,54,.16);
+      border-radius: 28px;
+      box-shadow: 0 28px 80px rgba(0,0,0,.28);
+    }
+    .personal-story-format-copy {
+      display: grid;
+      gap: 4px;
+      text-align: center;
+    }
+    .personal-story-format-copy strong {
+      color: var(--green);
+      font-size: .86rem;
+      font-weight: 1000;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .personal-story-format-copy span {
+      color: var(--muted);
+      font-size: .7rem;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+    .personal-story-preview-frame {
+      display: grid;
+      min-height: 0;
+      place-items: center;
+      padding: 10px;
+      overflow: hidden;
+      background: var(--beige);
+      border-radius: 22px;
+    }
+    .personal-story-format--badge .personal-story-preview-frame {
+      background-color: #f5f1e7;
+      background-image:
+        linear-gradient(45deg, rgba(45,79,54,.07) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(45,79,54,.07) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(45,79,54,.07) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(45,79,54,.07) 75%);
+      background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+      background-size: 24px 24px;
     }
     .personal-story-preview {
       display: block;
-      width: min(400px, 100%);
-      max-height: calc(100vh - 92px);
+      max-width: 100%;
       object-fit: contain;
-      background: var(--beige);
-      border: 5px solid var(--white);
-      border-radius: 28px;
-      box-shadow: 0 28px 80px rgba(0,0,0,.36);
+      border: 4px solid var(--white);
+      border-radius: 20px;
+      box-shadow: 0 16px 38px rgba(45,79,54,.2);
     }
-    .personal-story-downloads {
-      position: absolute;
-      top: -48px;
-      left: 80px;
-      display: flex;
-      gap: 8px;
+    .personal-story-preview--track {
+      width: min(270px, 100%);
+      max-height: calc(100vh - 270px);
+    }
+    .personal-story-preview--badge {
+      width: 100%;
+      max-height: calc(100vh - 310px);
+      object-fit: contain;
     }
     .personal-story-download,
     .personal-story-close {
@@ -1264,11 +1320,15 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 8px 15px;
+      width: 100%;
+      min-height: 46px;
+      padding: 9px 15px;
       color: var(--white);
       background: var(--orange);
       border-radius: 999px;
-      font-size: .72rem;
+      font-size: .76rem;
+      line-height: 1.2;
+      text-align: center;
     }
     .personal-story-download--badge { background: var(--green); }
     .personal-story-close {
@@ -1456,18 +1516,19 @@
       }
       .round-summary-download { min-height: 44px; padding: 9px 12px; font-size: .76rem; }
       .round-summary-close { top: -104px; width: 44px; height: 44px; }
-      .personal-story { padding-top: 122px; }
-      .personal-story-shell { max-height: calc(100vh - 140px); }
-      .personal-story-preview { max-height: calc(100vh - 146px); }
-      .personal-story-downloads {
-        top: -104px;
-        left: 0;
-        right: 52px;
-        display: grid;
+      .personal-story { padding: 62px 8px 8px; }
+      .personal-story-shell { max-height: calc(100vh - 70px); }
+      .personal-story-formats {
         grid-template-columns: 1fr;
+        max-height: calc(100vh - 70px);
+        padding: 2px 4px 10px;
       }
-      .personal-story-download { min-height: 44px; font-size: .76rem; }
-      .personal-story-close { top: -104px; width: 44px; height: 44px; }
+      .personal-story-format { gap: 12px; padding: 14px; border-radius: 24px; }
+      .personal-story-preview-frame { padding: 8px; }
+      .personal-story-preview--track { max-height: 58vh; }
+      .personal-story-preview--badge { max-height: 34vh; }
+      .personal-story-download { min-height: 48px; font-size: .76rem; }
+      .personal-story-close { top: -52px; right: 4px; width: 44px; height: 44px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1618,12 +1679,29 @@
 
   <div class="personal-story" id="personal-story" hidden>
     <div class="personal-story-shell" role="dialog" aria-modal="true" aria-label="Личные карточки для Stories">
-      <div class="personal-story-downloads">
-        <button class="personal-story-download" id="personal-story-download" type="button">Скачать PNG · 1080 × 1920</button>
-        <button class="personal-story-download personal-story-download--badge" id="personal-badge-download" type="button">Скачать PNG-плашку</button>
+      <div class="personal-story-formats">
+        <section class="personal-story-format" aria-labelledby="personal-story-track-title">
+          <div class="personal-story-format-copy">
+            <strong id="personal-story-track-title">Личный трек</strong>
+            <span>Готовая карточка для Stories · 1080 × 1920</span>
+          </div>
+          <div class="personal-story-preview-frame">
+            <img class="personal-story-preview personal-story-preview--track" id="personal-story-preview" alt="">
+          </div>
+          <button class="personal-story-download" id="personal-story-download" type="button">Скачать карточку «Личный трек»</button>
+        </section>
+        <section class="personal-story-format personal-story-format--badge" aria-labelledby="personal-story-badge-title">
+          <div class="personal-story-format-copy">
+            <strong id="personal-story-badge-title">Личный рубеж</strong>
+            <span>Прозрачная плашка для своей фотографии · 1080 × 720</span>
+          </div>
+          <div class="personal-story-preview-frame">
+            <img class="personal-story-preview personal-story-preview--badge" id="personal-badge-preview" alt="">
+          </div>
+          <button class="personal-story-download personal-story-download--badge" id="personal-badge-download" type="button">Скачать плашку «Личный рубеж»</button>
+        </section>
       </div>
       <button class="personal-story-close" id="personal-story-close" type="button" aria-label="Закрыть личные карточки">×</button>
-      <img class="personal-story-preview" id="personal-story-preview" alt="">
     </div>
   </div>
 
@@ -1913,12 +1991,13 @@
           status: "closed",
           marks: {
             "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 13-го круга отмечен. Оба чек-поинта круга приняты." },
-            "Лена · болид №10": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 13-й круг отмечен. Второй сезон открыт." },
+            "Лена · болид №10": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 13-го круга отмечен. Оба чек-поинта круга приняты." },
             "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Старт и финиш 13-го круга отмечены. Оба чек-поинта круга приняты." },
             "Болид №7": { entered: true, finished: false, pit: false, late: false, lastMark: "Стартовый чек-поинт 13-го круга принят." },
             "Юля · болид №17": { entered: true, finished: true, pit: false, late: false, lastMark: "Старт и финиш 13-го круга отмечены. Оба чек-поинта круга приняты." },
             "Лена · болид №3": { entered: false, finished: false, pit: true, late: false, lastMark: "Пит-стоп с 28 сентября 2026. Пройденный путь сохранён." },
-            "Даша · болид №5": { entered: false, finished: false, pit: true, late: false, lastMark: "Пит-стоп с 25 сентября 2026. Пройденный путь сохранён." }
+            "Даша · болид №5": { entered: false, finished: false, pit: true, late: false, lastMark: "Пит-стоп с 25 сентября 2026. Пройденный путь сохранён." },
+            "Света": { entered: false, finished: false, pit: true, late: false, lastMark: "Пит-стоп с 28 сентября 2026. Пройденный путь сохранён." }
           }
         },
         {
@@ -1929,6 +2008,8 @@
           status: "active",
           marks: {
             "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 14-й круг отмечен." },
+            "Женя · болид №9": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 14-й круг отмечен." },
+            "Лена · болид №10": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 14-й круг отмечен." },
             "Юля · болид №17": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 14-й круг отмечен." },
             "Аня · болид №22": { entered: true, finished: false, pit: false, late: false, lastMark: "Стартовый чек-поинт 14-го круга принят." },
             "Настя · болид №28": { entered: true, finished: false, pit: false, late: false, lastMark: "Первый заезд на трек отмечен. Стартовый чек-поинт 14-го круга принят." }
@@ -1944,7 +2025,7 @@
         { name: "Ира", joinedRound: 2, firstReport: "2026-07-14", trackPauses: [{ pausedAt: "2026-07-27", resumedAt: null }] },
         { name: "Нина", joinedRound: 2, firstReport: "2026-07-17", trackPauses: [{ pausedAt: "2026-08-11", resumedAt: null }] },
         { name: "Болид №7", joinedRound: 3, firstReport: "2026-07-20" },
-        { name: "Света", profileUrl: "https://t.me/c/4389010152/2/75", joinedRound: 3, firstReport: "2026-07-22" },
+        { name: "Света", profileUrl: "https://t.me/c/4389010152/2/75", joinedRound: 3, firstReport: "2026-07-22", trackPauses: [{ pausedAt: "2026-09-27", resumedAt: null }] },
         { name: "Ира · болид №8", joinedRound: 3, firstReport: "2026-07-26", trackPauses: [{ pausedAt: "2026-08-27", resumedAt: null }] },
         { name: "Аня · болид №22", profileUrl: "https://t.me/c/4389010152/2/331", joinedRound: 4, firstReport: "2026-07-28" },
         { name: "Даша", joinedRound: 4, firstReport: "2026-07-29", trackPauses: [{ pausedAt: "2026-09-05", resumedAt: null }] },
@@ -3854,6 +3935,7 @@
       const download = document.getElementById("personal-story-download");
       const badgeDownload = document.getElementById("personal-badge-download");
       const preview = document.getElementById("personal-story-preview");
+      const badgePreview = document.getElementById("personal-badge-preview");
       const shell = layer.querySelector(".personal-story-shell");
       opener.classList.add("is-loading");
       opener.setAttribute("aria-busy", "true");
@@ -3872,16 +3954,16 @@
         preview.alt = isPitStop
           ? "Карточка пит-стопа участника " + person.name
           : "Личный трек участника " + person.name + ", " + seasonForRound(round).title + ", круг " + round.number;
+        badgePreview.src = badgeCanvas.toDataURL("image/png");
+        badgePreview.alt = "Плашка «Личный рубеж» участника " + person.name;
         shell.setAttribute("aria-label", "Личные карточки участника " + person.name + " для Stories");
         layer.hidden = false;
         document.body.classList.add("summary-open");
         download.disabled = false;
-        download.textContent = isPitStop
-          ? "Получить карточку пит-стопа 🔧"
-          : "Скачать PNG · 1080 × 1920";
+        download.textContent = "Скачать карточку «Личный трек»";
         download.onclick = () => downloadPersonalStory(person, canvas, download, round, isPitStop);
         badgeDownload.disabled = false;
-        badgeDownload.textContent = "Скачать PNG-плашку";
+        badgeDownload.textContent = "Скачать плашку «Личный рубеж»";
         badgeDownload.onclick = () => downloadPersonalBadge(person, badgeCanvas, badgeDownload);
         close.focus();
 
