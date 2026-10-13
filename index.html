@@ -1576,10 +1576,10 @@
     <div class="week-bar">
       <div class="current-round">
         <span class="current-round-label">Сейчас едем</span>
-        <strong id="current-round-title">круг 12</strong>
-        <span class="current-round-dates" id="current-round-dates">· 21–26 сентября</span>
+        <strong id="current-round-title">круг 15</strong>
+        <span class="current-round-dates" id="current-round-dates">· 12–17 октября</span>
       </div>
-      <div class="week-meta"><span class="demo-badge" id="demo-badge">Демонстрационные данные</span><span class="week-updated" id="week-updated">Последняя отметка: 21 сентября 2026</span></div>
+      <div class="week-meta"><span class="demo-badge" id="demo-badge">Демонстрационные данные</span><span class="week-updated" id="week-updated">Последняя отметка: 13 октября 2026</span></div>
     </div>
 
     <nav class="tabs" role="tablist" aria-label="Разделы табло">
@@ -1733,11 +1733,11 @@
       <div class="confetti" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
       <img src="elf.webp" alt="Эльфийка-штурман отмечает чек-поинты">
       <div class="celebration-copy">
-        <h2 id="celebration-title">Круг 12 — мы уже едем!</h2>
+        <h2 id="celebration-title">Круг 15 — мы уже едем!</h2>
         <p id="celebration-text"></p>
         <div class="celebration-results" id="celebration-results"></div>
         <p class="celebration-prompt" id="celebration-prompt">Ещё не на треке? Можно присоединиться и сейчас — поздний старт тоже считается.</p>
-        <div class="celebration-actions"><a class="celebration-action" id="celebration-action" href="https://t.me/c/4389010152/15" target="_blank" rel="noopener noreferrer">Присоединиться к кругу 12</a><button class="celebration-close" id="celebration-close" type="button">Перейти к табло</button></div>
+        <div class="celebration-actions"><a class="celebration-action" id="celebration-action" href="https://t.me/c/4389010152/15" target="_blank" rel="noopener noreferrer">Присоединиться к кругу 15</a><button class="celebration-close" id="celebration-close" type="button">Перейти к табло</button></div>
       </div>
     </div>
   </div>
@@ -1797,7 +1797,7 @@
       ],
       timeZone: "Europe/Moscow",
       selectedSeason: 2,
-      selectedRound: 14,
+      selectedRound: 15,
       rounds: [
         {
           number: 1,
@@ -2027,15 +2027,27 @@
           number: 14,
           dates: "5–10 октября",
           endDate: "2026-10-10",
-          updated: "7 октября 2026",
-          status: "active",
+          updated: "13 октября 2026",
+          status: "closed",
           marks: {
-            "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 14-й круг отмечен." },
-            "Женя · болид №9": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 14-й круг отмечен." },
+            "Аня": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 14-го круга отмечен. Оба чек-поинта круга приняты." },
+            "Женя · болид №9": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 14-го круга отмечен. Оба чек-поинта круга приняты." },
             "Лена · болид №10": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 14-й круг отмечен." },
             "Юля · болид №17": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 14-й круг отмечен." },
-            "Аня · болид №22": { entered: true, finished: false, pit: false, late: false, lastMark: "Стартовый чек-поинт 14-го круга принят." },
-            "Настя · болид №28": { entered: true, finished: false, pit: false, late: false, lastMark: "Первый заезд на трек отмечен. Стартовый чек-поинт 14-го круга принят." }
+            "Аня · болид №22": { entered: true, finished: true, pit: false, late: false, lastMark: "Финиш 14-го круга отмечен. Оба чек-поинта круга приняты." },
+            "Настя · болид №28": { entered: true, finished: true, pit: false, late: false, lastMark: "Первый финиш на треке отмечен. Оба чек-поинта 14-го круга приняты." }
+          }
+        },
+        {
+          number: 15,
+          dates: "12–17 октября",
+          endDate: "2026-10-17",
+          updated: "13 октября 2026",
+          status: "active",
+          marks: {
+            "Настя · болид №28": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 15-й круг отмечен." },
+            "Аня": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 15-й круг отмечен." },
+            "Женя": { entered: true, finished: false, pit: false, late: false, lastMark: "Заезд на 15-й круг отмечен." }
           }
         }
       ],
@@ -2059,8 +2071,8 @@
         { name: "Настя · болид №28", joinedRound: 14, firstReport: "2026-10-05" }
       ],
       celebration: {
-        id: "season-2-round-14-start-v1",
-        round: 14
+        id: "season-2-round-15-start-v1",
+        round: 15
       }
     };
 
