@@ -1229,18 +1229,39 @@
     }
     .personal-story-shell {
       position: relative;
+      display: flex;
+      flex-direction: column;
       --story-preview-width: clamp(180px, calc(56.25vh - 151.875px), 270px);
       width: min(940px, 100%);
       max-height: calc(100vh - 86px);
     }
+    .personal-story-badge-column { display: grid; gap: 14px; min-width: 0; }
+    .personal-story-share {
+      display: flex; flex-direction: column; align-items: stretch;
+      gap: 12px; padding: 14px 18px; border-radius: 22px;
+      color: var(--green); background: var(--white); font-size: .9rem; font-weight: 800;
+    }
+    #personal-story-share-label { text-align: center; }
+    .personal-story-share button {
+      width: 100%;
+      padding: 11px 18px; border: 2px solid var(--green); border-radius: 999px;
+      color: var(--green); background: transparent; font: 900 .9rem Nunito, sans-serif; cursor: pointer;
+    }
+    .personal-story-share button:hover { color: var(--white); background: var(--green); }
+    .personal-story-share button:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+    .personal-story-share input { width: 100%; min-width: 0; padding: 10px; font: inherit; color: var(--green); }
+    .personal-story-share-status { font-size: .8rem; text-align: center; }
+    .card-link-error { position: fixed; z-index: 200; bottom: 18px; left: 5%; right: 5%; padding: 18px; border: 2px solid var(--orange); border-radius: 18px; background: var(--white); color: var(--green); }
     .personal-story-formats {
       display: grid;
+      flex: 1 1 auto;
+      min-height: 0;
       grid-template-columns: auto minmax(320px, 520px);
       gap: 16px;
       align-items: start;
       justify-content: center;
       width: 100%;
-      max-height: calc(100vh - 86px);
+      max-height: none;
       padding: 2px 6px 10px;
       overflow: auto;
       scrollbar-gutter: stable;
@@ -1538,7 +1559,7 @@
       }
       .personal-story-formats {
         grid-template-columns: 1fr;
-        max-height: calc(100vh - 70px);
+        max-height: none;
         padding: 2px 4px 10px;
       }
       .personal-story-format { gap: 12px; padding: 14px; border-radius: 24px; }
@@ -1700,6 +1721,7 @@
     </div>
   </div>
 
+  <p class="card-link-error" id="card-link-error" role="status" hidden></p>
   <div class="personal-story" id="personal-story" hidden>
     <div class="personal-story-shell" role="dialog" aria-modal="true" aria-label="Личные карточки для Stories">
       <div class="personal-story-formats">
@@ -1713,6 +1735,7 @@
             <img class="personal-story-preview personal-story-preview--track" id="personal-story-preview" alt="">
           </div>
         </section>
+        <div class="personal-story-badge-column">
         <section class="personal-story-format personal-story-format--badge" aria-labelledby="personal-story-badge-title">
           <div class="personal-story-format-copy">
             <strong id="personal-story-badge-title">Личный рубеж</strong>
@@ -1723,6 +1746,13 @@
             <img class="personal-story-preview personal-story-preview--badge" id="personal-badge-preview" alt="">
           </div>
         </section>
+      <div class="personal-story-share">
+        <span id="personal-story-share-label">Личные карточки</span>
+        <button id="personal-story-copy" type="button">🔗 Скопировать ссылку на карточки</button>
+        <input id="personal-story-link" type="url" readonly hidden aria-label="Ссылка на личные карточки">
+        <span class="personal-story-share-status" id="personal-story-copy-status" role="status" hidden></span>
+      </div>
+        </div>
       </div>
       <button class="personal-story-close" id="personal-story-close" type="button" aria-label="Закрыть личные карточки">×</button>
     </div>
@@ -1742,6 +1772,7 @@
     </div>
   </div>
 
+  <script src="personal-links.js"></script>
   <script>
     /*
       ДАННЫЕ ТАБЛО
@@ -2081,23 +2112,23 @@
         }
       ],
       members: [
-        { name: "Аня", profileUrl: "https://t.me/c/4389010152/2/80", joinedRound: 1, firstReport: "2026-07-06" },
-        { name: "Юля", joinedRound: 1, firstReport: "2026-07-06", trackPauses: [{ pausedAt: "2026-07-27", resumedAt: null }] },
-        { name: "Лена · болид №10", profileUrl: "https://t.me/c/4389010152/2/201", joinedRound: 1, firstReport: "2026-07-06" },
-        { name: "Женя · болид №9", joinedRound: 1, firstReport: "2026-07-06" },
-        { name: "Женя", profileUrl: "https://t.me/c/4389010152/2/197", joinedRound: 2, firstReport: "2026-07-13" },
-        { name: "Ира", joinedRound: 2, firstReport: "2026-07-14", trackPauses: [{ pausedAt: "2026-07-27", resumedAt: null }] },
-        { name: "Нина", joinedRound: 2, firstReport: "2026-07-17", trackPauses: [{ pausedAt: "2026-08-11", resumedAt: null }] },
-        { name: "Болид №7", joinedRound: 3, firstReport: "2026-07-20" },
-        { name: "Света", profileUrl: "https://t.me/c/4389010152/2/75", joinedRound: 3, firstReport: "2026-07-22", trackPauses: [{ pausedAt: "2026-09-27", resumedAt: null }] },
-        { name: "Ира · болид №8", joinedRound: 3, firstReport: "2026-07-26", trackPauses: [{ pausedAt: "2026-08-27", resumedAt: null }] },
-        { name: "Аня · болид №22", profileUrl: "https://t.me/c/4389010152/2/331", joinedRound: 4, firstReport: "2026-07-28" },
-        { name: "Даша", joinedRound: 4, firstReport: "2026-07-29", trackPauses: [{ pausedAt: "2026-09-05", resumedAt: null }] },
-        { name: "Юля · болид №17", profileUrl: "https://t.me/c/4389010152/2/410", joinedRound: 5, firstReport: "2026-08-11" },
-        { name: "Таня · болид №11", joinedRound: 4, firstReport: "2026-08-02", trackPauses: [{ pausedAt: "2026-08-31", resumedAt: null }] },
-        { name: "Лена · болид №3", joinedRound: 5, firstReport: "2026-08-05", trackPauses: [{ pausedAt: "2026-09-27", resumedAt: null }] },
-        { name: "Даша · болид №5", joinedRound: 8, firstReport: "2026-08-29", trackPauses: [{ pausedAt: "2026-09-24", resumedAt: null }] },
-        { name: "Настя · болид №28", profileUrl: "https://t.me/c/4389010152/2/980", joinedRound: 14, firstReport: "2026-10-05" }
+        { cardId: "p01", name: "Аня", profileUrl: "https://t.me/c/4389010152/2/80", joinedRound: 1, firstReport: "2026-07-06" },
+        { cardId: "p02", name: "Юля", joinedRound: 1, firstReport: "2026-07-06", trackPauses: [{ pausedAt: "2026-07-27", resumedAt: null }] },
+        { cardId: "p03", name: "Лена · болид №10", profileUrl: "https://t.me/c/4389010152/2/201", joinedRound: 1, firstReport: "2026-07-06" },
+        { cardId: "p04", name: "Женя · болид №9", joinedRound: 1, firstReport: "2026-07-06" },
+        { cardId: "p05", name: "Женя", profileUrl: "https://t.me/c/4389010152/2/197", joinedRound: 2, firstReport: "2026-07-13" },
+        { cardId: "p06", name: "Ира", joinedRound: 2, firstReport: "2026-07-14", trackPauses: [{ pausedAt: "2026-07-27", resumedAt: null }] },
+        { cardId: "p07", name: "Нина", joinedRound: 2, firstReport: "2026-07-17", trackPauses: [{ pausedAt: "2026-08-11", resumedAt: null }] },
+        { cardId: "p08", name: "Болид №7", joinedRound: 3, firstReport: "2026-07-20" },
+        { cardId: "p09", name: "Света", profileUrl: "https://t.me/c/4389010152/2/75", joinedRound: 3, firstReport: "2026-07-22", trackPauses: [{ pausedAt: "2026-09-27", resumedAt: null }] },
+        { cardId: "p10", name: "Ира · болид №8", joinedRound: 3, firstReport: "2026-07-26", trackPauses: [{ pausedAt: "2026-08-27", resumedAt: null }] },
+        { cardId: "p11", name: "Аня · болид №22", profileUrl: "https://t.me/c/4389010152/2/331", joinedRound: 4, firstReport: "2026-07-28" },
+        { cardId: "p12", name: "Даша", joinedRound: 4, firstReport: "2026-07-29", trackPauses: [{ pausedAt: "2026-09-05", resumedAt: null }] },
+        { cardId: "p13", name: "Юля · болид №17", profileUrl: "https://t.me/c/4389010152/2/410", joinedRound: 5, firstReport: "2026-08-11" },
+        { cardId: "p14", name: "Таня · болид №11", joinedRound: 4, firstReport: "2026-08-02", trackPauses: [{ pausedAt: "2026-08-31", resumedAt: null }] },
+        { cardId: "p15", name: "Лена · болид №3", joinedRound: 5, firstReport: "2026-08-05", trackPauses: [{ pausedAt: "2026-09-27", resumedAt: null }] },
+        { cardId: "p16", name: "Даша · болид №5", joinedRound: 8, firstReport: "2026-08-29", trackPauses: [{ pausedAt: "2026-09-24", resumedAt: null }] },
+        { cardId: "p17", name: "Настя · болид №28", profileUrl: "https://t.me/c/4389010152/2/980", joinedRound: 14, firstReport: "2026-10-05" }
       ],
       celebration: {
         id: "season-2-round-17-start-v1",
@@ -3993,7 +4024,12 @@
       }
     }
 
-    async function openPersonalStory(person, opener, round = selectedRound()) {
+    let personalStoryRequest = 0;
+    let personalStoryDismiss = null;
+    async function openPersonalStory(person, opener, round = selectedRound(), fromLink = false) {
+      document.getElementById("card-link-error").hidden = true;
+      if (personalStoryDismiss) personalStoryDismiss(false);
+      const request = ++personalStoryRequest;
       const layer = document.getElementById("personal-story");
       const close = document.getElementById("personal-story-close");
       const download = document.getElementById("personal-story-download");
@@ -4014,6 +4050,7 @@
             : createPersonalStoryCanvas(person, round),
           createPersonalBadgeCanvas(person)
         ]);
+        if (request !== personalStoryRequest) return;
         preview.src = canvas.toDataURL("image/png");
         preview.alt = isPitStop
           ? "Карточка пит-стопа участника " + person.name
@@ -4029,26 +4066,105 @@
         badgeDownload.disabled = false;
         badgeDownload.textContent = "Скачать плашку «Личный рубеж»";
         badgeDownload.onclick = () => downloadPersonalBadge(person, badgeCanvas, badgeDownload);
+        const revision = BOARD_DATA.publication ? BOARD_DATA.publication.runId + "." + BOARD_DATA.publication.runAttempt : "";
+        const link = PersonalLinks.url(window.location.href, person.cardId, round.number, revision);
+        const linkInput = document.getElementById("personal-story-link");
+        const copyStatus = document.getElementById("personal-story-copy-status");
+        const copy = document.getElementById("personal-story-copy");
+        linkInput.value = link;
+        linkInput.hidden = true;
+        copyStatus.hidden = true;
+        document.getElementById("personal-story-share-label").textContent = person.name + " · круг " + round.number;
+        copy.textContent = "🔗 Скопировать ссылку на карточки";
+        copy.onclick = async () => {
+          try {
+            if (!navigator.clipboard?.writeText) throw new Error("COPY_UNAVAILABLE");
+            await navigator.clipboard.writeText(link);
+            copy.textContent = "Ссылка скопирована ✓";
+            copyStatus.textContent = "Можно отправить участнику: откроются обе карточки этого круга.";
+          } catch {
+            linkInput.hidden = false;
+            linkInput.focus();
+            linkInput.select();
+            copyStatus.textContent = "Выделенная ссылка готова к копированию.";
+          }
+          copyStatus.hidden = false;
+        };
+        if (!fromLink && window.location.hash !== new URL(link).hash) {
+          history.pushState({ personalCards: true }, "", link);
+        }
         close.focus();
 
-        const dismiss = () => {
+        const dismiss = (updateAddress = true) => {
           if (layer.hidden) return;
+          ++personalStoryRequest;
           layer.hidden = true;
           document.body.classList.remove("summary-open");
           document.removeEventListener("keydown", onEscape);
+          personalStoryDismiss = null;
+          if (updateAddress) {
+            if (history.state?.personalCards) history.back();
+            else {
+              const address = new URL(window.location.href);
+              address.hash = "";
+              history.replaceState(null, "", address);
+            }
+          }
           opener.focus();
         };
-        close.onclick = dismiss;
+        personalStoryDismiss = dismiss;
+        close.onclick = () => dismiss();
         layer.onclick = event => { if (event.target === layer) dismiss(); };
         const onEscape = event => {
-          if (event.key !== "Escape" || layer.hidden) return;
-          dismiss();
+          if (layer.hidden) return;
+          if (event.key === "Escape") dismiss();
+          if (event.key === "Tab") {
+            const controls = [...shell.querySelectorAll("button:not([disabled]), input:not([hidden]), a[href]")];
+            const first = controls[0], last = controls.at(-1);
+            if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+            else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+          }
         };
         document.addEventListener("keydown", onEscape);
+      } catch {
+        if (request === personalStoryRequest) {
+          layer.hidden = true;
+          document.body.classList.remove("summary-open");
+          showPersonalLinkError("Не удалось подготовить карточки. Обнови страницу и попробуй ещё раз.");
+          opener.focus();
+        }
       } finally {
         opener.classList.remove("is-loading");
         opener.removeAttribute("aria-busy");
       }
+    }
+
+    function showPersonalLinkError(text) {
+      const notice = document.getElementById("card-link-error");
+      notice.textContent = text;
+      notice.hidden = false;
+    }
+
+    function openPersonalLink() {
+      document.getElementById("card-link-error").hidden = true;
+      ++personalStoryRequest;
+      if (personalStoryDismiss) personalStoryDismiss(false);
+      let target;
+      try { target = PersonalLinks.parse(window.location.hash); }
+      catch { showPersonalLinkError("Ссылка на карточки неполная. Выбери участника на табло."); return true; }
+      if (!target) {
+        ++personalStoryRequest;
+        if (personalStoryDismiss) personalStoryDismiss(false);
+        return false;
+      }
+      try {
+        const { person, round } = PersonalLinks.resolve(BOARD_DATA, target);
+        const candidate = document.querySelector('[data-personal-card="' + person.cardId + '"]');
+        const opener = candidate?.getClientRects().length ? candidate : document.querySelector("h1");
+        if (!opener.matches("button, a[href], input, select, [tabindex]")) opener.setAttribute("tabindex", "-1");
+        openPersonalStory(person, opener, round, true);
+      } catch { showPersonalLinkError("Карточки по этой ссылке не найдены. Выбери участника на табло."); }
+      return true;
     }
 
     function showCelebration() {
@@ -4275,6 +4391,7 @@
         avatar.textContent = initial(person.name);
         avatar.setAttribute("aria-label", "Открыть личные карточки участника " + person.name + " для Stories");
         avatar.title = "Открыть личные карточки для Stories";
+        avatar.dataset.personalCard = person.cardId;
         avatar.addEventListener("click", () => openPersonalStory(person, avatar));
         const nameText = document.createElement("span");
         nameText.textContent = person.name;
@@ -4451,7 +4568,8 @@
       syncHistoryScrollbars();
     }, { passive: true });
     document.fonts?.ready.then(scheduleSeasonRouteDraw);
-    showCelebration();
+    window.addEventListener("hashchange", openPersonalLink);
+    if (!openPersonalLink()) showCelebration();
   </script>
 </body>
 </html>

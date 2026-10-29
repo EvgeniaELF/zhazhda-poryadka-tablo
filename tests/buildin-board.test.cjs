@@ -44,12 +44,15 @@ test('полная сборка выпускает только HTML и публ
   const fsp=require('node:fs/promises'),path=require('node:path'),os=require('node:os');
   const dir=await fsp.mkdtemp(path.join(os.tmpdir(),'board-export-'));
   const oldFetch=global.fetch,oldToken=process.env.BUILDIN_API_TOKEN,oldSummary=process.env.GITHUB_STEP_SUMMARY;
+  const oldRelease=Object.fromEntries(['GITHUB_RUN_ID','GITHUB_RUN_ATTEMPT','GITHUB_SHA'].map(k=>[k,process.env[k]]));
   try {
     const repo=path.join(__dirname,'..');
     await fsp.copyFile(path.join(repo,'index.html'),path.join(dir,'index.html'));
     await fsp.copyFile(path.join(repo,'buildin-sync.json'),path.join(dir,'buildin-sync.json'));
+    await fsp.copyFile(path.join(repo,'personal-links.js'),path.join(dir,'personal-links.js'));
     for(const asset of await fsp.readdir(repo))if(/\.(webp|svg|png)$/.test(asset))await fsp.copyFile(path.join(repo,asset),path.join(dir,asset));
     process.env.BUILDIN_API_TOKEN='local-secret-do-not-export';delete process.env.GITHUB_STEP_SUMMARY;
+    Object.assign(process.env,{GITHUB_RUN_ID:'98765',GITHUB_RUN_ATTEMPT:'2',GITHUB_SHA:'a'.repeat(40)});
     const events=[event('Настя · болид №28',17,'Старт'),event('Аня',17,'Старт'),event('Настя · болид №28',16,'Финиш'),event('Настя · болид №28',16,'Старт'),event('Лена · болид №10',16,'Старт'),event('Лена · болид №10',15,'Финиш')];
     global.fetch=async(url,options)=>{
       assert.ok(['GET','POST'].includes(options.method));
@@ -64,14 +67,20 @@ test('полная сборка выпускает только HTML и публ
     assert.ok(!built.includes('local-secret-do-not-export'));
     assert.ok(!built.includes(config.participantsDatabaseId));
     assert.ok(!built.includes(config.eventsDatabaseId));
+    assert.ok(built.includes('<meta name="tablo-publication" content="98765.2.'+'a'.repeat(40)+'">'));
+    const manifest=JSON.parse(await fsp.readFile(path.join(dir,'_site/cards.json'),'utf8'));
+    assert.deepEqual(manifest.publication,{runId:'98765',runAttempt:'2',sha:'a'.repeat(40)});
+    assert.equal(manifest.events.length,6);
+    for(const record of events)assert.ok(!JSON.stringify(manifest).includes(record.id));
     for(const code of built.matchAll(/<script>([\s\S]*?)<\/script>/g))new (require('node:vm').Script)(code[1]);
     const files=await fsp.readdir(path.join(dir,'_site'));
-    assert.equal(files.length,15);assert.ok(files.every(p=>p==='index.html'||/\.(svg|png|webp)$/.test(p)));
+    assert.equal(files.length,17);assert.ok(files.every(p=>['index.html','cards.json','personal-links.js'].includes(p)||/\.(svg|png|webp)$/.test(p)));
     assert.equal(await fsp.readFile(path.join(dir,'index.html'),'utf8'),html);
   } finally {
     global.fetch=oldFetch;
     if(oldToken===undefined)delete process.env.BUILDIN_API_TOKEN;else process.env.BUILDIN_API_TOKEN=oldToken;
     if(oldSummary===undefined)delete process.env.GITHUB_STEP_SUMMARY;else process.env.GITHUB_STEP_SUMMARY=oldSummary;
+    for(const [key,val] of Object.entries(oldRelease)){if(val===undefined)delete process.env[key];else process.env[key]=val;}
     await fsp.rm(dir,{recursive:true,force:true});
   }
 });

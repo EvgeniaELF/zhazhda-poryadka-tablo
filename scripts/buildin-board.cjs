@@ -3,6 +3,7 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const vm = require('node:vm');
+const {createHash} = require('node:crypto');
 const {setTimeout: delay} = require('node:timers/promises');
 const API = 'https://api.buildin.ai/v2';
 const UUID = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
@@ -71,9 +72,12 @@ function currentCalendar(board, now) {
 function mergeBoard(base, sourceRows, eventRows, sourceSchema, eventSchema, config, now=new Date()) {
   const board=structuredClone(base), {sf,ef}=schemas(sourceSchema,eventSchema,config);
   const current=currentCalendar(board,now), members=new Map();
+  const cardIds=new Set();
   for (const member of board.members) {
     const name=normalize(member.name);
     if (!name || members.has(name)) fail('В табло неоднозначные имена участников.');
+    if(!/^p[0-9]{2,5}$/.test(member.cardId || '') || cardIds.has(member.cardId)) fail('В исходном табло нужен уникальный постоянный cardId каждого участника.');
+    cardIds.add(member.cardId);
     members.set(name,member);
   }
   const source=new Map(), byName=new Map();
@@ -90,7 +94,7 @@ function mergeBoard(base, sourceRows, eventRows, sourceSchema, eventSchema, conf
     const item={id,name,member};source.set(id,item);byName.set(name,item);
   }
   if (!source.size || source.size!==members.size) fail('Состав Buildin и табло не совпадает. История не заменена.');
-  const report={version:'1.0.0',checkedAt:now.toISOString(),participants:source.size,sourceEvents:0,uniqueMarks:0,duplicates:0,legacyNameMatches:0,added:[],preservedHistory:true};
+  const report={version:'1.1.0',checkedAt:now.toISOString(),participants:source.size,sourceEvents:0,uniqueMarks:0,duplicates:0,legacyNameMatches:0,added:[],events:[],preservedHistory:true};
   const seen=new Set();
   for (const row of eventRows) {
     pageId(row);if(row.in_trash || row.archived) continue;
@@ -109,6 +113,7 @@ function mergeBoard(base, sourceRows, eventRows, sourceSchema, eventSchema, conf
     }
     if (!person) fail('Событие ссылается на неизвестного участника.');
     if ((person.member.joinedRound || 1)>round) fail('Событие предшествует первому кругу участника.');
+    report.events.push({key:eventKey(row.id),cardId:person.member.cardId,round,event:kind});
     const key=person.id+':'+round+':'+kind;
     if (seen.has(key)) {report.duplicates++;continue;}seen.add(key);report.uniqueMarks++;
     const r=board.rounds.find(x=>x.number===round), old=r.marks[person.member.name] || {};
@@ -155,6 +160,18 @@ function inject(html,board) {
   const json=JSON.stringify(board,null,2).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
   return html.slice(0,start)+'    const BOARD_DATA = '+json+';'+html.slice(end);
 }
+function eventKey(id) {
+  if(!UUID.test(id || ''))fail('Некорректный ID события.');
+  return createHash('sha256').update('zhazhda-poryadka:event:v1:'+id.toLowerCase()).digest('hex');
+}
+function publication(env=process.env) {
+  if(!env.GITHUB_RUN_ID)return null;
+  if(!/^[1-9]\d{0,19}$/.test(env.GITHUB_RUN_ID) || !/^[1-9]\d{0,4}$/.test(env.GITHUB_RUN_ATTEMPT || '') || !/^[a-f0-9]{40}$/.test(env.GITHUB_SHA || ''))fail('Некорректный номер публикации GitHub.');
+  return {runId:env.GITHUB_RUN_ID,runAttempt:env.GITHUB_RUN_ATTEMPT,sha:env.GITHUB_SHA};
+}
+function publicManifest(board,report,release) {
+  return {schema:1,publication:release,members:board.members.map(p=>({cardId:p.cardId,name:p.name})),events:report.events};
+}
 async function run(root=process.cwd()) {
   const config=JSON.parse(await fs.readFile(path.join(root,'buildin-sync.json'),'utf8'));
   if(!UUID.test(config.participantsDatabaseId) || !UUID.test(config.eventsDatabaseId) || config.participantsDatabaseId===config.eventsDatabaseId) fail('Неверные ID двух баз.');
@@ -167,18 +184,26 @@ async function run(root=process.cwd()) {
   const sourceRows=await queryAll(request,config.participantsDatabaseId);
   const eventRows=await queryAll(request,config.eventsDatabaseId);
   const {board,report}=mergeBoard(boardPart(html).board,sourceRows,eventRows,sourceSchema,eventSchema,config);
+  const release=publication();
+  if(release)board.publication=release;
   const out=path.join(root,'_site');await fs.rm(out,{recursive:true,force:true});await fs.mkdir(out,{recursive:true});
   for(const asset of ASSETS) {
     const src=path.join(root,asset);const stat=await fs.lstat(src);
     if(!stat.isFile() || stat.isSymbolicLink()) fail('Не найден безопасный ресурс оформления: '+asset);
     await fs.copyFile(src,path.join(out,asset));
   }
-  await fs.writeFile(path.join(out,'index.html'),inject(html,board));
+  const published=inject(html,board);
+  const marker=release?'<meta name="tablo-publication" content="'+release.runId+'.'+release.runAttempt+'.'+release.sha+'">':'';
+  await fs.writeFile(path.join(out,'index.html'),published.replace('</head>',marker+'\n</head>'));
+  const linkScript=path.join(root,'personal-links.js'),linkStat=await fs.lstat(linkScript);
+  if(!linkStat.isFile()||linkStat.isSymbolicLink())fail('Не найден безопасный скрипт персональных ссылок.');
+  await fs.copyFile(linkScript,path.join(out,'personal-links.js'));
+  await fs.writeFile(path.join(out,'cards.json'),JSON.stringify(publicManifest(board,report,release))+'\n');
   await fs.writeFile(path.join(root,'sync-report.json'),JSON.stringify(report,null,2)+'\n');
   const summary='## Проверка Buildin → табло\n\nУчастников: '+report.participants+'. Событий: '+report.sourceEvents+'. Уникальных отметок: '+report.uniqueMarks+'. Повторов в базе: '+report.duplicates+'.\n\nНовых отметок относительно исходного табло: '+report.added.length+'. Старых сопоставлений по уникальному имени: '+report.legacyNameMatches+'.\n\nСтарые сезоны, даты выхода на трек и пит-стопы сохранены. Проверка только читает Buildin. Удаления и исправления исходных исторических отметок требуют отдельной сверки.\n';
   await fs.writeFile(path.join(root,'sync-report.md'),summary);
   if(process.env.GITHUB_STEP_SUMMARY)await fs.appendFile(process.env.GITHUB_STEP_SUMMARY,summary);
   console.log('Проверка завершена: '+report.participants+' участников, '+report.uniqueMarks+' отметок. Подробности: sync-report.json.');
 }
-module.exports={boardPart,mergeBoard,queryAll,client,inject,SafeError,run,currentCalendar};
+module.exports={boardPart,mergeBoard,queryAll,client,inject,SafeError,run,currentCalendar,eventKey,publication,publicManifest};
 if(require.main===module)run().catch(error=>{console.error(error instanceof SafeError?error.message:'Не удалось собрать табло. Секреты и ответы API не выводятся.');process.exitCode=1;});
