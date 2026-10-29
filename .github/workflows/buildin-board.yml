@@ -1,4 +1,5 @@
 name: Buildin → табло
+# Infrastructure update 1.0.1: Node 24 Actions and an explicit Ubuntu image.
 
 on:
   workflow_dispatch:
@@ -21,13 +22,18 @@ concurrency:
 jobs:
   build:
     if: github.event_name == 'workflow_dispatch' || vars.BUILDIN_SYNC_ENABLED == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Получить код табло
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
+      - name: Подготовить Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
       - name: Проверить правила объединения
         run: node --test tests/buildin-board.test.cjs
       - name: Прочитать Buildin и собрать предварительное табло
@@ -46,7 +52,7 @@ jobs:
           retention-days: 3
       - name: Подготовить проверенный сайт к публикации
         if: (github.event_name == 'schedule' || inputs.publish) && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: _site/
           retention-days: 1
@@ -54,7 +60,7 @@ jobs:
   deploy:
     needs: build
     if: (github.event_name == 'schedule' || inputs.publish) && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       pages: write
@@ -65,4 +71,4 @@ jobs:
     steps:
       - name: Обновить существующее табло
         id: deployment
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
