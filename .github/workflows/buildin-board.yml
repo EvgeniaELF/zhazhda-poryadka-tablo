@@ -9,6 +9,11 @@ on:
         type: boolean
         required: true
         default: false
+      notice_event:
+        description: 'Служебный идентификатор отметки для личной ссылки; вручную оставить пустым'
+        type: string
+        required: false
+        default: ''
   schedule:
     - cron: '7 6,18 * * *'
 
@@ -18,6 +23,7 @@ permissions:
 concurrency:
   group: buildin-board-pages
   cancel-in-progress: false
+  queue: max
 
 jobs:
   build:
@@ -37,7 +43,7 @@ jobs:
           package-manager-cache: false
 
       - name: Проверить правила объединения
-        run: node --test tests/buildin-board.test.cjs
+        run: node --test tests/*.test.cjs
 
       - name: Прочитать Buildin и собрать предварительное табло
         env:
@@ -68,12 +74,31 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
+      contents: read
       pages: write
       id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Получить проверенный код уведомления
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Подготовить Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
       - name: Обновить существующее табло
         id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+      - name: Отправить личную ссылку после публикации
+        if: github.event_name == 'workflow_dispatch' && inputs.notice_event != ''
+        continue-on-error: true
+        env:
+          NOTICE_EVENT: ${{ inputs.notice_event }}
+        run: node scripts/notify-publication.cjs
