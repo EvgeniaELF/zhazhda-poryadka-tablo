@@ -1,0 +1,68 @@
+name: Buildin → табло
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Опубликовать проверенный результат на текущем сайте?'
+        type: boolean
+        required: true
+        default: false
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: buildin-board-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch' || vars.BUILDIN_SYNC_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Получить код табло
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Проверить правила объединения
+        run: node --test tests/buildin-board.test.cjs
+      - name: Прочитать Buildin и собрать предварительное табло
+        env:
+          BUILDIN_API_TOKEN: ${{ secrets.BUILDIN_API_TOKEN }}
+        run: node scripts/buildin-board.cjs
+      - name: Сохранить результат для просмотра
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: tablo-preview
+          path: |
+            _site/
+            sync-report.json
+            sync-report.md
+          if-no-files-found: error
+          retention-days: 3
+      - name: Подготовить проверенный сайт к публикации
+        if: (github.event_name == 'schedule' || inputs.publish) && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: _site/
+          retention-days: 1
+
+  deploy:
+    needs: build
+    if: (github.event_name == 'schedule' || inputs.publish) && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Обновить существующее табло
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
