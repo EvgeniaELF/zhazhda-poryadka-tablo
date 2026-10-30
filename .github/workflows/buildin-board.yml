@@ -1,5 +1,5 @@
 name: Buildin → табло
-# Infrastructure update 1.0.1: Node 24 Actions and an explicit Ubuntu image.
+# Notification option 1.2.0: github-pages environment secrets, direct Telegram delivery.
 
 on:
   workflow_dispatch:
@@ -101,4 +101,6 @@ jobs:
         continue-on-error: true
         env:
           NOTICE_EVENT: ${{ inputs.notice_event }}
+          NAVIGATOR_TELEGRAM_BOT_TOKEN: ${{ secrets.NAVIGATOR_TELEGRAM_BOT_TOKEN }}
+          NAVIGATOR_ADMIN_TELEGRAM_ID: ${{ secrets.NAVIGATOR_ADMIN_TELEGRAM_ID }}
         run: node scripts/notify-publication.cjs
