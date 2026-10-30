@@ -1,5 +1,5 @@
 'use strict';
-// Prepared option 1.2.0: send from the trusted GitHub deploy job, after Pages.
+// Option 1.2.2: participant-ready cards, then a separate owner menu, after Pages.
 // Credentials are supplied only to this step by github-pages environment secrets.
 const fs=require('node:fs/promises');
 const {setTimeout:delay}=require('node:timers/promises');
@@ -7,10 +7,12 @@ const SITE='https://evgeniaelf.github.io/zhazhda-poryadka-tablo/';
 const REPO='EvgeniaELF/zhazhda-poryadka-tablo';
 const WORKFLOW=REPO+'/.github/workflows/buildin-board.yml@refs/heads/main';
 const BOT='navigator_admin_bot';
-const CODES=new Set(['INVALID_NOTICE_CONTEXT','TELEGRAM_NOT_CONFIGURED','PUBLICATION_NOT_READY','PUBLICATION_INVALID_CARD','PUBLICATION_EVENT_NOT_FOUND','TELEGRAM_TOKEN_REJECTED','TELEGRAM_WRONG_BOT','TELEGRAM_BOT_CHECK_UNAVAILABLE','TELEGRAM_CHAT_UNAVAILABLE','TELEGRAM_RATE_LIMITED','TELEGRAM_REQUEST_REJECTED','TELEGRAM_DELIVERY_UNCONFIRMED']);
+const CODES=new Set(['INVALID_NOTICE_CONTEXT','TELEGRAM_NOT_CONFIGURED','PUBLICATION_NOT_READY','PUBLICATION_INVALID_CARD','PUBLICATION_EVENT_NOT_FOUND','TELEGRAM_TOKEN_REJECTED','TELEGRAM_WRONG_BOT','TELEGRAM_BOT_CHECK_UNAVAILABLE','TELEGRAM_CHAT_UNAVAILABLE','TELEGRAM_RATE_LIMITED','TELEGRAM_REQUEST_REJECTED','TELEGRAM_DELIVERY_UNCONFIRMED','TELEGRAM_MENU_UNCONFIRMED']);
 class NoticeError extends Error{}
 const object=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 const same=(a,b)=>typeof a==='string'&&a.toLowerCase()===b.toLowerCase();
+const html=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const confirmed=(sent,owner)=>object(sent)&&Number.isSafeInteger(sent.message_id)&&sent.message_id>0&&sent.chat?.id===owner&&sent.chat?.type==='private';
 function context(env){
   if(!/^[a-f0-9]{64}$/.test(env.NOTICE_EVENT||'')||!same(env.GITHUB_REPOSITORY,REPO)
     ||env.GITHUB_REPOSITORY_ID!=='1297869392'||env.GITHUB_REPOSITORY_OWNER_ID!=='250887240'
@@ -91,20 +93,28 @@ async function notify(env=process.env,{fetchImpl=fetch,sleep=delay,report=()=>{}
   const me=await telegram(ctx,'getMe',{},fetchImpl);
   if(!object(me)||me.is_bot!==true||!same(me.username,BOT)||String(me.id)!==ctx.token.split(':')[0])throw new NoticeError('TELEGRAM_WRONG_BOT');
   const link=SITE+'?v='+ctx.runId+'.'+ctx.runAttempt+'#card='+card.cardId+'&round='+card.round;
-  const payload={chat_id:ctx.owner,text:'✅ Карточки обновлены.\n'+card.name+'\nКруг '+card.round+' · '+card.event+'\n\nЛичный трек и Личный рубеж:\n'+link+'\n\nМожно скачать PNG или переслать участнику эту ссылку.',link_preview_options:{is_disabled:true},reply_markup:{inline_keyboard:[[{text:'Открыть личные карточки',url:link}]]}};
+  const payload={chat_id:ctx.owner,parse_mode:'HTML',text:'✅ Карточки обновлены.\n\n'+card.event+' '+card.round+' круга · принят 🏎️\nкарточки Личный трек и Личный рубеж можно посмотреть и скачать тут: <a href="'+html(link)+'">'+html(card.name)+'</a>',link_preview_options:{is_disabled:true}};
   // One send attempt: a timeout may mean Telegram accepted the message.
   const sent=await telegram(ctx,'sendMessage',payload,fetchImpl);
-  if(!object(sent)||!Number.isSafeInteger(sent.message_id)||sent.message_id<1||sent.chat?.id!==ctx.owner||sent.chat?.type!=='private')throw new NoticeError('TELEGRAM_DELIVERY_UNCONFIRMED');
-  report('TELEGRAM_DELIVERED');return {status:'delivered'};
+  if(!confirmed(sent,ctx.owner))throw new NoticeError('TELEGRAM_DELIVERY_UNCONFIRMED');
+  report('TELEGRAM_DELIVERED');
+  // A separate message keeps the participant-ready cards above an editable menu.
+  // An uncertain menu send is reported, never retried automatically.
+  try{
+    const menu=await telegram(ctx,'sendMessage',{chat_id:ctx.owner,text:'Выбери следующее действие.',reply_markup:{inline_keyboard:[[{text:'Ещё отметка в этом круге',callback_data:'r:'+card.round}],[{text:'← В меню',callback_data:'home'}]]}},fetchImpl);
+    if(!confirmed(menu,ctx.owner))throw new NoticeError('TELEGRAM_MENU_UNCONFIRMED');
+  }catch{throw new NoticeError('TELEGRAM_MENU_UNCONFIRMED');}
+  report('TELEGRAM_MENU_DELIVERED');return {status:'delivered'};
 }
 async function main(){
   try{
     const r=await notify(process.env,{report:code=>console.log('::notice::Личная ссылка: '+code)});
-    if(process.env.GITHUB_STEP_SUMMARY)await fs.appendFile(process.env.GITHUB_STEP_SUMMARY,r.status==='delivered'?'\nЛичная ссылка: Telegram подтвердил отправку владельцу пульта.\n':'\nЛичная ссылка: этот запуск не запрашивал сообщение.\n');
+    if(process.env.GITHUB_STEP_SUMMARY)await fs.appendFile(process.env.GITHUB_STEP_SUMMARY,r.status==='delivered'?'\nTelegram подтвердил отправку карточек владельцу пульта и отдельного меню ниже.\n':'\nЛичная ссылка: этот запуск не запрашивал сообщение.\n');
   }catch(error){
     const code=error instanceof NoticeError&&CODES.has(error.message)?error.message:'NOTICE_UNCONFIRMED';
-    console.log('::warning::Табло опубликовано; личная ссылка не подтверждена. Код: '+code);
-    if(process.env.GITHUB_STEP_SUMMARY)await fs.appendFile(process.env.GITHUB_STEP_SUMMARY,'\n⚠️ Табло опубликовано; отправка личной ссылки не подтверждена. Код: '+code+'. Ссылку можно скопировать на сайте.\n');
+    const warning=code==='TELEGRAM_MENU_UNCONFIRMED'?'Карточки отправлены; доставка меню не подтверждена. Открой пульт командой /start.':'Табло опубликовано; отправка личной ссылки не подтверждена. Ссылку можно скопировать на сайте.';
+    console.log('::warning::'+warning+' Код: '+code);
+    if(process.env.GITHUB_STEP_SUMMARY)await fs.appendFile(process.env.GITHUB_STEP_SUMMARY,'\n⚠️ '+warning+' Код: '+code+'.\n');
     process.exitCode=1;
   }
 }

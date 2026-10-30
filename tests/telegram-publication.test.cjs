@@ -18,14 +18,16 @@ function fixture(custom=()=>{}){
   };
   return {manifest,calls,logs,waits,options:{fetchImpl,report:s=>logs.push(s),sleep:async ms=>waits.push(ms)}};
 }
-test('GitHub verifies this exact published release before one owner-only Telegram send, without a Yandex call',async()=>{
+test('GitHub verifies the exact release, sends participant-ready cards, then a separate owner menu without Yandex',async()=>{
   const r=fixture();assert.deepEqual(await notify(env,r.options),{status:'delivered'});
-  assert.deepEqual(r.calls.map(c=>new URL(c.url).hostname),['evgeniaelf.github.io','evgeniaelf.github.io','api.telegram.org','api.telegram.org']);
+  assert.deepEqual(r.calls.map(c=>new URL(c.url).hostname),['evgeniaelf.github.io','evgeniaelf.github.io','api.telegram.org','api.telegram.org','api.telegram.org']);
   const payload=JSON.parse(r.calls[3].init.body);
   assert.equal(payload.chat_id,Number(env.NAVIGATOR_ADMIN_TELEGRAM_ID));assert.match(payload.text,/Женя · болид №9/);
-  assert.equal(payload.reply_markup.inline_keyboard[0][0].url,SITE+'?v=12345.1#card=p04&round=17');
-  assert.equal(payload.reply_markup.inline_keyboard.length,1);assert.ok(!payload.reply_markup.inline_keyboard[0][0].callback_data);
-  assert.deepEqual(r.logs,['PUBLICATION_VERIFIED','TELEGRAM_DELIVERED']);
+  assert.equal(payload.parse_mode,'HTML');assert.equal(payload.text,'✅ Карточки обновлены.\n\nСтарт 17 круга · принят 🏎️\nкарточки Личный трек и Личный рубеж можно посмотреть и скачать тут: <a href="'+SITE+'?v=12345.1#card=p04&amp;round=17">Женя · болид №9</a>');
+  assert.equal(payload.reply_markup,undefined);
+  const menu=JSON.parse(r.calls[4].init.body);assert.equal(menu.chat_id,Number(env.NAVIGATOR_ADMIN_TELEGRAM_ID));assert.equal(menu.text,'Выбери следующее действие.');
+  assert.deepEqual(menu.reply_markup.inline_keyboard,[[{text:'Ещё отметка в этом круге',callback_data:'r:17'}],[{text:'← В меню',callback_data:'home'}]]);
+  assert.deepEqual(r.logs,['PUBLICATION_VERIFIED','TELEGRAM_DELIVERED','TELEGRAM_MENU_DELIVERED']);
   for(const c of r.calls.slice(0,2)){assert.equal(c.init.method,'GET');assert.ok(!JSON.stringify(c.init).includes(env.NAVIGATOR_TELEGRAM_BOT_TOKEN));}
 });
 test('empty notice from scheduled or ordinary manual publication never touches any credential or network',async()=>{
@@ -44,9 +46,9 @@ test('stale manifest and stale HTML cannot send a current-card claim; retries st
     await assert.rejects(notify(env,r.options),/PUBLICATION_NOT_READY/);assert.equal(r.waits.length,5);assert.ok(r.calls.every(c=>c.url.startsWith(SITE)));
   }
 });
-test('Pages propagation may be retried before sending, and the successful final send happens once',async()=>{
+test('Pages propagation may be retried before sending, and each successful message is sent once',async()=>{
   let reads=0;const r=fixture((url,init,{manifest})=>url.includes('cards.json')&&++reads<3?Response.json({...manifest,publication:null}):undefined);
-  await notify(env,r.options);assert.equal(reads,3);assert.deepEqual(r.waits,[5000,5000]);assert.equal(r.calls.filter(c=>c.url.endsWith('/sendMessage')).length,1);
+  await notify(env,r.options);assert.equal(reads,3);assert.deepEqual(r.waits,[5000,5000]);assert.equal(r.calls.filter(c=>c.url.endsWith('/sendMessage')).length,2);
 });
 test('removed or duplicated event is not announced, and ambiguous participant mapping cannot choose another person',async()=>{
   for(const variant of ['missing','duplicate','member']){
@@ -94,3 +96,36 @@ test('oversized public response and redirect responses cannot carry a bot token 
   }
 });
 module.exports={env,fixture};
+test('participant names and the personal link are escaped for Telegram HTML',async()=>{
+  const r=fixture();r.manifest.members[0].name='Женя & <b>"№9"</b>';
+  await notify(env,r.options);const card=JSON.parse(r.calls[3].init.body);
+  assert.ok(card.text.includes('Женя &amp; &lt;b&gt;&quot;№9&quot;&lt;/b&gt;'));
+  assert.ok(card.text.includes('#card=p04&amp;round=17'));assert.ok(!card.text.includes('<b>'));
+  assert.equal(card.reply_markup,undefined);assert.equal(card.parse_mode,'HTML');
+});
+test('finish text and the separate menu keep the exact published round and participant',async()=>{
+  const r=fixture();r.manifest.members[0].name='Болид №7';Object.assign(r.manifest.events[0],{event:'Финиш',round:16});
+  await notify(env,r.options);const card=JSON.parse(r.calls[3].init.body),menu=JSON.parse(r.calls[4].init.body);
+  assert.ok(card.text.includes('Финиш 16 круга · принят 🏎️'));assert.ok(card.text.endsWith('>Болид №7</a>'));
+  assert.ok(card.text.includes('round=16'));assert.equal(menu.reply_markup.inline_keyboard[0][0].callback_data,'r:16');
+});
+test('an uncertain or rejected menu does not repeat delivered cards and reports only menu failure',async()=>{
+  for(const mode of ['network','json',400,403,429]){
+    const r=fixture((url,init,{calls})=>{
+      if(!url.endsWith('/sendMessage')||calls.filter(c=>c.url.endsWith('/sendMessage')).length!==2)return;
+      if(mode==='network')throw Error('PRIVATE');
+      if(mode==='json')return new Response('PRIVATE');
+      return Response.json({ok:false,error_code:mode,description:'PRIVATE'},{status:mode});
+    });
+    await assert.rejects(notify(env,r.options),e=>e.message==='TELEGRAM_MENU_UNCONFIRMED');
+    assert.deepEqual(r.logs,['PUBLICATION_VERIFIED','TELEGRAM_DELIVERED']);
+    assert.equal(r.calls.filter(c=>c.url.endsWith('/sendMessage')).length,2);assert.equal(r.waits.length,0);
+  }
+});
+test('the menu is not confirmed for a wrong recipient, group, absent or invalid message ID',async()=>{
+  for(const result of [null,{}, {message_id:0,chat:{id:Number(env.NAVIGATOR_ADMIN_TELEGRAM_ID),type:'private'}},{message_id:78,chat:{id:1,type:'private'}},{message_id:78,chat:{id:Number(env.NAVIGATOR_ADMIN_TELEGRAM_ID),type:'group'}}]){
+    const r=fixture((url,init,{calls})=>url.endsWith('/sendMessage')&&calls.filter(c=>c.url.endsWith('/sendMessage')).length===2?Response.json({ok:true,result}):undefined);
+    await assert.rejects(notify(env,r.options),/TELEGRAM_MENU_UNCONFIRMED/);
+    assert.deepEqual(r.logs,['PUBLICATION_VERIFIED','TELEGRAM_DELIVERED']);assert.equal(r.calls.filter(c=>c.url.endsWith('/sendMessage')).length,2);
+  }
+});
