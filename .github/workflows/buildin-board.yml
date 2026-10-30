@@ -1,5 +1,5 @@
 name: Buildin → табло
-# Notification option 1.2.0: github-pages environment secrets, direct Telegram delivery.
+# Sender 1.2.2: verified Pages release, direct Telegram cards and separate menu.
 
 on:
   workflow_dispatch:
