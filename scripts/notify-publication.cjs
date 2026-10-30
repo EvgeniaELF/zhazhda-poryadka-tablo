@@ -1,73 +1,112 @@
 'use strict';
-// Post-deploy only. No Telegram token or permanent callback secret in GitHub.
-const CALLBACK='https://functions.yandexcloud.net/d4eo0fab2fjrqi9m6ki1?publication_notice=1';
+// Prepared option 1.2.0: send from the trusted GitHub deploy job, after Pages.
+// Credentials are supplied only to this step by github-pages environment secrets.
 const fs=require('node:fs/promises');
 const {setTimeout:delay}=require('node:timers/promises');
+const SITE='https://evgeniaelf.github.io/zhazhda-poryadka-tablo/';
+const REPO='EvgeniaELF/zhazhda-poryadka-tablo';
+const WORKFLOW=REPO+'/.github/workflows/buildin-board.yml@refs/heads/main';
+const BOT='navigator_admin_bot';
+const CODES=new Set(['INVALID_NOTICE_CONTEXT','TELEGRAM_NOT_CONFIGURED','PUBLICATION_NOT_READY','PUBLICATION_INVALID_CARD','PUBLICATION_EVENT_NOT_FOUND','TELEGRAM_TOKEN_REJECTED','TELEGRAM_WRONG_BOT','TELEGRAM_BOT_CHECK_UNAVAILABLE','TELEGRAM_CHAT_UNAVAILABLE','TELEGRAM_RATE_LIMITED','TELEGRAM_REQUEST_REJECTED','TELEGRAM_DELIVERY_UNCONFIRMED']);
 class NoticeError extends Error{}
-const callbackErrors=new Set(['PUBLICATION_DISABLED','PUBLICATION_FORBIDDEN','PUBLICATION_BAD_REQUEST','PUBLICATION_AUTH_UNAVAILABLE','PUBLICATION_DELIVERY_NOT_CONFIGURED','PUBLICATION_NOT_READY','PUBLICATION_EVENT_NOT_FOUND','PUBLICATION_INVALID_CARD','PUBLICATION_UNAVAILABLE','TELEGRAM_DELIVERY_UNCONFIRMED','BAD_ROUTE','BAD_REQUEST','JSON_REQUIRED','METHOD_NOT_ALLOWED']);
-// Diagnostic comparisons only, never authorization. Print fixed check names,
-// not claim values, JWTs, credentials, request URLs or response bodies.
-function claimMismatches(token,env,now=Date.now()){
-  let h,c;try{const p=token.split('.');if(p.length!==3)throw 0;h=JSON.parse(Buffer.from(p[0],'base64url'));c=JSON.parse(Buffer.from(p[1],'base64url'));if(!h||!c||typeof h!=='object'||typeof c!=='object')throw 0;}catch{return ['encoding'];}
-  const repo='EvgeniaELF/zhazhda-poryadka-tablo',sec=Math.floor(now/1000),same=(a,b)=>typeof a==='string'&&a.toLowerCase()===b.toLowerCase();
-  const subjects=['repo:'+repo+':environment:github-pages','repo:EvgeniaELF@250887240/zhazhda-poryadka-tablo@1297869392:environment:github-pages'];
-  const checks={alg:h.alg==='RS256',typ:h.typ==='JWT',kid:typeof h.kid==='string'&&h.kid.length<=200,header:!h.jku&&!h.x5u&&!h.crit,
-    issuer:c.iss==='https://token.actions.githubusercontent.com',audience:c.aud===CALLBACK,repository:same(c.repository,repo),repository_id:String(c.repository_id)==='1297869392',owner_id:String(c.repository_owner_id)==='250887240',
-    workflow:same(c.workflow_ref,repo+'/.github/workflows/buildin-board.yml@refs/heads/main'),reusable:!c.job_workflow_ref,ref:c.ref==='refs/heads/main',event:c.event_name==='workflow_dispatch',environment:c.environment==='github-pages',runner:c.runner_environment==='github-hosted',ref_type:c.ref_type==='branch',subject:subjects.some(s=>same(c.sub,s)),
-    time:Number.isInteger(c.exp)&&Number.isInteger(c.nbf)&&Number.isInteger(c.iat)&&c.exp>sec&&c.nbf<=sec+30&&c.iat<=sec+30&&c.iat>=sec-900&&c.exp-c.iat<=900&&c.exp>c.iat,
-    jti:typeof c.jti==='string'&&c.jti.length>0&&c.jti.length<=200,run_id:c.run_id===env.GITHUB_RUN_ID,run_attempt:c.run_attempt===env.GITHUB_RUN_ATTEMPT,sha:c.sha===env.GITHUB_SHA};
-  return Object.entries(checks).filter(([,ok])=>!ok).map(([name])=>name);
+const object=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
+const same=(a,b)=>typeof a==='string'&&a.toLowerCase()===b.toLowerCase();
+function context(env){
+  if(!/^[a-f0-9]{64}$/.test(env.NOTICE_EVENT||'')||!same(env.GITHUB_REPOSITORY,REPO)
+    ||env.GITHUB_REPOSITORY_ID!=='1297869392'||env.GITHUB_REPOSITORY_OWNER_ID!=='250887240'
+    ||env.GITHUB_EVENT_NAME!=='workflow_dispatch'||env.GITHUB_REF!=='refs/heads/main'
+    ||!same(env.GITHUB_WORKFLOW_REF,WORKFLOW)||env.GITHUB_SERVER_URL!=='https://github.com'
+    ||!/^[1-9]\d{0,19}$/.test(env.GITHUB_RUN_ID||'')||!/^[1-9]\d{0,4}$/.test(env.GITHUB_RUN_ATTEMPT||'')
+    ||!/^[a-f0-9]{40}$/.test(env.GITHUB_SHA||''))throw new NoticeError('INVALID_NOTICE_CONTEXT');
+  const token=env.NAVIGATOR_TELEGRAM_BOT_TOKEN,owner=env.NAVIGATOR_ADMIN_TELEGRAM_ID;
+  if(typeof token!=='string'||!/^[1-9]\d{4,15}:[A-Za-z0-9_-]{20,200}$/.test(token)
+    ||!/^[1-9]\d{0,15}$/.test(owner||'')||!Number.isSafeInteger(Number(owner)))throw new NoticeError('TELEGRAM_NOT_CONFIGURED');
+  return {eventKey:env.NOTICE_EVENT,runId:env.GITHUB_RUN_ID,runAttempt:env.GITHUB_RUN_ATTEMPT,sha:env.GITHUB_SHA,token,owner:Number(owner)};
 }
-async function getToken(env,fetchImpl){
-  const url=new URL(env.ACTIONS_ID_TOKEN_REQUEST_URL||'');
-  if(url.protocol!=='https:'||url.username||url.password||url.port||!url.hostname.endsWith('.actions.githubusercontent.com')
-    ||typeof env.ACTIONS_ID_TOKEN_REQUEST_TOKEN!=='string'||!env.ACTIONS_ID_TOKEN_REQUEST_TOKEN||/[\r\n]/.test(env.ACTIONS_ID_TOKEN_REQUEST_TOKEN))throw new NoticeError('OIDC_NOT_CONFIGURED');
-  url.searchParams.set('audience',CALLBACK);
-  const r=await fetchImpl(url.href,{method:'GET',headers:{Authorization:'Bearer '+env.ACTIONS_ID_TOKEN_REQUEST_TOKEN,Accept:'application/json'},redirect:'error',signal:AbortSignal.timeout(5000)});
-  if(!r.ok)throw new NoticeError('OIDC_UNAVAILABLE');
-  const text=await r.text();if(Buffer.byteLength(text)>32768)throw new NoticeError('OIDC_UNAVAILABLE');
-  const token=JSON.parse(text).value;
-  if(typeof token!=='string'||token.length>16384||!/^[-A-Za-z0-9_]+\.[-A-Za-z0-9_]+\.[-A-Za-z0-9_]+$/.test(token))throw new NoticeError('OIDC_UNAVAILABLE');
-  return token;
+async function read(url,init,fetchImpl,limit,timeout=5000){
+  const controller=new AbortController();let timer;
+  try{return await Promise.race([
+    (async()=>{
+      const response=await fetchImpl(url,{...init,redirect:'error',signal:controller.signal});
+      let text;
+      if(response.body?.getReader){
+        const reader=response.body.getReader(),chunks=[];let size=0;
+        try{for(;;){const p=await reader.read();if(p.done)break;size+=p.value.byteLength;if(size>limit)throw new Error('SIZE');chunks.push(Buffer.from(p.value));}}
+        catch(error){await reader.cancel().catch(()=>{});throw error;}finally{reader.releaseLock();}
+        text=Buffer.concat(chunks).toString('utf8');
+      }else{text=await response.text();if(Buffer.byteLength(text)>limit)throw new Error('SIZE');}
+      return {status:response.status,ok:response.ok,text};
+    })(),
+    new Promise((_,reject)=>{timer=setTimeout(()=>{controller.abort();reject(new Error('TIMEOUT'));},timeout);})
+  ]);}finally{clearTimeout(timer);controller.abort();}
+}
+function findCard(manifest,ctx){
+  const p=manifest?.publication;
+  if(!object(manifest)||manifest.schema!==1||!object(p)||p.runId!==ctx.runId||p.runAttempt!==ctx.runAttempt||p.sha!==ctx.sha
+    ||!Array.isArray(manifest.events)||!Array.isArray(manifest.members))throw new NoticeError('PUBLICATION_NOT_READY');
+  const events=manifest.events.filter(e=>e?.key===ctx.eventKey);
+  if(events.length!==1)throw new NoticeError('PUBLICATION_EVENT_NOT_FOUND');
+  const e=events[0],members=manifest.members.filter(m=>m?.cardId===e.cardId);
+  if(members.length!==1||!/^p[0-9]{2,5}$/.test(e.cardId||'')||!Number.isInteger(e.round)||e.round<1||e.round>999
+    ||!['Старт','Финиш'].includes(e.event)||typeof members[0].name!=='string'||members[0].name.length>100
+    ||!members[0].name.trim()||/[\x00-\x1f\x7f\u200b-\u200f\u202a-\u202e\u2066-\u2069]/u.test(members[0].name))throw new NoticeError('PUBLICATION_INVALID_CARD');
+  return {cardId:e.cardId,round:e.round,event:e.event,name:members[0].name};
+}
+async function publication(ctx,{fetchImpl,sleep}){
+  for(let attempt=0;attempt<6;attempt++){
+    try{
+      const revision=ctx.runId+'.'+ctx.runAttempt;
+      const m=await read(SITE+'cards.json?v='+revision,{method:'GET',headers:{Accept:'application/json','Cache-Control':'no-cache'}},fetchImpl,256*1024);
+      if(m.status!==200)throw new NoticeError('PUBLICATION_NOT_READY');
+      let manifest;try{manifest=JSON.parse(m.text);}catch{throw new NoticeError('PUBLICATION_NOT_READY');}
+      const card=findCard(manifest,ctx);
+      const page=await read(SITE+'?v='+revision,{method:'GET',headers:{Accept:'text/html','Cache-Control':'no-cache'}},fetchImpl,2*1024*1024);
+      const marker='<meta name="tablo-publication" content="'+ctx.runId+'.'+ctx.runAttempt+'.'+ctx.sha+'">';
+      if(page.status!==200||!page.text.includes(marker))throw new NoticeError('PUBLICATION_NOT_READY');
+      return card;
+    }catch(error){
+      if(error instanceof NoticeError&&['PUBLICATION_INVALID_CARD','PUBLICATION_EVENT_NOT_FOUND'].includes(error.message))throw error;
+      if(attempt===5)throw new NoticeError('PUBLICATION_NOT_READY');
+      await sleep(5000);
+    }
+  }
+}
+async function telegram(ctx,method,payload,fetchImpl){
+  if(!['getMe','sendMessage'].includes(method))throw new NoticeError('TELEGRAM_REQUEST_REJECTED');
+  let r,data;
+  try{
+    r=await read('https://api.telegram.org/bot'+ctx.token+'/'+method,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)},fetchImpl,64*1024,10000);
+    data=JSON.parse(r.text);
+  }catch{throw new NoticeError(method==='getMe'?'TELEGRAM_BOT_CHECK_UNAVAILABLE':'TELEGRAM_DELIVERY_UNCONFIRMED');}
+  if(!r.ok||!object(data)||data.ok!==true){
+    const code=Number.isInteger(data?.error_code)?data.error_code:r.status;
+    throw new NoticeError(code===401?'TELEGRAM_TOKEN_REJECTED':code===403?'TELEGRAM_CHAT_UNAVAILABLE':code===429?'TELEGRAM_RATE_LIMITED':method==='getMe'?'TELEGRAM_BOT_CHECK_UNAVAILABLE':'TELEGRAM_REQUEST_REJECTED');
+  }
+  return data.result;
 }
 async function notify(env=process.env,{fetchImpl=fetch,sleep=delay,report=()=>{}}={}){
-  const eventKey=env.NOTICE_EVENT;
-  if(!eventKey)return {status:'skipped'};
-  if(!/^[a-f0-9]{64}$/.test(eventKey)||!/^[1-9]\d{0,19}$/.test(env.GITHUB_RUN_ID||'')
-    ||!/^[1-9]\d{0,4}$/.test(env.GITHUB_RUN_ATTEMPT||'')||!/^[a-f0-9]{40}$/.test(env.GITHUB_SHA||''))throw new NoticeError('INVALID_NOTICE_CONTEXT');
-  const body={eventKey,runId:env.GITHUB_RUN_ID,runAttempt:env.GITHUB_RUN_ATTEMPT,sha:env.GITHUB_SHA};
-  for(let attempt=0;attempt<6;attempt++){
-    let token;
-    try{token=await getToken(env,fetchImpl);}catch(error){report(error instanceof NoticeError&&error.message==='OIDC_NOT_CONFIGURED'?'OIDC_NOT_CONFIGURED':'OIDC_UNAVAILABLE');throw new NoticeError('OIDC_UNAVAILABLE');}
-    const mismatches=claimMismatches(token,env);
-    report(mismatches.length?'OIDC_UNVERIFIED_CHECK_MISMATCH: '+mismatches.join(','):'OIDC_UNVERIFIED_CHECKS_OK');
-    let response,data;
-    try{
-      // Authorization is reserved by the Yandex HTTPS invocation layer.
-      response=await fetchImpl(CALLBACK,{method:'POST',headers:{'Content-Type':'application/json','X-Navigator-Publication-Authorization':'Bearer '+token},body:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(25000)});
-      const text=await response.text();if(Buffer.byteLength(text)>32768)throw new Error('SIZE');data=JSON.parse(text);
-    }catch{
-      // The function might already have sent Telegram. No blind resend after
-      // an ambiguous network outcome.
-      report('CALLBACK_NETWORK_UNCONFIRMED');throw new NoticeError('NOTICE_DELIVERY_UNCONFIRMED');
-    }
-    const status=Number.isInteger(response.status)&&response.status>=100&&response.status<=599?String(response.status):'UNKNOWN';
-    report('CALLBACK_HTTP_'+status+': '+(data?.ok===true?'OK':callbackErrors.has(data?.error)?data.error:'UNRECOGNIZED_RESPONSE'));
-    if(response.status===200&&data.ok===true)return {status:'delivered'};
-    if(response.status===503&&['PUBLICATION_NOT_READY','PUBLICATION_AUTH_UNAVAILABLE','PUBLICATION_DELIVERY_NOT_CONFIGURED'].includes(data.error)&&attempt<5){await sleep(5000);continue;}
-    throw new NoticeError('NOTICE_DELIVERY_UNCONFIRMED');
-  }
-  throw new NoticeError('NOTICE_DELIVERY_UNCONFIRMED');
+  if(!env.NOTICE_EVENT)return {status:'skipped'};
+  const ctx=context(env),card=await publication(ctx,{fetchImpl,sleep});
+  report('PUBLICATION_VERIFIED');
+  const me=await telegram(ctx,'getMe',{},fetchImpl);
+  if(!object(me)||me.is_bot!==true||!same(me.username,BOT)||String(me.id)!==ctx.token.split(':')[0])throw new NoticeError('TELEGRAM_WRONG_BOT');
+  const link=SITE+'?v='+ctx.runId+'.'+ctx.runAttempt+'#card='+card.cardId+'&round='+card.round;
+  const payload={chat_id:ctx.owner,text:'✅ Карточки обновлены.\n'+card.name+'\nКруг '+card.round+' · '+card.event+'\n\nЛичный трек и Личный рубеж:\n'+link+'\n\nМожно скачать PNG или переслать участнику эту ссылку.',link_preview_options:{is_disabled:true},reply_markup:{inline_keyboard:[[{text:'Открыть личные карточки',url:link}]]}};
+  // One send attempt: a timeout may mean Telegram accepted the message.
+  const sent=await telegram(ctx,'sendMessage',payload,fetchImpl);
+  if(!object(sent)||!Number.isSafeInteger(sent.message_id)||sent.message_id<1||sent.chat?.id!==ctx.owner||sent.chat?.type!=='private')throw new NoticeError('TELEGRAM_DELIVERY_UNCONFIRMED');
+  report('TELEGRAM_DELIVERED');return {status:'delivered'};
 }
 async function main(){
   try{
-    const result=await notify(process.env,{report:line=>console.log('::notice::Личная ссылка: '+line)});
-    if(process.env.GITHUB_STEP_SUMMARY)await fs.appendFile(process.env.GITHUB_STEP_SUMMARY,result.status==='delivered'?'\nЛичная ссылка: сообщение доставлено в пульт штурмана.\n':'\nЛичная ссылка: этот запуск не запрашивал сообщение.\n');
-  }catch{
-    console.log('::warning::Табло опубликовано, но доставка личной ссылки в бот не подтверждена. Карточки можно открыть на сайте и скопировать ссылку.');
-    if(process.env.GITHUB_STEP_SUMMARY)await fs.appendFile(process.env.GITHUB_STEP_SUMMARY,'\n⚠️ Табло опубликовано. Сообщение с личной ссылкой в бот не подтверждено; открой карточки на сайте и скопируй ссылку.\n');
+    const r=await notify(process.env,{report:code=>console.log('::notice::Личная ссылка: '+code)});
+    if(process.env.GITHUB_STEP_SUMMARY)await fs.appendFile(process.env.GITHUB_STEP_SUMMARY,r.status==='delivered'?'\nЛичная ссылка: Telegram подтвердил отправку владельцу пульта.\n':'\nЛичная ссылка: этот запуск не запрашивал сообщение.\n');
+  }catch(error){
+    const code=error instanceof NoticeError&&CODES.has(error.message)?error.message:'NOTICE_UNCONFIRMED';
+    console.log('::warning::Табло опубликовано; личная ссылка не подтверждена. Код: '+code);
+    if(process.env.GITHUB_STEP_SUMMARY)await fs.appendFile(process.env.GITHUB_STEP_SUMMARY,'\n⚠️ Табло опубликовано; отправка личной ссылки не подтверждена. Код: '+code+'. Ссылку можно скопировать на сайте.\n');
     process.exitCode=1;
   }
 }
-module.exports={notify,getToken,NoticeError,CALLBACK,claimMismatches};
+module.exports={notify,findCard,context,NoticeError,SITE};
 if(require.main===module)main();

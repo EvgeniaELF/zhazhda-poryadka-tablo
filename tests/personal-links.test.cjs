@@ -3,7 +3,6 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 const {createHash}=require('node:crypto');
 const links=require('../personal-links');
 const {boardPart,eventKey,publication,publicManifest,mergeBoard}=require('../scripts/buildin-board.cjs');
-const {notify,getToken,CALLBACK}=require('../scripts/notify-publication.cjs');
 const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8'),board=boardPart(html).board;
 test('all 17 existing members have distinct permanent link IDs without changing historical data',()=>{
   assert.equal(new Set(board.members.map(m=>m.cardId)).size,17);assert.ok(board.members.every(m=>links.validCard(m.cardId)));
@@ -39,33 +38,4 @@ test('public notification metadata hashes page identifiers and contains no datab
 });
 test('a development build cannot masquerade as a GitHub release marker',()=>{
   assert.equal(publication({}),null);assert.throws(()=>publication({GITHUB_RUN_ID:'12345',GITHUB_RUN_ATTEMPT:'1',GITHUB_SHA:'bad'}));
-});
-const env={NOTICE_EVENT:'b'.repeat(64),GITHUB_RUN_ID:'12345',GITHUB_RUN_ATTEMPT:'1',GITHUB_SHA:'a'.repeat(40),ACTIONS_ID_TOKEN_REQUEST_URL:'https://pipelines.actions.githubusercontent.com/fixture?id=123',ACTIONS_ID_TOKEN_REQUEST_TOKEN:'FAKE_RUNNER_TOKEN'};
-const token='header.payload.signature';
-test('the post-deploy helper requests the exact audience and sends no permanent bot credential',async()=>{
-  const calls=[];assert.deepEqual(await notify(env,{fetchImpl:async(url,init)=>{
-    calls.push({url,init});assert.equal(init.redirect,'error');
-    if(calls.length===1){assert.equal(new URL(url).searchParams.get('audience'),CALLBACK);return Response.json({value:token});}
-    assert.equal(url,CALLBACK);assert.equal(init.headers.Authorization,undefined);assert.equal(init.headers['X-Navigator-Publication-Authorization'],'Bearer '+token);assert.deepEqual(JSON.parse(init.body),{eventKey:env.NOTICE_EVENT,runId:'12345',runAttempt:'1',sha:env.GITHUB_SHA});return Response.json({ok:true});
-  }}),{status:'delivered'});assert.equal(calls.length,2);
-});
-test('only pre-send temporary failures are retried while Pages propagates',async()=>{
-  let callbacks=0;const waits=[];
-  await notify(env,{sleep:async ms=>waits.push(ms),fetchImpl:async(url)=>url===CALLBACK?(++callbacks<3?Response.json({error:'PUBLICATION_NOT_READY'},{status:503}):Response.json({ok:true})):Response.json({value:token})});
-  assert.equal(callbacks,3);assert.deepEqual(waits,[5000,5000]);
-});
-test('ambiguous network or Telegram outcomes never trigger a blind automatic resend',async()=>{
-  for(const failure of ['network',202,403]){
-    let calls=0;await assert.rejects(notify(env,{sleep:()=>assert.fail('No retries'),fetchImpl:async url=>{
-      if(url!==CALLBACK)return Response.json({value:token});calls++;
-      if(failure==='network')throw new Error('PRIVATE');return Response.json({ok:false,error:'TELEGRAM_DELIVERY_UNCONFIRMED'},{status:failure});
-    }}),/NOTICE_DELIVERY_UNCONFIRMED/);assert.equal(calls,1);
-  }
-});
-test('manual and scheduled builds without a request do not send owner notifications',async()=>{
-  assert.deepEqual(await notify({...env,NOTICE_EVENT:''},{fetchImpl:()=>assert.fail('No request')}),{status:'skipped'});
-  await assert.rejects(notify({...env,NOTICE_EVENT:'bad'},{fetchImpl:()=>assert.fail('No request')}),/INVALID_NOTICE_CONTEXT/);
-});
-test('runner credentials cannot be sent to an arbitrary or lookalike OIDC host',async()=>{
-  for(const host of ['https://attacker.test/','https://actions.githubusercontent.com.attacker.test/','http://pipelines.actions.githubusercontent.com/'])await assert.rejects(getToken({...env,ACTIONS_ID_TOKEN_REQUEST_URL:host},()=>assert.fail('No request')),/OIDC_NOT_CONFIGURED/);
 });
