@@ -27,7 +27,8 @@ async function notify(env=process.env,{fetchImpl=fetch,sleep=delay}={}){
     try{token=await getToken(env,fetchImpl);}catch{throw new NoticeError('OIDC_UNAVAILABLE');}
     let response,data;
     try{
-      response=await fetchImpl(CALLBACK,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(25000)});
+      // Authorization is reserved by the Yandex HTTPS invocation layer.
+      response=await fetchImpl(CALLBACK,{method:'POST',headers:{'Content-Type':'application/json','X-Navigator-Publication-Authorization':'Bearer '+token},body:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(25000)});
       const text=await response.text();if(Buffer.byteLength(text)>32768)throw new Error('SIZE');data=JSON.parse(text);
     }catch{
       // The function might already have sent Telegram. No blind resend after

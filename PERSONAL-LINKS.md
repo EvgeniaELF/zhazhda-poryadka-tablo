@@ -45,3 +45,9 @@ Telegram-токен и webhook-секрет не добавляются в GitHu
 - https://docs.github.com/en/actions/reference/security/oidc
 - https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency
 - https://github.blog/changelog/2026-05-07-github-actions-concurrency-groups-now-allow-larger-queues/
+
+## Исправление транспорта r1 — 30 октября 2026
+
+Yandex Cloud Functions использует Authorization для платформенной авторизации и удаляет его до вызова функции. GitHub OIDC JWT передаётся в X-Navigator-Publication-Authorization: Bearer <JWT>. Исправлены обе стороны: scripts/notify-publication.cjs и index.js функции. Проверки подписи, репозитория, workflow, получателя и публикации сохранены. Версия протокола функции 2.3.5 и адаптер 1.0.11 совместимы без обновления адаптера. Workflow YAML не меняется.
+
+На живых запусках 18/19 до исправления сайт успешно опубликован, а отправка уведомления завершилась предупреждением. Отказ Authorization на уровне Яндекса подтверждён безопасным запросом с заведомо недействующим тестовым значением; без него запрос доходит до обработчика. После установки r1 нужен повторный живой тест существующей отметки.

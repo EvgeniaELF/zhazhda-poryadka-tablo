@@ -46,7 +46,7 @@ test('the post-deploy helper requests the exact audience and sends no permanent 
   const calls=[];assert.deepEqual(await notify(env,{fetchImpl:async(url,init)=>{
     calls.push({url,init});assert.equal(init.redirect,'error');
     if(calls.length===1){assert.equal(new URL(url).searchParams.get('audience'),CALLBACK);return Response.json({value:token});}
-    assert.equal(url,CALLBACK);assert.equal(init.headers.Authorization,'Bearer '+token);assert.deepEqual(JSON.parse(init.body),{eventKey:env.NOTICE_EVENT,runId:'12345',runAttempt:'1',sha:env.GITHUB_SHA});return Response.json({ok:true});
+    assert.equal(url,CALLBACK);assert.equal(init.headers.Authorization,undefined);assert.equal(init.headers['X-Navigator-Publication-Authorization'],'Bearer '+token);assert.deepEqual(JSON.parse(init.body),{eventKey:env.NOTICE_EVENT,runId:'12345',runAttempt:'1',sha:env.GITHUB_SHA});return Response.json({ok:true});
   }}),{status:'delivered'});assert.equal(calls.length,2);
 });
 test('only pre-send temporary failures are retried while Pages propagates',async()=>{
