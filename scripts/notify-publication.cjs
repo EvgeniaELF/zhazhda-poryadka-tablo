@@ -54,25 +54,42 @@ function findCard(manifest,ctx){
     ||!members[0].name.trim()||/[\x00-\x1f\x7f\u200b-\u200f\u202a-\u202e\u2066-\u2069]/u.test(members[0].name))throw new NoticeError('PUBLICATION_INVALID_CARD');
   return {cardId:e.cardId,round:e.round,event:e.event,name:members[0].name};
 }
-async function publication(ctx,{fetchImpl,sleep}){
-  for(let attempt=0;attempt<6;attempt++){
+// GitHub Pages deployment can complete before every edge cache serves the new
+// release. Wait for an exact manifest AND HTML marker before any Telegram call.
+// Keep the checks bounded by the deploy job's 10-minute timeout.
+const PAGE_CHECK_ATTEMPTS=30;
+const PAGE_CHECK_INTERVAL_MS=5000;
+async function publication(ctx,{fetchImpl,sleep,report=()=>{}}){
+  let lastStage='CARDS_REQUEST';
+  for(let attempt=0;attempt<PAGE_CHECK_ATTEMPTS;attempt++){
     try{
       const revision=ctx.runId+'.'+ctx.runAttempt;
+      lastStage='CARDS_REQUEST';
       const m=await read(SITE+'cards.json?v='+revision,{method:'GET',headers:{Accept:'application/json','Cache-Control':'no-cache'}},fetchImpl,256*1024);
-      if(m.status!==200)throw new NoticeError('PUBLICATION_NOT_READY');
-      let manifest;try{manifest=JSON.parse(m.text);}catch{throw new NoticeError('PUBLICATION_NOT_READY');}
+      if(m.status!==200){lastStage='CARDS_HTTP';throw new NoticeError('PUBLICATION_NOT_READY');}
+      let manifest;
+      try{manifest=JSON.parse(m.text);}catch{lastStage='CARDS_JSON';throw new NoticeError('PUBLICATION_NOT_READY');}
+      lastStage='CARDS_VERSION';
       const card=findCard(manifest,ctx);
+      lastStage='HTML_REQUEST';
       const page=await read(SITE+'?v='+revision,{method:'GET',headers:{Accept:'text/html','Cache-Control':'no-cache'}},fetchImpl,2*1024*1024);
       const marker='<meta name="tablo-publication" content="'+ctx.runId+'.'+ctx.runAttempt+'.'+ctx.sha+'">';
-      if(page.status!==200||!page.text.includes(marker))throw new NoticeError('PUBLICATION_NOT_READY');
+      if(page.status!==200){lastStage='HTML_HTTP';throw new NoticeError('PUBLICATION_NOT_READY');}
+      if(!page.text.includes(marker)){lastStage='HTML_VERSION';throw new NoticeError('PUBLICATION_NOT_READY');}
       return card;
     }catch(error){
       if(error instanceof NoticeError&&['PUBLICATION_INVALID_CARD','PUBLICATION_EVENT_NOT_FOUND'].includes(error.message))throw error;
-      if(attempt===5)throw new NoticeError('PUBLICATION_NOT_READY');
-      await sleep(5000);
+      if(attempt===PAGE_CHECK_ATTEMPTS-1){
+        // Fixed diagnostic codes only: never log response bodies, tokens, URLs,
+        // participant information, or errors from fetch implementations.
+        report('PAGES_CHECK_FAILED_'+lastStage);
+        throw new NoticeError('PUBLICATION_NOT_READY');
+      }
+      await sleep(PAGE_CHECK_INTERVAL_MS);
     }
   }
 }
+
 async function telegram(ctx,method,payload,fetchImpl){
   if(!['getMe','sendMessage'].includes(method))throw new NoticeError('TELEGRAM_REQUEST_REJECTED');
   let r,data;
@@ -88,7 +105,7 @@ async function telegram(ctx,method,payload,fetchImpl){
 }
 async function notify(env=process.env,{fetchImpl=fetch,sleep=delay,report=()=>{}}={}){
   if(!env.NOTICE_EVENT)return {status:'skipped'};
-  const ctx=context(env),card=await publication(ctx,{fetchImpl,sleep});
+  const ctx=context(env),card=await publication(ctx,{fetchImpl,sleep,report});
   report('PUBLICATION_VERIFIED');
   const me=await telegram(ctx,'getMe',{},fetchImpl);
   if(!object(me)||me.is_bot!==true||!same(me.username,BOT)||String(me.id)!==ctx.token.split(':')[0])throw new NoticeError('TELEGRAM_WRONG_BOT');

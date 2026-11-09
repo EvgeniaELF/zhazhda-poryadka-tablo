@@ -43,12 +43,22 @@ test('missing and malformed bot/owner secrets fail closed before reading Pages o
 test('stale manifest and stale HTML cannot send a current-card claim; retries stay on the public site',async()=>{
   for(const which of ['manifest','html']){
     const r=fixture((url,init,{manifest})=>url===SITE+(which==='manifest'?'cards.json?v=12345.1':'?v=12345.1')?(which==='manifest'?Response.json({...manifest,publication:{...manifest.publication,runId:'old'}}):new Response('old page')):undefined);
-    await assert.rejects(notify(env,r.options),/PUBLICATION_NOT_READY/);assert.equal(r.waits.length,5);assert.ok(r.calls.every(c=>c.url.startsWith(SITE)));
+    await assert.rejects(notify(env,r.options),/PUBLICATION_NOT_READY/);assert.equal(r.waits.length,29);assert.ok(r.calls.every(c=>c.url.startsWith(SITE)));assert.ok(r.logs.some(s=>s.startsWith('PAGES_CHECK_FAILED_')));
   }
 });
 test('Pages propagation may be retried before sending, and each successful message is sent once',async()=>{
   let reads=0;const r=fixture((url,init,{manifest})=>url.includes('cards.json')&&++reads<3?Response.json({...manifest,publication:null}):undefined);
   await notify(env,r.options);assert.equal(reads,3);assert.deepEqual(r.waits,[5000,5000]);assert.equal(r.calls.filter(c=>c.url.endsWith('/sendMessage')).length,2);
+});
+test('Pages may take longer than six attempts to propagate; no Telegram message is sent prematurely',async()=>{
+  let reads=0;
+  const r=fixture((url,init,{manifest})=>url.includes('cards.json')&&++reads<=9?Response.json({...manifest,publication:{...manifest.publication,runId:'previous'}}):undefined);
+  await notify(env,r.options);
+  assert.equal(reads,10);
+  assert.equal(r.waits.length,9);
+  assert.ok(r.waits.every(ms=>ms===5000));
+  assert.equal(r.calls.filter(c=>c.url.endsWith('/sendMessage')).length,2);
+  assert.deepEqual(r.logs,['PUBLICATION_VERIFIED','TELEGRAM_DELIVERED','TELEGRAM_MENU_DELIVERED']);
 });
 test('removed or duplicated event is not announced, and ambiguous participant mapping cannot choose another person',async()=>{
   for(const variant of ['missing','duplicate','member']){
