@@ -26,7 +26,28 @@ test('несколько/неполные связи отклоняются',()=
 test('совпадение первых имён не объединяет участников',()=>{const r=merge([event('Аня',17,'Финиш')]);assert.equal(r.board.rounds[16].marks['Аня'].finished,true);assert.equal(r.board.rounds[16].marks['Аня · болид №22'],undefined);});
 test('потеря/добавление/переименование участника останавливают сборку',()=>{assert.throws(()=>merge([],rows().slice(1)),/не совпадает/);const s=rows();s[0].properties.Участник.title=text('Новое имя');assert.throws(()=>merge([],s),/новый участник/);});
 test('дубли в источнике не допускаются',()=>assert.throws(()=>merge([],[...rows(),rows()[0]]),/неоднозначные/));
-test('изменение статуса требует точных дат паузы, а не догадки по времени запуска',()=>{const s=rows();s[0].properties.Статус.select.name='На пит-стопе';assert.throws(()=>merge([],s),/пит-стопов/);});
+test('изменение статуса требует точных дат паузы, а не догадки по времени запуска',()=>{
+  const activeRows=rows();
+  const noPauseIndex=baseline.members.findIndex(m=>m.cardId==='p03');
+  assert.ok(noPauseIndex>=0);
+  activeRows[noPauseIndex].properties.Статус.select.name='На пит-стопе';
+  assert.throws(()=>merge([],activeRows),/пит-стопов/);
+  const pausedRows=rows();
+  const anyaIndex=baseline.members.findIndex(m=>m.cardId==='p01');
+  assert.ok(anyaIndex>=0);
+  pausedRows[anyaIndex].properties.Статус.select.name='На треке';
+  assert.throws(()=>merge([],pausedRows),/пит-стопов/);
+});
+test('пит-стоп Ани: старт 18-го круга приходит только из Buildin, 19-й круг создаётся календарём',()=>{
+  const result=mergeBoard(baseline,rows(),[event('Аня',18,'Старт')],sourceSchema,eventSchema,config,new Date('2026-11-09T12:00:00Z'));
+  const anya=result.board.members.find(person=>person.cardId==='p01');
+  assert.deepEqual(anya.trackPauses,[{pausedAt:'2026-11-04',resumedAt:null}]);
+  assert.equal(anya.pitStopRound,19);
+  assert.equal(result.board.selectedRound,19);
+  assert.equal(result.board.rounds.find(r=>r.number===18).marks.Аня.entered,true);
+  assert.equal(result.board.rounds.find(r=>r.number===19).marks.Аня,undefined);
+  assert.equal(baseline.rounds.length,17);
+});
 test('исторические даты 26 июля, 2 августа, 11 августа не меняются',()=>{const b=merge().board;for(const [name,date] of [['Ира · болид №8','2026-07-26'],['Таня · болид №11','2026-08-02'],['Юля · болид №17','2026-08-11']])assert.equal(b.members.find(m=>m.name===name).firstReport,date);});
 test('будущий круг, тип и круг до участия не публикуются',()=>{assert.throws(()=>merge([event('Аня',18,'Старт')]),/некорректным кругом/);assert.throws(()=>merge([event('Аня',17,'Удалить')]),/неизвестным типом/);assert.throws(()=>merge([event('Настя · болид №28',1,'Старт')]),/предшествует/);});
 test('особая отметка не затирается обычным стартом',()=>{const b=structuredClone(baseline);b.rounds[16].marks.Аня={skip:true};assert.throws(()=>merge([event('Аня',17,'Старт')],rows(),b),/особой исторической/);});

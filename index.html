@@ -1789,6 +1789,7 @@
       trackPauses — паузы в счётчике дней на треке:
         pausedAt — последний день, который входит в счётчик перед паузой;
         resumedAt — первый день после возвращения на трек (null, пока пауза продолжается).
+      pitStopRound — круг, на котором показывается значок пит-стопа; не создаёт круг и не добавляет событие.
 
       История строится автоматически из независимых отметок: заезд, поездка, финиш и осознанная пауза.
 
@@ -2112,7 +2113,7 @@
         }
       ],
       members: [
-        { cardId: "p01", name: "Аня", profileUrl: "https://t.me/c/4389010152/2/80", joinedRound: 1, firstReport: "2026-07-06" },
+        { cardId: "p01", name: "Аня", profileUrl: "https://t.me/c/4389010152/2/80", joinedRound: 1, firstReport: "2026-07-06", trackPauses: [{ pausedAt: "2026-11-04", resumedAt: null }], pitStopRound: 19 },
         { cardId: "p02", name: "Юля", joinedRound: 1, firstReport: "2026-07-06", trackPauses: [{ pausedAt: "2026-07-27", resumedAt: null }] },
         { cardId: "p03", name: "Лена · болид №10", profileUrl: "https://t.me/c/4389010152/2/201", joinedRound: 1, firstReport: "2026-07-06" },
         { cardId: "p04", name: "Женя · болид №9", joinedRound: 1, firstReport: "2026-07-06" },
@@ -4041,9 +4042,10 @@
       opener.setAttribute("aria-busy", "true");
       try {
         const roundMark = round.marks[person.name] || {};
-        const isPitStop = round.number === BOARD_DATA.selectedRound
+        const isPitStop = (round.number === BOARD_DATA.selectedRound
           ? isOnActivePitStop(person)
-          : Boolean(roundMark.pit && !roundMark.entered && !roundMark.finished);
+          : Boolean(roundMark.pit && !roundMark.entered && !roundMark.finished))
+          || (person.pitStopRound === round.number && !roundMark.entered && !roundMark.finished);
         const [canvas, badgeCanvas] = await Promise.all([
           isPitStop
             ? createPitStopStoryCanvas(person)
@@ -4363,7 +4365,7 @@
       historyMembers.forEach(person => {
         const isOnPitStop = isOnActivePitStop(person);
         const activePitStopRound = isOnPitStop
-          ? BOARD_DATA.rounds.find(item => Boolean(item.marks[person.name]?.pit))?.number
+          ? (person.pitStopRound ?? BOARD_DATA.rounds.find(item => Boolean(item.marks[person.name]?.pit))?.number)
           : null;
         const lastCheckpointRoundBeforePit = activePitStopRound != null
           ? BOARD_DATA.rounds
@@ -4421,7 +4423,7 @@
           const mark = round.marks[person.name] || {};
           const hasStart = Boolean(mark.entered);
           const hasFinish = Boolean(mark.finished);
-          const isPit = Boolean(mark.pit) && !hasStart && !hasFinish;
+          const isPit = Boolean(mark.pit || person.pitStopRound === round.number) && !hasStart && !hasFinish;
           const isSkip = Boolean(mark.skip) && !hasStart && !hasFinish && !isPit;
           const notJoined = (person.joinedRound || 1) > round.number;
           const pitStopContinues = activePitStopRound != null && round.number > activePitStopRound;
