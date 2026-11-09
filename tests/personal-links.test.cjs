@@ -8,7 +8,16 @@ test('all 17 existing members have distinct permanent link IDs without changing 
   assert.equal(new Set(board.members.map(m=>m.cardId)).size,17);assert.ok(board.members.every(m=>links.validCard(m.cardId)));
   const recipients=['Аня','Юля','Лена · болид №10','Женя · болид №9','Женя','Ира','Нина','Болид №7','Света','Ира · болид №8','Аня · болид №22','Даша','Юля · болид №17','Таня · болид №11','Лена · болид №3','Даша · болид №5','Настя · болид №28'];
   for(const [i,name] of recipients.entries())assert.equal(board.members.find(p=>p.cardId==='p'+String(i+1).padStart(2,'0'))?.name,name,'An existing public link must not change its recipient');
-  const historical=structuredClone(board);for(const person of historical.members)delete person.cardId;
+  const historical=structuredClone(board);
+  // Разрешено только согласованное дополнение: пит-стоп Ани без номера.
+  const anya=historical.members.find(person=>person.cardId==='p01');
+  assert.equal(anya?.name,'Аня');
+  assert.deepEqual(anya.trackPauses,[{pausedAt:'2026-11-04',resumedAt:null}]);
+  assert.equal(anya.pitStopRound,19);
+  delete anya.trackPauses;
+  delete anya.pitStopRound;
+  for(const person of historical.members)delete person.cardId;
+  // Исходная история и остальные 16 участниц всё ещё должны точно совпадать с эталоном.
   assert.equal(createHash('sha256').update(JSON.stringify(historical)).digest('hex'),'7eb082bddeb79cddd9adc25bf685ec8cb68a5469c38e5b9b48903eae133b8ace');
 });
 test('a shared link opens both cards for the selected person and selected historical round',()=>{
