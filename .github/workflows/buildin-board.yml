@@ -9,6 +9,14 @@ on:
         type: boolean
         required: true
         default: false
+      manage_preview:
+        description: 'Проверить управление участницами до его включения?'
+        type: boolean
+        default: false
+      bootstrap_digest:
+        description: 'Только первый перенос: код сопоставления из проверенного предпросмотра'
+        type: string
+        default: ''
       notice_event:
         description: 'Служебный идентификатор отметки для личной ссылки; вручную оставить пустым'
         type: string
@@ -30,6 +38,10 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || vars.BUILDIN_SYNC_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    outputs:
+      managed: ${{ steps.assemble.outputs.managed }}
+    env:
+      BUILDIN_PARTICIPANT_MANAGEMENT: ${{ vars.BUILDIN_PARTICIPANT_MANAGEMENT == 'true' || inputs.manage_preview }}
     steps:
       - name: Получить код табло
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -43,11 +55,21 @@ jobs:
           package-manager-cache: false
 
       - name: Проверить правила объединения
+        env:
+          BUILDIN_PARTICIPANT_MANAGEMENT: 'false'
         run: node --test tests/*.test.cjs
 
+      - name: Прочитать сохранённую историю участия
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/participant-state.cjs fetch
+
       - name: Прочитать Buildin и собрать предварительное табло
+        id: assemble
         env:
           BUILDIN_API_TOKEN: ${{ secrets.BUILDIN_API_TOKEN }}
+          PARTICIPANT_BOOTSTRAP_DIGEST: ${{ inputs.bootstrap_digest }}
+          PARTICIPANT_PUBLISH: ${{ (github.event_name == 'schedule' || inputs.publish) && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
         run: node scripts/buildin-board.cjs
 
       - name: Сохранить результат для просмотра
@@ -61,6 +83,17 @@ jobs:
           if-no-files-found: error
           retention-days: 3
 
+      - name: Передать проверенную историю для сохранения
+        if: env.BUILDIN_PARTICIPANT_MANAGEMENT == 'true' && (github.event_name == 'schedule' || inputs.publish) && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: participant-state-candidate
+          path: |
+            participant-state-candidate.json
+            participant-state-meta.json
+          if-no-files-found: error
+          retention-days: 3
+
       - name: Подготовить проверенный сайт к публикации
         if: (github.event_name == 'schedule' || inputs.publish) && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
@@ -68,9 +101,36 @@ jobs:
           path: _site/
           retention-days: 1
 
-  deploy:
+  preserve:
     needs: build
-    if: (github.event_name == 'schedule' || inputs.publish) && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    if: needs.build.outputs.managed == 'true' && (github.event_name == 'schedule' || inputs.publish) && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Получить проверенный код сохранения
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Подготовить Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Получить проверенный снимок этой сборки
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name participant-state-candidate --dir .participant-state
+      - name: Сохранить историю перед публикацией
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/participant-state.cjs save
+
+  deploy:
+    needs: [build, preserve]
+    if: always() && !cancelled() && needs.build.result == 'success' && (needs.preserve.result == 'success' || (needs.preserve.result == 'skipped' && needs.build.outputs.managed == 'false')) && (github.event_name == 'schedule' || inputs.publish) && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
