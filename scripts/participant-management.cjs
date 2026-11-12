@@ -16,10 +16,29 @@ const sourceKey = id => hash('zhazhda-poryadka:participant:v1:' + id.toLowerCase
 const boardFingerprint = base => hash(base);
 const shiftDate = (date, n) => new Date(Date.parse(date + 'T00:00:00Z') + n * DAY).toISOString().slice(0, 10);
 const todayInMoscow = now => new Intl.DateTimeFormat('en-CA', {timeZone:'Europe/Moscow',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
+// Diagnose a rejected API date without logging the page or original values.
+function dateShape(value, depth=0) {
+  if (value === null) return {type:'null'};
+  if (Array.isArray(value)) return {type:'array',length:value.length};
+  const type = typeof value;
+  if (type === 'string') return {
+    type, length:value.length,
+    pattern:value.slice(0,64).replace(/[0-9]/g,'0').replace(/[A-Za-z]/g,'A').replace(/[^0A :./+\-]/gu,'?'),
+    dateOnly:/^\d{4}[-/]\d{2}[-/]\d{2}$/.test(value),
+    midnight:/^\d{4}[-/]\d{2}[-/]\d{2}[T ]00:00(?::00(?:\.0+)?)?(?:Z|[+-]\d{2}:?\d{2})?$/.test(value)
+  };
+  if (type !== 'object' || depth >= 2) return {type};
+  const fields = {};
+  for (const key of ['start','end','time_zone','date','value','timestamp','startDate','endDate','startTime','endTime','start_date','end_date','start_time','end_time','includeTime','include_time','showTime','isRange']) {
+    if (Object.hasOwn(value,key)) fields[key] = dateShape(value[key],depth+1);
+  }
+  return {type,fieldCount:Object.keys(value).length,fields,
+    equalStartEnd:typeof value.start === 'string' && typeof value.end === 'string' && value.start === value.end};
+}
 function dateValue(page, field) {
   const v = core.value(page, field).date;
   if (v === null) return null;
-  if (!v || v.end || typeof v.start !== 'string' || !/^\d{4}[-/]\d{2}[-/]\d{2}$/.test(v.start)) fail('«' + field.name + '»: укажи одну дату без времени и диапазона.');
+  if (!v || v.end || typeof v.start !== 'string' || !/^\d{4}[-/]\d{2}[-/]\d{2}$/.test(v.start)) fail('«' + field.name + '»: нужна одна дата без времени и диапазона. DATE_SHAPE=' + JSON.stringify(dateShape(v)));
   const iso = v.start.replaceAll('/', '-'), t = Date.parse(iso + 'T00:00:00Z');
   if (!Number.isFinite(t) || new Date(t).toISOString().slice(0, 10) !== iso) fail('«' + field.name + '»: неверная календарная дата.');
   return iso;
