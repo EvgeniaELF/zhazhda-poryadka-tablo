@@ -5,7 +5,7 @@
   else root.PersonalLinks = api;
 })(typeof window === 'object' ? window : globalThis, function () {
   'use strict';
-  const CARD = /^p[0-9]{2,5}$/;
+  const CARD = /^p(?:[0-9]{2,5}|[a-f0-9]{16})$/;
   function validCard(id) { return typeof id === 'string' && CARD.test(id); }
   function validRound(n) { return Number.isInteger(n) && n >= 1 && n <= 999; }
   function parse(hash) {
