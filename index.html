@@ -2170,6 +2170,22 @@
       return Boolean((member.trackPauses || []).some(pause => pause.pausedAt && !pause.resumedAt));
     }
 
+    function historyParticipants(season = selectedSeason()) {
+      const throughRound = Math.min(season.lastRound, BOARD_DATA.selectedRound);
+      if (throughRound < season.firstRound) return [];
+      const archived = season.lastRound < BOARD_DATA.selectedRound;
+      const seasonRounds = roundsForSeason(season).filter(round => round.number <= throughRound);
+      return BOARD_DATA.members
+        .filter(person => (person.joinedRound || 1) <= throughRound)
+        .filter(person => !archived || seasonRounds.some(round => {
+          if (round.number < (person.joinedRound || 1)) return false;
+          const state = Participation.roundState(person, round.number, BOARD_DATA.rounds);
+          return state === "track" || state === "pit";
+        }))
+        .map(person => ({ person, isOnPitStop: !archived && isOnActivePitStop(person) }))
+        .sort((a, b) => Number(a.isOnPitStop) - Number(b.isOnPitStop));
+    }
+
     function selectedParticipants() {
       const round = selectedRound();
       return BOARD_DATA.members
@@ -4347,16 +4363,10 @@
         grid.appendChild(head);
       });
 
-      const round = selectedRound();
-      const historyMembers = [...BOARD_DATA.members].sort((a, b) => {
-        const aOnPitStop = isOnActivePitStop(a);
-        const bOnPitStop = isOnActivePitStop(b);
-        return Number(aOnPitStop) - Number(bOnPitStop);
-      });
+      const historyMembers = historyParticipants();
       let pitStopSectionAdded = false;
 
-      historyMembers.forEach(person => {
-        const isOnPitStop = isOnActivePitStop(person);
+      historyMembers.forEach(({ person, isOnPitStop }) => {
         if (isOnPitStop && !pitStopSectionAdded) {
           const divider = document.createElement("div");
           divider.className = "pit-stop-divider history-pit-stop-divider";
