@@ -18,6 +18,13 @@ function fixture(custom=()=>{}){
   };
   return {manifest,calls,logs,waits,options:{fetchImpl,report:s=>logs.push(s),sleep:async ms=>waits.push(ms)}};
 }
+test('a new participant receives cards under its stable automatic identifier',async()=>{
+  const r=fixture(),card='p1234567890abcdef';
+  r.manifest.members[0].cardId=card;r.manifest.events[0].cardId=card;
+  assert.deepEqual(await notify(env,r.options),{status:'delivered'});
+  assert.match(JSON.parse(r.calls[3].init.body).text,new RegExp('#card='+card+'&amp;round=17'));
+  assert.deepEqual(r.logs,['PUBLICATION_VERIFIED','TELEGRAM_DELIVERED','TELEGRAM_MENU_DELIVERED']);
+});
 test('GitHub verifies the exact release, sends participant-ready cards, then a separate owner menu without Yandex',async()=>{
   const r=fixture();assert.deepEqual(await notify(env,r.options),{status:'delivered'});
   assert.deepEqual(r.calls.map(c=>new URL(c.url).hostname),['evgeniaelf.github.io','evgeniaelf.github.io','api.telegram.org','api.telegram.org','api.telegram.org']);

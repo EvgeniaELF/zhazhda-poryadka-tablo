@@ -49,7 +49,7 @@ function findCard(manifest,ctx){
   const events=manifest.events.filter(e=>e?.key===ctx.eventKey);
   if(events.length!==1)throw new NoticeError('PUBLICATION_EVENT_NOT_FOUND');
   const e=events[0],members=manifest.members.filter(m=>m?.cardId===e.cardId);
-  if(members.length!==1||!/^p[0-9]{2,5}$/.test(e.cardId||'')||!Number.isInteger(e.round)||e.round<1||e.round>999
+  if(members.length!==1||!/^p(?:[0-9]{2,5}|[a-f0-9]{16})$/.test(e.cardId||'')||!Number.isInteger(e.round)||e.round<1||e.round>999
     ||!['Старт','Финиш'].includes(e.event)||typeof members[0].name!=='string'||members[0].name.length>100
     ||!members[0].name.trim()||/[\x00-\x1f\x7f\u200b-\u200f\u202a-\u202e\u2066-\u2069]/u.test(members[0].name))throw new NoticeError('PUBLICATION_INVALID_CARD');
   return {cardId:e.cardId,round:e.round,event:e.event,name:members[0].name};

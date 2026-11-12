@@ -9,7 +9,7 @@ const API = 'https://api.buildin.ai/v2';
 const UUID = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
 const ANCHOR = Date.UTC(2026, 6, 6);
 const DAY = 86400000;
-const ASSETS = ['author.webp','checkpoints.webp','elf-checklist-finish.png','elf.webp','favicon.svg','finish-flag.webp','helmet.webp','logo-compact-color.svg','logo-horizontal-color.svg','logo-horizontal-reverse.svg','logo-mark-micro-color.svg','season-trophy-elf.png','start-flag.webp','track.webp'];
+const ASSETS = ['author.webp','checkpoints.webp','elf-checklist-finish.png','elf.webp','favicon.svg','finish-flag.webp','helmet.webp','logo-compact-color.svg','logo-horizontal-color.svg','logo-horizontal-reverse.svg','logo-mark-micro-color.svg','season-trophy-elf.png','start-flag.webp','track.webp','participation.js'];
 class SafeError extends Error {}
 const fail = message => { throw new SafeError(message); };
 const normalize = s => String(s).normalize('NFC').trim().replace(/\s+/gu,' ');
@@ -53,8 +53,24 @@ function currentCalendar(board, now) {
   const iso = new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Moscow',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
   const today=Date.parse(iso+'T00:00:00Z');
   const current=1+Math.floor((today-ANCHOR)/(7*DAY));
-  const season=board.seasons.find(s=>current>=s.firstRound && current<=s.lastRound);
-  if (!season) fail('Для текущего круга ещё не настроен сезон. Публикация остановлена.');
+  if (!Number.isInteger(current) || current<1 || current>999) fail('Дата вне поддерживаемого календаря табло.');
+  const seasonNumber=1+Math.floor((current-1)/12);
+  const label = t => new Intl.DateTimeFormat('ru-RU',{timeZone:'UTC',day:'numeric',month:'long',year:'numeric'}).format(t).replace(/ г\.$/,'');
+  for(let n=1;n<=seasonNumber;n++) {
+    if (!board.seasons.some(s=>s.number===n)) {
+      const firstRound=(n-1)*12+1, start=new Date(ANCHOR+(firstRound-1)*7*DAY);
+      board.seasons.push({number:n,title:'Сезон '+n,started:start.toISOString().slice(0,10),startedLabel:label(start).replace(/ \d{4}$/,''),dates:'с '+label(start),firstRound,lastRound:firstRound+11,totalRounds:12,status:'active'});
+    }
+  }
+  board.seasons.sort((a,b)=>a.number-b.number);
+  for(const item of board.seasons) {
+    if(item.firstRound!==(item.number-1)*12+1 || item.lastRound!==item.number*12)fail('Нарушены границы сезонов.');
+    if(item.status==='active' && item.number<seasonNumber) {
+      item.dates=label(new Date(Date.parse(item.started+'T00:00:00Z')))+' – '+label(new Date(ANCHOR+(item.lastRound-1)*7*DAY+5*DAY));
+    }
+    item.status=item.number<seasonNumber?'closed':item.number===seasonNumber?'active':'future';
+  }
+  const season=board.seasons.find(s=>s.number===seasonNumber);
   const numbers=new Set(board.rounds.map(r=>r.number));
   if (numbers.size!==board.rounds.length) fail('В исходном табло повторяется номер круга.');
   const endLabel = date => new Intl.DateTimeFormat('ru-RU',{timeZone:'UTC',day:'numeric',month:'long'}).format(date);
@@ -70,6 +86,7 @@ function currentCalendar(board, now) {
   return current;
 }
 function mergeBoard(base, sourceRows, eventRows, sourceSchema, eventSchema, config, now=new Date()) {
+  if(config.participantManagement) return require('./participant-management.cjs').mergeManaged(base,sourceRows,eventRows,sourceSchema,eventSchema,config,now,config.previousState || null);
   const board=structuredClone(base), {sf,ef}=schemas(sourceSchema,eventSchema,config);
   const current=currentCalendar(board,now), members=new Map();
   const cardIds=new Set();
@@ -183,7 +200,27 @@ async function run(root=process.cwd()) {
   if(sourceSchema.object!=='database' || eventSchema.object!=='database' || sourceSchema.id?.toLowerCase()!==config.participantsDatabaseId || eventSchema.id?.toLowerCase()!==config.eventsDatabaseId) fail('Buildin вернул неизвестную схему.');
   const sourceRows=await queryAll(request,config.participantsDatabaseId);
   const eventRows=await queryAll(request,config.eventsDatabaseId);
-  const {board,report}=mergeBoard(boardPart(html).board,sourceRows,eventRows,sourceSchema,eventSchema,config);
+  const managed=process.env.BUILDIN_PARTICIPANT_MANAGEMENT==='true';
+  if(!managed){
+    try{if(JSON.parse(await fs.readFile(path.join(root,'participant-state-input.json'),'utf8')))fail('История управления уже существует. Прежний режим не может её перезаписать.');}
+    catch(e){if(e.code!=='ENOENT')throw e;}
+  }
+  if(managed){
+    config.participantManagement=true;
+    config.previousState=JSON.parse(await fs.readFile(path.join(root,'participant-state-input.json'),'utf8'));
+  }
+  const result=mergeBoard(boardPart(html).board,sourceRows,eventRows,sourceSchema,eventSchema,config);
+  const {board,report}=result;
+  if(managed){
+    const meta=JSON.parse(await fs.readFile(path.join(root,'participant-state-meta.json'),'utf8'));
+    if(!config.previousState){
+      meta.bootstrapApproved=Boolean(report.bootstrapDigest && process.env.PARTICIPANT_BOOTSTRAP_DIGEST===report.bootstrapDigest);
+      if(process.env.PARTICIPANT_PUBLISH==='true' && !meta.bootstrapApproved)fail('Первый перенос не подтверждён. Сначала запусти предпросмотр и сверь код сопоставления в отчёте.');
+    }
+    await fs.writeFile(path.join(root,'participant-state-candidate.json'),JSON.stringify(result.state)+'\n',{mode:0o600});
+    await fs.writeFile(path.join(root,'participant-state-meta.json'),JSON.stringify(meta)+'\n',{mode:0o600});
+  }
+  if(process.env.GITHUB_OUTPUT)await fs.appendFile(process.env.GITHUB_OUTPUT,'managed='+managed+'\n');
   const release=publication();
   if(release)board.publication=release;
   const out=path.join(root,'_site');await fs.rm(out,{recursive:true,force:true});await fs.mkdir(out,{recursive:true});
@@ -201,9 +238,10 @@ async function run(root=process.cwd()) {
   await fs.writeFile(path.join(out,'cards.json'),JSON.stringify(publicManifest(board,report,release))+'\n');
   await fs.writeFile(path.join(root,'sync-report.json'),JSON.stringify(report,null,2)+'\n');
   const summary='## Проверка Buildin → табло\n\nУчастников: '+report.participants+'. Событий: '+report.sourceEvents+'. Уникальных отметок: '+report.uniqueMarks+'. Повторов в базе: '+report.duplicates+'.\n\nНовых отметок относительно исходного табло: '+report.added.length+'. Старых сопоставлений по уникальному имени: '+report.legacyNameMatches+'.\n\nСтарые сезоны, даты выхода на трек и пит-стопы сохранены. Проверка только читает Buildin. Удаления и исправления исходных исторических отметок требуют отдельной сверки.\n';
-  await fs.writeFile(path.join(root,'sync-report.md'),summary);
-  if(process.env.GITHUB_STEP_SUMMARY)await fs.appendFile(process.env.GITHUB_STEP_SUMMARY,summary);
+  const extra=managed?'\nУправление через «Участники». Черновиков: '+report.drafts.length+'. Изменений профилей: '+report.profileChanges.length+'.\n'+(report.bootstrapDigest?'\nПервое сопоставление (сверить все 17 личных ссылок): `'+report.bootstrapDigest+'`\n':''):'';
+  await fs.writeFile(path.join(root,'sync-report.md'),summary+extra);
+  if(process.env.GITHUB_STEP_SUMMARY)await fs.appendFile(process.env.GITHUB_STEP_SUMMARY,summary+extra);
   console.log('Проверка завершена: '+report.participants+' участников, '+report.uniqueMarks+' отметок. Подробности: sync-report.json.');
 }
-module.exports={boardPart,mergeBoard,queryAll,client,inject,SafeError,run,currentCalendar,eventKey,publication,publicManifest};
+module.exports={boardPart,mergeBoard,queryAll,client,inject,SafeError,run,currentCalendar,eventKey,publication,publicManifest,field,value,title,pageId,schemas,normalize};
 if(require.main===module)run().catch(error=>{console.error(error instanceof SafeError?error.message:'Не удалось собрать табло. Секреты и ответы API не выводятся.');process.exitCode=1;});

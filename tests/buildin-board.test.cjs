@@ -53,7 +53,7 @@ test('будущий круг, тип и круг до участия не пу�
 test('особая отметка не затирается обычным стартом',()=>{const b=structuredClone(baseline);b.rounds[16].marks.Аня={skip:true};assert.throws(()=>merge([event('Аня',17,'Старт')],rows(),b),/особой исторической/);});
 test('удалённое событие не добавляется; история из базового файла остаётся',()=>assert.equal(merge([event('Аня',17,'Финиш',{in_trash:true})]).report.uniqueMarks,0));
 test('следующий понедельник открывает круг18, даты/сезон совпадают',()=>{const b=structuredClone(baseline);currentCalendar(b,new Date('2026-11-01T21:00:00Z'));assert.equal(b.selectedRound,18);assert.equal(b.selectedSeason,2);assert.equal(b.rounds.at(-1).endDate,'2026-11-07');assert.equal(b.rounds[16].status,'closed');});
-test('неизвестный будущий сезон требует подготовки',()=>assert.throws(()=>currentCalendar(structuredClone(baseline),new Date('2027-01-01Z')),/настроен сезон/));
+test('третий сезон открывается автоматически с 25-го круга',()=>{const b=structuredClone(baseline);currentCalendar(b,new Date('2026-12-20T21:00:00Z'));assert.equal(b.selectedRound,25);assert.equal(b.selectedSeason,3);assert.deepEqual([b.seasons[2].firstRound,b.seasons[2].lastRound],[25,36]);assert.equal(b.seasons[1].status,'closed');assert.equal(b.rounds.find(r=>r.number===25).endDate,'2026-12-26');});
 test('экспорт не исполняет текст участника как HTML/script',()=>{const b=structuredClone(baseline);b.members[0].name='</script><script>alert(1)</script>';const exported=inject(html,b);assert.ok(!exported.includes('"</script><script>alert(1)</script>"'));assert.deepEqual(boardPart(exported).board,b);});
 test('HTML вне блока данных остаётся побайтно тем же',()=>{const p=boardPart(html),out=inject(html,baseline),q=boardPart(out);assert.equal(html.slice(0,p.start),out.slice(0,q.start));assert.equal(html.slice(p.end),out.slice(q.end));});
 test('пагинация читает все страницы',async()=>{const calls=[];const all=await queryAll(async(p,b)=>{calls.push(b);return b.start_cursor?{object:'list',results:[2],has_more:false}:{object:'list',results:[1],has_more:true,next_cursor:'next'};},config.eventsDatabaseId);assert.deepEqual(all,[1,2]);assert.equal(calls[1].start_cursor,'next');});
@@ -71,6 +71,7 @@ test('полная сборка выпускает только HTML и публ
     await fsp.copyFile(path.join(repo,'index.html'),path.join(dir,'index.html'));
     await fsp.copyFile(path.join(repo,'buildin-sync.json'),path.join(dir,'buildin-sync.json'));
     await fsp.copyFile(path.join(repo,'personal-links.js'),path.join(dir,'personal-links.js'));
+    await fsp.copyFile(path.join(repo,'participation.js'),path.join(dir,'participation.js'));
     for(const asset of await fsp.readdir(repo))if(/\.(webp|svg|png)$/.test(asset))await fsp.copyFile(path.join(repo,asset),path.join(dir,asset));
     process.env.BUILDIN_API_TOKEN='local-secret-do-not-export';delete process.env.GITHUB_STEP_SUMMARY;
     Object.assign(process.env,{GITHUB_RUN_ID:'98765',GITHUB_RUN_ATTEMPT:'2',GITHUB_SHA:'a'.repeat(40)});
@@ -95,7 +96,7 @@ test('полная сборка выпускает только HTML и публ
     for(const record of events)assert.ok(!JSON.stringify(manifest).includes(record.id));
     for(const code of built.matchAll(/<script>([\s\S]*?)<\/script>/g))new (require('node:vm').Script)(code[1]);
     const files=await fsp.readdir(path.join(dir,'_site'));
-    assert.equal(files.length,17);assert.ok(files.every(p=>['index.html','cards.json','personal-links.js'].includes(p)||/\.(svg|png|webp)$/.test(p)));
+    assert.equal(files.length,18);assert.ok(files.every(p=>['index.html','cards.json','personal-links.js','participation.js'].includes(p)||/\.(svg|png|webp)$/.test(p)));
     assert.equal(await fsp.readFile(path.join(dir,'index.html'),'utf8'),html);
   } finally {
     global.fetch=oldFetch;

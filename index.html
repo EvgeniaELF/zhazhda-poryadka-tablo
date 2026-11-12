@@ -1773,6 +1773,7 @@
   </div>
 
   <script src="personal-links.js"></script>
+  <script src="participation.js"></script>
   <script>
     /*
       ДАННЫЕ ТАБЛО
@@ -2173,7 +2174,9 @@
       const round = selectedRound();
       return BOARD_DATA.members
         .filter(member => (member.joinedRound || 1) <= round.number)
-        .filter(member => !isOnActivePitStop(member) && !round.marks[member.name]?.pit)
+        .filter(member => round.number === BOARD_DATA.selectedRound
+          ? !isOnActivePitStop(member) && !round.marks[member.name]?.pit
+          : !["pit", "paused"].includes(Participation.roundState(member, round.number, BOARD_DATA.rounds)))
         .map(member => {
           const mark = round.marks[member.name] || {};
           return {
@@ -2283,19 +2286,8 @@
     }
 
     function daysOnTrack(member, now = new Date()) {
-      if (!member || !member.firstReport) return 0;
-      const dayMs = 86400000;
-      const todayUtc = todayUtcInBoardTimeZone(now);
-      const firstReportUtc = dateStringToUtc(member.firstReport);
-      const totalDays = Math.max(0, Math.floor((todayUtc - firstReportUtc) / dayMs) + 1);
-      const pausedDays = (member.trackPauses || []).reduce((total, pause) => {
-        if (!pause.pausedAt) return total;
-        const firstPausedDayUtc = Math.max(firstReportUtc, dateStringToUtc(pause.pausedAt) + dayMs);
-        const resumeUtc = pause.resumedAt ? dateStringToUtc(pause.resumedAt) : todayUtc + dayMs;
-        const pauseEndUtc = Math.min(todayUtc + dayMs, resumeUtc);
-        return total + Math.max(0, Math.floor((pauseEndUtc - firstPausedDayUtc) / dayMs));
-      }, 0);
-      return Math.max(0, totalDays - pausedDays);
+      const today = new Date(todayUtcInBoardTimeZone(now)).toISOString().slice(0, 10);
+      return Participation.daysOnTrack(member, today);
     }
 
     function pilotStats(name, throughRoundNumber = BOARD_DATA.selectedRound) {
@@ -2487,7 +2479,7 @@
         else if (mark.finished) groups.finished.members.push(member);
       });
       const seasonTotals = BOARD_DATA.rounds
-        .filter(item => item.number <= round.number)
+        .filter(item => item.number >= seasonForRound(round).firstRound && item.number <= round.number)
         .reduce((totals, item) => {
           const itemEligible = BOARD_DATA.members.filter(member => (member.joinedRound || 1) <= item.number);
           return itemEligible.reduce((result, member) => {
@@ -4042,10 +4034,9 @@
       opener.setAttribute("aria-busy", "true");
       try {
         const roundMark = round.marks[person.name] || {};
-        const isPitStop = (round.number === BOARD_DATA.selectedRound
+        const isPitStop = round.number === BOARD_DATA.selectedRound
           ? isOnActivePitStop(person)
-          : Boolean(roundMark.pit && !roundMark.entered && !roundMark.finished))
-          || (person.pitStopRound === round.number && !roundMark.entered && !roundMark.finished);
+          : ["pit", "paused"].includes(Participation.roundState(person, round.number, BOARD_DATA.rounds));
         const [canvas, badgeCanvas] = await Promise.all([
           isPitStop
             ? createPitStopStoryCanvas(person)
@@ -4190,7 +4181,9 @@
 
       BOARD_DATA.members
         .filter(member => (member.joinedRound || 1) <= round.number)
-        .filter(member => !isOnActivePitStop(member) && !round.marks[member.name]?.pit)
+        .filter(member => round.number === BOARD_DATA.selectedRound
+          ? !isOnActivePitStop(member) && !round.marks[member.name]?.pit
+          : !["pit", "paused"].includes(Participation.roundState(member, round.number, BOARD_DATA.rounds)))
         .forEach(member => {
           const mark = round.marks[member.name] || {};
           if (mark.entered && mark.finished) groups.full.push(member.name);
@@ -4364,18 +4357,6 @@
 
       historyMembers.forEach(person => {
         const isOnPitStop = isOnActivePitStop(person);
-        const activePitStopRound = isOnPitStop
-          ? (person.pitStopRound ?? BOARD_DATA.rounds.find(item => Boolean(item.marks[person.name]?.pit))?.number)
-          : null;
-        const lastCheckpointRoundBeforePit = activePitStopRound != null
-          ? BOARD_DATA.rounds
-              .filter(item => item.number < activePitStopRound)
-              .filter(item => {
-                const itemMark = item.marks[person.name] || {};
-                return Boolean(itemMark.entered || itemMark.finished);
-              })
-              .reduce((lastRound, item) => Math.max(lastRound, item.number), 0)
-          : null;
         if (isOnPitStop && !pitStopSectionAdded) {
           const divider = document.createElement("div");
           divider.className = "pit-stop-divider history-pit-stop-divider";
@@ -4423,17 +4404,12 @@
           const mark = round.marks[person.name] || {};
           const hasStart = Boolean(mark.entered);
           const hasFinish = Boolean(mark.finished);
-          const isPit = Boolean(mark.pit || person.pitStopRound === round.number) && !hasStart && !hasFinish;
+          const pauseState = Participation.roundState(person, round.number, BOARD_DATA.rounds);
+          const isPit = pauseState === "pit" && !hasStart && !hasFinish;
           const isSkip = Boolean(mark.skip) && !hasStart && !hasFinish && !isPit;
           const notJoined = (person.joinedRound || 1) > round.number;
-          const pitStopContinues = activePitStopRound != null && round.number > activePitStopRound;
-          const emptyBeforePit = activePitStopRound != null
-            && lastCheckpointRoundBeforePit > 0
-            && round.number > lastCheckpointRoundBeforePit
-            && round.number < activePitStopRound
-            && !hasStart
-            && !hasFinish
-            && !isPit;
+          const pitStopContinues = pauseState === "paused";
+          const emptyBeforePit = pauseState === "bridge";
           const value = notJoined ? "not-joined" : pitStopContinues ? "paused" : isPit ? "pit" : isSkip ? "skip" : hasStart && hasFinish ? "both" : hasStart ? "start-only" : hasFinish ? "finish-only" : "future";
           const canOpenStory = !notJoined
             && !pitStopContinues
