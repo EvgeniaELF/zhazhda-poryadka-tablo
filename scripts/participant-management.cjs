@@ -38,8 +38,12 @@ function dateShape(value, depth=0) {
 function dateValue(page, field) {
   const v = core.value(page, field).date;
   if (v === null) return null;
-  if (!v || v.end || typeof v.start !== 'string' || !/^\d{4}[-/]\d{2}[-/]\d{2}$/.test(v.start)) fail('«' + field.name + '»: нужна одна дата без времени и диапазона. DATE_SHAPE=' + JSON.stringify(dateShape(v)));
-  const iso = v.start.replaceAll('/', '-'), t = Date.parse(iso + 'T00:00:00Z');
+  // Buildin also returns YYYY/MM/DDTHH:mm:ss with null time_zone when the
+  // calendar's time switch is off. These controls describe calendar days:
+  // preserve the written day; do not parse that suffix as a UTC instant.
+  const match = typeof v?.start === 'string' && /^(\d{4})([-/])(\d{2})\2(\d{2})(?:T([01]\d|2[0-3]):([0-5]\d):([0-5]\d))?$/.exec(v.start);
+  if (!v || v.end || !match || (match[5] !== undefined && v.time_zone != null)) fail('«' + field.name + '»: нужна одна календарная дата без диапазона и неоднозначного часового пояса. DATE_SHAPE=' + JSON.stringify(dateShape(v)));
+  const iso = match[1] + '-' + match[3] + '-' + match[4], t = Date.parse(iso + 'T00:00:00Z');
   if (!Number.isFinite(t) || new Date(t).toISOString().slice(0, 10) !== iso) fail('«' + field.name + '»: неверная календарная дата.');
   return iso;
 }
