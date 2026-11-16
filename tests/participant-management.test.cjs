@@ -117,12 +117,38 @@ test('московская полночь открывает новый круг
   assert.equal(a.selectedRound,24);assert.equal(b.selectedRound,25);assert.equal(b.selectedSeason,3);assert.deepEqual(b.rounds.slice(0,17).map(r=>r.marks),base.rounds.map(r=>r.marks));
   core.currentCalendar(b,new Date('2027-03-14T21:00:00Z'));assert.equal(b.selectedRound,37);assert.equal(b.selectedSeason,4);
 });
-function uiFunction(name,context){const start=html.indexOf('    function '+name+'(');assert.ok(start>=0);const end=html.indexOf('\n    function ',start+10);return vm.runInNewContext('('+html.slice(start,end).trim()+')',context);}
-test('настоящая функция сводки считает итоги только внутри выбранного сезона',()=>{
+function uiFunction(name,context){const start=html.indexOf('    function '+name+'(');assert.ok(start>=0);const next=/\n    (?:async )?function /.exec(html.slice(start+10));assert.ok(next);const end=start+10+next.index;return vm.runInNewContext('('+html.slice(start,end).trim()+')',context);}
+test('сводка круга накапливает итоги всех сезонов до выбранного круга включительно',()=>{
   const p={name:'Участница',joinedRound:1};
-  const board={members:[p],rounds:[{number:12,marks:{Участница:{entered:true,finished:true}}},{number:13,marks:{Участница:{entered:true}}}]};
+  const board={members:[p],rounds:[{number:12,marks:{Участница:{entered:true,finished:true}}},{number:13,marks:{Участница:{entered:true}}},{number:14,marks:{Участница:{entered:true,finished:true}}}]};
   const fn=uiFunction('roundSummaryData',{BOARD_DATA:board,seasonForRound:()=>({firstRound:13})});
-  const data=fn(board.rounds[1]);assert.equal(data.seasonCheckpoints,1);assert.equal(data.seasonEntered,1);assert.equal(data.seasonFinished,0);
+  const data=fn(board.rounds[1]);
+  assert.equal(data.seasonCheckpoints,3);assert.equal(data.seasonEntered,2);assert.equal(data.seasonFinished,1);
+  assert.equal(data.roundCheckpoints,1);assert.equal(data.entered,1);assert.equal(data.finished,0);assert.equal(data.participants.length,1);
+  assert.equal(fn(board.rounds[2]).seasonCheckpoints,5);
+});
+test('сводка сезона сохраняет границы выбранного сезона',()=>{
+  const p={name:'Участница',joinedRound:1};
+  const board={members:[p],rounds:[{number:12,status:'closed',marks:{Участница:{entered:true,finished:true}}},{number:13,status:'closed',marks:{Участница:{entered:true}}},{number:14,status:'active',marks:{Участница:{finished:true}}},{number:25,status:'active',marks:{Участница:{entered:true,finished:true}}}]};
+  const fn=uiFunction('seasonSummaryData',{BOARD_DATA:board,roundsForSeason:season=>board.rounds.filter(r=>r.number>=season.firstRound&&r.number<=season.lastRound),seasonDaysForRound:()=>1});
+  const first=fn({number:1,firstRound:1,lastRound:12}),second=fn({number:2,firstRound:13,lastRound:24});
+  assert.equal(first.checkpoints,2);assert.equal(first.starts,1);assert.equal(first.finishes,1);
+  assert.equal(second.checkpoints,2);assert.equal(second.starts,1);assert.equal(second.finishes,1);assert.equal(second.rounds.length,2);
+});
+test('накопительные итоги не сбрасываются в третьем сезоне и учитывают поездки и паузы',()=>{
+  const a={name:'А',joinedRound:1},b={name:'Б',joinedRound:25};
+  const board={members:[a,b],rounds:[{number:1,marks:{А:{entered:true,finished:true},Б:{entered:true}}},{number:13,marks:{А:{skip:true}}},{number:24,marks:{А:{entered:true,startIcon:'☀',finished:true}}},{number:25,marks:{Б:{entered:true}}},{number:26,marks:{Б:{entered:true,finished:true}}}]};
+  const fn=uiFunction('roundSummaryData',{BOARD_DATA:board,seasonForRound:()=>({firstRound:25})});
+  const data=fn(board.rounds[3]);
+  assert.equal(data.seasonCheckpoints,6);assert.equal(data.seasonEntered,2);assert.equal(data.seasonTrips,1);assert.equal(data.seasonFinished,2);assert.equal(data.seasonSkipped,1);
+  assert.equal(data.roundCheckpoints,1);assert.equal(data.participants.length,1);assert.equal(data.participants[0].name,'Б');
+});
+test('накопительная сводка первого сезона сохраняет свой прежний результат',()=>{
+  const p={name:'Участница',joinedRound:1};
+  const board={members:[p],rounds:[{number:1,marks:{Участница:{entered:true,finished:true}}},{number:12,marks:{Участница:{skip:true}}},{number:13,marks:{Участница:{entered:true,finished:true}}}]};
+  const fn=uiFunction('roundSummaryData',{BOARD_DATA:board,seasonForRound:()=>({firstRound:1})});
+  assert.equal(fn(board.rounds[0]).seasonCheckpoints,2);
+  const data=fn(board.rounds[1]);assert.equal(data.seasonCheckpoints,3);assert.equal(data.seasonEntered,1);assert.equal(data.seasonFinished,1);assert.equal(data.seasonSkipped,1);
 });
 test('реальная функция счётчика использует все эпизоды паузы',()=>{
   const p={firstReport:'2026-11-01',trackPauses:[{pausedAt:'2026-11-04',resumedAt:'2026-11-08'},{pausedAt:'2026-11-09',resumedAt:'2026-11-12'}]};
