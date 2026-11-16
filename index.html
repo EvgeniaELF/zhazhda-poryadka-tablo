@@ -142,7 +142,7 @@
     }
 
     .hero-visual::before {
-      content: "";
+      content: none;
       position: absolute;
       width: 410px;
       height: 410px;
@@ -2495,7 +2495,7 @@
         else if (mark.finished) groups.finished.members.push(member);
       });
       const seasonTotals = BOARD_DATA.rounds
-        .filter(item => item.number >= seasonForRound(round).firstRound && item.number <= round.number)
+        .filter(item => item.number <= round.number)
         .reduce((totals, item) => {
           const itemEligible = BOARD_DATA.members.filter(member => (member.joinedRound || 1) <= item.number);
           return itemEligible.reduce((result, member) => {
